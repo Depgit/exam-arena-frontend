@@ -1,0 +1,15 @@
+services:
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+      args:
+        # Baked into the JS bundle at build time. Override when the API is
+        # not reachable from the browser at localhost:8080, e.g.
+        #   VITE_API_BASE_URL=http://192.168.1.10:8080 make docker-up
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080}
+        VITE_WS_BASE_URL: ${VITE_WS_BASE_URL:-ws://localhost:8080}
+    container_name: examarena-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
