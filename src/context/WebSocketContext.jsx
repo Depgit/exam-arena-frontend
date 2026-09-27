@@ -33,7 +33,7 @@ export function WebSocketProvider({ children }) {
     let cancelled = false
 
     function connect() {
-      const ws = new WebSocket(`${WS_BASE_URL}/ws?token=${encodeURIComponent(token)}`)
+      const ws = new WebSocket(`${WS_BASE_URL}/wss?token=${encodeURIComponent(token)}`)
       socketRef.current = ws
 
       ws.onopen = () => !cancelled && setConnected(true)
