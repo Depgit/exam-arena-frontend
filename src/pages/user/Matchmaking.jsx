@@ -25,7 +25,7 @@ export default function Matchmaking() {
     const interval = setInterval(() => {
       getQueueStats().then(({ data }) => setQueueStats(data.pools)).catch(() => { })
       count++;
-      if (count > 5) {
+      if (count > 15) {
         clearInterval(interval);
         handleLeave();
       }
