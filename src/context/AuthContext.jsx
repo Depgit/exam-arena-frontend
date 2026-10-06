@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
-import { loginUser, registerUser, getMe } from '../api/endpoints'
+import { loginUser, registerUser, getMe, clearCache } from '../api/endpoints'
 
 const AuthContext = createContext(null)
 
@@ -37,6 +37,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   const persist = (newToken, newUser) => {
+    clearCache() // never show the previous account's cached data
     localStorage.setItem(TOKEN_KEY, newToken)
     localStorage.setItem(USER_KEY, JSON.stringify(newUser))
     setToken(newToken)
@@ -56,6 +57,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   const logout = useCallback(() => {
+    clearCache()
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(USER_KEY)
     setToken(null)

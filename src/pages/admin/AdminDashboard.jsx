@@ -12,12 +12,12 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     let cancelled = false
-    const load = () =>
-      getAdminStats()
+    const load = (fresh) =>
+      getAdminStats({ fresh })
         .then(({ data }) => !cancelled && (setStats(data), setError('')))
         .catch((err) => !cancelled && setError(err.message))
-    load()
-    const id = setInterval(load, REFRESH_MS)
+    load(false) // first paint may reuse a recent copy
+    const id = setInterval(() => load(true), REFRESH_MS)
     return () => {
       cancelled = true
       clearInterval(id)

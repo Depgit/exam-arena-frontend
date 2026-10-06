@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useAuth } from './AuthContext'
 import { WS_BASE_URL } from '../api/client'
+import { invalidateForEvent } from '../api/endpoints'
 
 // Exam Arena enforces a single WebSocket session per user, and nearly every
 // real-time feature (matchmaking, live matches, friend matches) depends on
@@ -18,6 +19,9 @@ export function WebSocketProvider({ children }) {
   const reconnectTimer = useRef(null)
 
   const dispatch = useCallback((msg) => {
+    // Drop cached reads this event makes stale BEFORE any listener runs,
+    // so a page refetching in response gets fresh data.
+    invalidateForEvent(msg.type)
     const set = listenersRef.current.get(msg.type)
     if (set) set.forEach((cb) => cb(msg.payload ?? {}))
     const wildcard = listenersRef.current.get('*')
