@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import { loginUser, registerUser, getMe } from '../api/endpoints'
 
 const AuthContext = createContext(null)
@@ -62,16 +62,21 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
-  const value = {
-    token,
-    user,
-    isAdmin: user?.role === 'admin',
-    isAuthenticated: !!token && !!user,
-    loading,
-    login,
-    register,
-    logout,
-  }
+  // Memoised so every useAuth() consumer doesn't re-render whenever the
+  // provider's parent does — only when auth state actually changes.
+  const value = useMemo(
+    () => ({
+      token,
+      user,
+      isAdmin: user?.role === 'admin',
+      isAuthenticated: !!token && !!user,
+      loading,
+      login,
+      register,
+      logout,
+    }),
+    [token, user, loading, login, register, logout]
+  )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

@@ -26,23 +26,28 @@ export default function Login() {
 
   return (
     <div className="auth-page">
+      <div className="auth-hero" aria-hidden="true">
+        <span className="auth-hero-mark">⚡</span>
+      </div>
       <form className="auth-card" onSubmit={handleSubmit}>
-        <h1>Exam Arena</h1>
-        <p className="auth-subtitle">Log in to play or manage the game</p>
+        <div className="auth-logo">
+          EXAM<span>ARENA</span>
+        </div>
+        <p className="auth-subtitle">1v1 exam battles · climb the ranks</p>
         {error && <div className="alert-error">{error}</div>}
         <label>
           Username or email
-          <input value={loginId} onChange={(e) => setLoginId(e.target.value)} required autoFocus />
+          <input value={loginId} onChange={(e) => setLoginId(e.target.value)} required autoFocus autoComplete="username" />
         </label>
         <label>
           Password
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
         </label>
-        <button className="btn-primary" type="submit" disabled={busy}>
-          {busy ? 'Logging in…' : 'Log in'}
+        <button className="btn-primary btn-xl" type="submit" disabled={busy}>
+          {busy ? 'Entering arena…' : 'Enter the arena'}
         </button>
         <p className="auth-switch">
-          Don't have an account? <Link to="/register">Register</Link>
+          New challenger? <Link to="/register">Create an account</Link>
         </p>
       </form>
     </div>

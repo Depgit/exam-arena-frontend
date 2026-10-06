@@ -27,27 +27,32 @@ export default function Register() {
 
   return (
     <div className="auth-page">
+      <div className="auth-hero" aria-hidden="true">
+        <span className="auth-hero-mark">⚡</span>
+      </div>
       <form className="auth-card" onSubmit={handleSubmit}>
-        <h1>Create account</h1>
-        <p className="auth-subtitle">New accounts default to the "user" role</p>
+        <div className="auth-logo">
+          EXAM<span>ARENA</span>
+        </div>
+        <p className="auth-subtitle">Create your player — you start at Silver (1200)</p>
         {error && <div className="alert-error">{error}</div>}
         <label>
           Username
-          <input value={username} onChange={(e) => setUsername(e.target.value)} required minLength={3} maxLength={30} autoFocus />
+          <input value={username} onChange={(e) => setUsername(e.target.value)} required minLength={3} maxLength={30} autoFocus autoComplete="username" />
         </label>
         <label>
           Email
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
         </label>
         <label>
           Password
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
         </label>
-        <button className="btn-primary" type="submit" disabled={busy}>
-          {busy ? 'Creating account…' : 'Register'}
+        <button className="btn-primary btn-xl" type="submit" disabled={busy}>
+          {busy ? 'Creating player…' : 'Create player'}
         </button>
         <p className="auth-switch">
-          Already have an account? <Link to="/login">Log in</Link>
+          Already a player? <Link to="/login">Log in</Link>
         </p>
       </form>
     </div>

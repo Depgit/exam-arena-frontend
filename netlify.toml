@@ -1,0 +1,11 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Single-page app: every path (/app/dashboard, /app/profile/<id>, …) is a
+# client-side route. Without this, refreshing or opening a deep link on
+# Netlify returns its own 404 page instead of loading index.html.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

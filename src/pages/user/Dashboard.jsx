@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { getSubjects, getUserStats, getLeaderboard, getDailyChallenge } from '../../api/endpoints'
+import { getSubjects, getUserStats, getUserProfile, getLeaderboard, getDailyChallenge } from '../../api/endpoints'
+import { Avatar, RankBadge, tierFor } from '../../components/game/game'
 import { formatDuration } from './DailyChallenge'
 
 function DailyChallengeCard() {
@@ -70,6 +71,7 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const [subjects, setSubjects] = useState([])
   const [stats, setStats] = useState([])
+  const [ratings, setRatings] = useState([])
   const [leaderboard, setLeaderboard] = useState([])
   const [lbCategory, setLbCategory] = useState(null)
   const [error, setError] = useState('')
@@ -77,12 +79,15 @@ export default function Dashboard() {
   useEffect(() => {
     async function load() {
       try {
-        const [{ data: subs }, { data: st }] = await Promise.all([
+        const [{ data: subs }, { data: st }, profile] = await Promise.all([
           getSubjects(),
           getUserStats(user.id),
+          // Ratings are a nice-to-have for the player card; never block the lobby on them.
+          getUserProfile(user.id).catch(() => null),
         ])
         setSubjects(subs)
         setStats(st ?? [])
+        setRatings(profile?.data?.ratings ?? [])
         // Load leaderboard for the first available subject
         if (subs && subs.length > 0) {
           setLbCategory(subs[0])
@@ -106,61 +111,116 @@ export default function Dashboard() {
     }
   }
 
+  const name = user.display_name || user.username
+  const best = ratings.reduce((a, r) => (a == null || r.rating > a.rating ? r : a), null)
+  const totals = stats.reduce(
+    (t, s) => ({
+      matches: t.matches + s.total_matches,
+      wins: t.wins + s.wins,
+      streak: Math.max(t.streak, s.current_win_streak),
+    }),
+    { matches: 0, wins: 0, streak: 0 }
+  )
+  const winRate = totals.matches > 0 ? Math.round((totals.wins / totals.matches) * 100) : null
+
   return (
     <div className="page dashboard-page">
-      <h1>Welcome back, {user.display_name || user.username} 👋</h1>
       {error && <div className="alert-error">{error}</div>}
+
+      {/* ── Player card + primary CTA ─────────────────────────── */}
+      <section className="lobby-hero">
+        <div className="lobby-player">
+          <Avatar name={name} size={72} ring={best ? tierFor(best.rating).key : 'silver'} />
+          <div className="lobby-player-info">
+            <span className="eyebrow">Welcome back</span>
+            <h1>{name}</h1>
+            <div className="lobby-player-meta">
+              {best ? (
+                <>
+                  <RankBadge rating={best.rating} />
+                  <span className="muted">best in {best.exam_category_name || best.exam_category_code}</span>
+                </>
+              ) : (
+                <RankBadge rating={1200} />
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="lobby-cta">
+          <Link to="/app/matchmaking" className="btn-play">
+            <span className="btn-play-icon" aria-hidden="true">⚔️</span>
+            <span>
+              <strong>Play</strong>
+              <small>Find a ranked opponent</small>
+            </span>
+          </Link>
+        </div>
+      </section>
+
+      <div className="kpi-strip">
+        <div className="kpi-tile"><span>Matches</span><strong>{totals.matches}</strong></div>
+        <div className="kpi-tile"><span>Wins</span><strong>{totals.wins}</strong></div>
+        <div className="kpi-tile"><span>Win rate</span><strong>{winRate == null ? '—' : `${winRate}%`}</strong></div>
+        <div className="kpi-tile kpi-fire"><span>Win streak</span><strong>{totals.streak > 0 ? `🔥 ${totals.streak}` : 0}</strong></div>
+      </div>
 
       <div className="dashboard-layout">
         {/* ── Left / Main column ────────────────────────────────── */}
         <div className="dashboard-main">
           <DailyChallengeCard />
 
-          <div className="card-grid">
+          <h2>Game modes</h2>
+          <div className="card-grid mode-grid">
             <Link to="/app/matchmaking" className="action-card ranked">
               <div className="action-icon">⚔️</div>
-              <h3>Ranked Match</h3>
-              <p>Ranked queue with similarly-rated opponents, or Arena — open to everyone.</p>
+              <h3>Ranked</h3>
+              <p>Matched against players near your rating. ELO on the line.</p>
+              <span className="mode-tag">Competitive</span>
             </Link>
             <Link to="/app/friend" className="action-card friend">
-              <div className="action-icon">👥</div>
+              <div className="action-icon">🎮</div>
               <h3>Friend Match</h3>
-              <p>Create or join a private room with a room code.</p>
+              <p>Private room with a code. Settle it with a friend.</p>
+              <span className="mode-tag">Private</span>
             </Link>
             <Link to="/app/practice" className="action-card practice">
               <div className="action-icon">🎯</div>
               <h3>Practice</h3>
-              <p>Solve questions solo with instant feedback. No rating impact.</p>
+              <p>Solo drills with instant feedback. No rating impact.</p>
+              <span className="mode-tag">Solo</span>
             </Link>
             <Link to="/app/leaderboard" className="action-card leaderboard-card">
               <div className="action-icon">🏆</div>
               <h3>Leaderboard</h3>
-              <p>See how you stack up by exam category.</p>
+              <p>See who rules each exam category.</p>
+              <span className="mode-tag">Ranks</span>
             </Link>
           </div>
 
-          <h2>Exam categories</h2>
-          <div className="chip-row">
-            {subjects?.map((s) => (
-              <span key={s.id} className="chip" title={s.description}>
-                {s.name}
-              </span>
-            ))}
-          </div>
-
-          <h2>Your stats</h2>
+          <h2>Your stats by category</h2>
           {stats && stats.length === 0 && (
-            <p className="muted">No stats yet — play a match or practice session to get started.</p>
+            <div className="empty-state">
+              <span aria-hidden="true">🎮</span>
+              <p>No stats yet — play your first match to get on the board.</p>
+              <Link to="/app/matchmaking" className="btn-primary small">Play now</Link>
+            </div>
           )}
           <div className="stats-grid">
-            {stats && stats.map((s) => (
-              <div key={s.exam_category_id} className="stat-card">
-                <div className="stat-row"><span>Matches</span><strong>{s.total_matches}</strong></div>
-                <div className="stat-row"><span>W / L / D</span><strong>{s.wins} / {s.losses} / {s.draws}</strong></div>
-                <div className="stat-row"><span>Accuracy</span><strong>{s.overall_accuracy.toFixed(1)}%</strong></div>
-                <div className="stat-row"><span>Win streak</span><strong>{s.current_win_streak}</strong></div>
-              </div>
-            ))}
+            {stats && stats.map((s) => {
+              const r = ratings.find((x) => x.exam_category_id === s.exam_category_id)
+              return (
+                <div key={s.exam_category_id} className="stat-card">
+                  <div className="stat-card-head">
+                    <h3>{s.exam_category_name || subjects.find((x) => x.id === s.exam_category_id)?.name || 'Category'}</h3>
+                    {r && <RankBadge rating={r.rating} size="sm" />}
+                  </div>
+                  <div className="stat-row"><span>Matches</span><strong>{s.total_matches}</strong></div>
+                  <div className="stat-row"><span>W / L / D</span><strong>{s.wins} / {s.losses} / {s.draws}</strong></div>
+                  <div className="stat-row"><span>Accuracy</span><strong>{s.overall_accuracy.toFixed(1)}%</strong></div>
+                  <div className="accuracy-bar"><span style={{ width: `${Math.min(100, s.overall_accuracy)}%` }} /></div>
+                </div>
+              )
+            })}
           </div>
         </div>
 
@@ -193,12 +253,13 @@ export default function Dashboard() {
                 return (
                   <li
                     key={entry.user_id}
-                    className={`lb-item ${isMe ? 'lb-me' : ''}`}
-                    onClick={() => navigate(`/app/profile`)}
+                    className={`lb-item ${isMe ? 'lb-me' : ''} ${idx < 3 ? `lb-top lb-top-${idx + 1}` : ''}`}
+                    onClick={() => navigate(`/app/profile/${entry.user_id}`)}
                     title={`View ${entry.username}'s profile`}
                     style={{ cursor: 'pointer' }}
                   >
                     <span className="lb-rank">{medal || `#${idx + 1}`}</span>
+                    <Avatar name={entry.display_name || entry.username} size={26} />
                     <span className="lb-name">{entry.display_name || entry.username}{isMe ? ' ★' : ''}</span>
                     <span className="lb-rating">{entry.rating}</span>
                   </li>

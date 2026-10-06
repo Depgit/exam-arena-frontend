@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { getDailyChallenge, startDailyChallenge, submitDailyChallenge } from '../../api/endpoints'
 import { useAuth } from '../../context/AuthContext'
 import FlagQuestionButton from '../../components/FlagQuestionButton'
+import QuestionCard, { KeyHint, ProgressDots, sortOptions, useAnswerKeys } from '../../components/game/QuestionCard'
+import { Avatar, TimerRing } from '../../components/game/game'
+import * as sfx from '../../lib/sfx'
 
 export function formatDuration(ms) {
   const total = Math.max(0, Math.round((ms ?? 0) / 1000))
@@ -18,6 +21,7 @@ export function DailyLeaderboard({ entries, userId }) {
       {entries?.map((e) => (
         <li key={e.user_id} className={`lb-item ${e.user_id === userId ? 'lb-me' : ''}`}>
           <span className="lb-rank">#{e.rank}</span>
+          <Avatar name={e.display_name || e.username} size={26} />
           <span className="lb-name">{e.display_name || e.username}</span>
           <span className="lb-rating">
             {e.correct}/{e.total} · {formatDuration(e.time_taken_ms)}
@@ -105,63 +109,74 @@ export default function DailyChallenge() {
     return () => clearInterval(id)
   }, [run, submit])
 
+  // Same controls as a live match: A–D pick, Enter = next (or submit on
+  // the last question), ← → move between questions.
+  const runQuestions = run?.questions ?? []
+  const runQuestion = runQuestions[current]
+  const pick = (optionId) => {
+    if (!runQuestion) return
+    sfx.play('select')
+    setSelections((s) => ({ ...s, [runQuestion.id]: optionId }))
+  }
+  const confirmSubmit = () => {
+    const open = runQuestions.filter((q) => !selections[q.id]).length
+    if (open > 0 && !window.confirm(`${open} question${open === 1 ? '' : 's'} unanswered. Submit anyway?`)) return
+    submit()
+  }
+  useAnswerKeys({
+    enabled: !!runQuestion && !submitting,
+    options: sortOptions(runQuestion),
+    onPick: pick,
+    onEnter: current < runQuestions.length - 1 ? () => setCurrent(current + 1) : confirmSubmit,
+    onPrev: current > 0 ? () => setCurrent(current - 1) : undefined,
+    onNext: current < runQuestions.length - 1 ? () => setCurrent(current + 1) : undefined,
+  })
+
   if (error && !run && !overview) {
     return <div className="page"><div className="alert-error">{error}</div></div>
   }
-  if (!overview) return <div className="page-center">Loading…</div>
+  if (!overview) {
+    return (
+      <div className="page-center">
+        <div className="spinner" />
+      </div>
+    )
+  }
 
   // ── Playing ──────────────────────────────────────────────────────────
   if (run) {
-    const questions = run.questions
-    const question = questions[current]
+    const questions = runQuestions
+    const question = runQuestion
     if (!question) {
-      return <div className="page-center">this feature will be available soon.....</div>;
+      return <div className="page-center">No questions in today's challenge.</div>
     }
     const selected = selections[question.id] || ''
     const answered = questions.filter((q) => selections[q.id]).length
     const isLast = current === questions.length - 1
-    const lowTime = remainingMs != null && remainingMs <= 30_000
-
-    function handleSubmit() {
-      const open = questions.length - answered
-      if (open > 0 && !window.confirm(`${open} question${open === 1 ? '' : 's'} unanswered. Submit anyway?`)) return
-      submit()
-    }
+    const remainingSec = remainingMs == null ? null : Math.max(0, Math.ceil(remainingMs / 1000))
 
     return (
       <div className="page match-page">
-        <div className="match-header">
-          <div>Daily Challenge · Question {current + 1} / {questions.length}</div>
-          {remainingMs != null && (
-            <div className={`timer ${lowTime ? 'timer-low' : ''}`}>⏱ {formatDuration(remainingMs)}</div>
-          )}
+        <div className="practice-hud">
+          <span className="eyebrow">📅 Daily</span>
+          <div className="match-progress" aria-label={`${answered} of ${questions.length} answered`}>
+            <span style={{ width: `${(answered / questions.length) * 100}%` }} />
+          </div>
+          <span className="practice-score">{answered}/{questions.length}</span>
+          <TimerRing remaining={remainingSec} total={overview.time_limit_seconds} size={56} />
         </div>
         {error && <div className="alert-error">{error}</div>}
 
-        <div className="question-card">
-          <div className="question-card-head">
-            <span className={`badge badge-${question.difficulty}`}>{question.difficulty}</span>
-            <FlagQuestionButton questionId={question && question.id} />
-          </div>
-          <p className="question-body">{question.body}</p>
-          <div className="options">
-            {question?.options
-              .slice()
-              .sort((a, b) => a.order_index - b.order_index)
-              .map((opt) => (
-                <button
-                  key={opt.id}
-                  className={`option-btn ${selected === opt.id ? 'selected' : ''}`}
-                  onClick={() => setSelections((s) => ({ ...s, [question.id]: opt.id }))}
-                  aria-pressed={selected === opt.id}
-                >
-                  {opt.option_text}
-                </button>
-              ))}
-          </div>
-          {selected && (
-            <div className="answer-actions">
-              <p className="muted">You can change any answer until you submit.</p>
+        <QuestionCard
+          key={question.id}
+          question={question}
+          index={current}
+          total={questions.length}
+          selectedId={selected}
+          onSelect={pick}
+        >
+          <KeyHint action={isLast ? 'submit' : 'go next'}>
+            {selected && (
               <button
                 type="button"
                 className="btn-ghost small"
@@ -173,34 +188,30 @@ export default function DailyChallenge() {
                   })
                 }
               >
-                Clear selection
+                Clear
               </button>
-            </div>
-          )}
-        </div>
+            )}
+          </KeyHint>
+        </QuestionCard>
 
         <div className="match-nav">
-          <div className="progress-dots">
-            {questions?.map((q, i) => (
-              <span
-                key={q.id}
-                className={`dot ${selections[q.id] ? 'answered' : ''} ${i === current ? 'active' : ''}`}
-                onClick={() => setCurrent(i)}
-                title={`Question ${i + 1}`}
-              />
-            ))}
-          </div>
+          <ProgressDots
+            questions={questions}
+            current={current}
+            stateOf={(q) => (selections[q.id] ? 'answered' : '')}
+            onJump={setCurrent}
+          />
           <div className="nav-buttons">
             <button className="btn-ghost" onClick={() => setCurrent(current - 1)} disabled={current === 0}>
               ← Back
             </button>
             {isLast ? (
-              <button className="btn-primary" onClick={handleSubmit} disabled={submitting}>
+              <button className="btn-primary btn-lg" onClick={confirmSubmit} disabled={submitting}>
                 {submitting ? 'Submitting…' : `Submit (${answered}/${questions.length})`}
               </button>
             ) : (
-              <button className="btn-primary" onClick={() => setCurrent(current + 1)}>
-                Next question →
+              <button className={selected ? 'btn-primary btn-lg' : 'btn-ghost'} onClick={() => setCurrent(current + 1)}>
+                {selected ? 'Next →' : 'Skip →'}
               </button>
             )}
           </div>
@@ -218,7 +229,10 @@ export default function DailyChallenge() {
     const participants = result?.participants ?? overview.participants
     return (
       <div className="page">
-        <h1>Daily Challenge · {overview.date}</h1>
+        <header className="page-head">
+          <span className="eyebrow">📅 Daily Challenge · {overview.date}</span>
+          <h1>Your result</h1>
+        </header>
         {result?.expired && (
           <div className="alert-error">Time ran out before your answers arrived, so this attempt scored 0.</div>
         )}
@@ -267,7 +281,7 @@ export default function DailyChallenge() {
             <DailyLeaderboard entries={overview.leaderboard} userId={user.id} />
           </div>
         </div>
-        <button className="btn-ghost" onClick={() => navigate('/app/dashboard')}>Back to home</button>
+        <button className="btn-ghost" onClick={() => navigate('/app/dashboard')}>Back to lobby</button>
       </div>
     )
   }
@@ -275,7 +289,11 @@ export default function DailyChallenge() {
   // ── Intro ────────────────────────────────────────────────────────────
   return (
     <div className="page">
-      <h1>Daily Challenge · {overview.date}</h1>
+      <header className="page-head">
+        <span className="eyebrow">📅 {overview.date}</span>
+        <h1>Daily Challenge</h1>
+        <p className="muted">Same questions for everyone today. One shot.</p>
+      </header>
       {error && <div className="alert-error">{error}</div>}
       {!overview.available ? (
         <div className="form-card">
@@ -291,7 +309,7 @@ export default function DailyChallenge() {
               <li>One attempt per day. Most correct wins; ties go to the fastest</li>
               <li>You can change answers until you submit</li>
             </ul>
-            <button className="btn-primary" onClick={begin}>Start challenge</button>
+            <button className="btn-primary btn-lg" onClick={begin}>Start challenge</button>
           </div>
           <div className="form-card">
             <h3>Today's top players ({overview.participants})</h3>

@@ -2,7 +2,7 @@ services:
   frontend:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.frontend
+      dockerfile: docker/Dockerfile
       args:
         # Baked into the JS bundle at build time. Override when the API is
         # not reachable from the browser at localhost:8080, e.g.

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useAuth } from './AuthContext'
 import { WS_BASE_URL } from '../api/client'
 
@@ -45,11 +45,26 @@ export function WebSocketProvider({ children }) {
       }
       ws.onerror = () => ws.close()
       ws.onmessage = (event) => {
-        try {
-          const msg = JSON.parse(event.data)
+        // The server drains its send queue into a SINGLE text frame with the
+        // individual messages newline-separated (see WritePump in
+        // internal/ws/client.go). Parsing event.data as one JSON document
+        // throws the moment that happens — which is exactly when traffic
+        // spikes, e.g. a score_update and a time_update landing together —
+        // and would silently discard every message in the batch. Split first,
+        // then parse each line on its own so one bad line cannot take its
+        // siblings down with it.
+        for (const line of String(event.data).split('\n')) {
+          if (!line.trim()) continue
+          let msg
+          try {
+            msg = JSON.parse(line)
+          } catch {
+            // Loud on purpose: a dropped frame means the UI is now out of
+            // step with the server, and that is worth seeing in the console.
+            console.warn('[ws] dropped unparseable frame:', line)
+            continue
+          }
           dispatch(msg)
-        } catch {
-          // ignore malformed frames
         }
       }
     }
@@ -78,8 +93,10 @@ export function WebSocketProvider({ children }) {
     return () => listenersRef.current.get(type)?.delete(callback)
   }, [])
 
+  const value = useMemo(() => ({ connected, send, subscribe }), [connected, send, subscribe])
+
   return (
-    <WebSocketContext.Provider value={{ connected, send, subscribe }}>
+    <WebSocketContext.Provider value={value}>
       {children}
     </WebSocketContext.Provider>
   )
@@ -92,11 +109,20 @@ export function useWebSocket() {
 }
 
 // Convenience hook: subscribe to one message type for the lifetime of a component.
+//
+// The callback is held in a ref rather than listed as an effect dependency.
+// Subscribing on every render would churn the listener set, but closing over
+// the first render's callback forever means a subscriber reads stale state —
+// which breaks anything that compares a previous value to the incoming one
+// (score deltas, streaks, answer feedback). The ref gives us one stable
+// subscription that always calls the latest closure.
 export function useWSListener(type, callback) {
   const { subscribe } = useWebSocket()
+  const callbackRef = useRef(callback)
+
   useEffect(() => {
-    const unsubscribe = subscribe(type, callback)
-    return unsubscribe
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type, subscribe])
+    callbackRef.current = callback
+  })
+
+  useEffect(() => subscribe(type, (payload) => callbackRef.current?.(payload)), [type, subscribe])
 }

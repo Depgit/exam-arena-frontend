@@ -23,16 +23,17 @@
   color-scheme: dark;
 
   /* ---- Neutral surfaces ---- */
-  --bg: #090c18;
+  --bg: #05060d;
   --bg-gradient:
-    radial-gradient(1100px 560px at 50% -12%, rgba(99, 102, 241, 0.16), transparent 62%),
-    radial-gradient(700px 420px at 100% 0%, rgba(34, 211, 238, 0.05), transparent 60%),
-    linear-gradient(180deg, #0b0f1e 0%, #090c18 100%);
-  --surface-1: #111628;          /* cards, panels            */
-  --surface-2: #171d33;          /* raised / hover           */
-  --surface-3: #20284a;          /* controls, active chips   */
-  --surface-inset: #0c1021;      /* inputs, answer options   */
-  --surface-glass: rgba(9, 12, 24, 0.74);
+    radial-gradient(1000px 520px at 50% -10%, rgba(124, 92, 255, 0.22), transparent 62%),
+    radial-gradient(700px 460px at 100% 10%, rgba(0, 229, 255, 0.08), transparent 60%),
+    radial-gradient(700px 460px at 0% 100%, rgba(255, 61, 168, 0.07), transparent 60%),
+    linear-gradient(180deg, #080a16 0%, #05060d 100%);
+  --surface-1: #0d1022;          /* cards, panels            */
+  --surface-2: #141834;          /* raised / hover           */
+  --surface-3: #1f2550;          /* controls, active chips   */
+  --surface-inset: #090b1a;      /* inputs, answer options   */
+  --surface-glass: rgba(7, 9, 20, 0.94);
   --card-gradient: linear-gradient(180deg, var(--surface-2) 0%, var(--surface-1) 100%);
   --overlay-hover: rgba(148, 163, 184, 0.07);
   --border: rgba(148, 163, 184, 0.12);
@@ -49,22 +50,22 @@
   --on-status: #090c18;          /* glyphs on status fills   */
 
   /* ---- Primary (indigo) ---- */
-  --primary: #6366f1;            /* fills, borders, dots     */
-  --primary-hover: #7477f5;
-  --primary-strong: #4f46e5;
-  --primary-text: #a5b4fc;       /* text & links on dark     */
-  --primary-soft: rgba(99, 102, 241, 0.16);
-  --primary-border: rgba(129, 140, 248, 0.5);
-  --primary-gradient: linear-gradient(135deg, #5457ee 0%, #6a4cf0 55%, #7c3aed 100%);
+  --primary: #7c5cff;            /* fills, borders, dots     */
+  --primary-hover: #8f74ff;
+  --primary-strong: #6a46ff;
+  --primary-text: #b9a8ff;       /* text & links on dark     */
+  --primary-soft: rgba(124, 92, 255, 0.16);
+  --primary-border: rgba(150, 125, 255, 0.55);
+  --primary-gradient: linear-gradient(135deg, #6a46ff 0%, #9b4dff 55%, #d63cff 100%);
 
   /* ---- Info (cyan) ---- */
-  --info: #22d3ee;
+  --info: #22e4ff;
   --info-strong: #06b6d4;
   --info-soft: rgba(34, 211, 238, 0.12);
   --info-border: rgba(34, 211, 238, 0.36);
 
   /* ---- Success (emerald) ---- */
-  --success: #34d399;
+  --success: #3ef0a0;
   --success-strong: #10b981;
   --success-soft: rgba(52, 211, 153, 0.12);
   --success-border: rgba(52, 211, 153, 0.42);
@@ -113,22 +114,22 @@
   --accent-violet-border: rgba(167, 139, 250, 0.4);
 
   /* ---- Focus ---- */
-  --focus-ring: #818cf8;
-  --focus-shadow: 0 0 0 3px rgba(129, 140, 248, 0.35);
+  --focus-ring: #9b86ff;
+  --focus-shadow: 0 0 0 3px rgba(155, 134, 255, 0.35);
 
   /* ---- Elevation ---- */
   --highlight: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 6px -2px rgba(0, 0, 0, 0.3);
   --shadow-2: 0 10px 28px -10px rgba(0, 0, 0, 0.6);
   --shadow-3: 0 24px 56px -16px rgba(0, 0, 0, 0.7);
-  --shadow-primary: 0 8px 22px -8px rgba(99, 102, 241, 0.65);
+  --shadow-primary: 0 8px 24px -8px rgba(124, 92, 255, 0.75);
 
   /* ---- Radii ---- */
   --radius-xs: 6px;
-  --radius-sm: 10px;             /* inputs, buttons   */
-  --radius-md: 12px;             /* rows, options     */
-  --radius-lg: 16px;             /* cards             */
-  --radius-xl: 20px;             /* auth / modals     */
+  --radius-sm: 8px;             /* inputs, buttons   */
+  --radius-md: 10px;             /* rows, options     */
+  --radius-lg: 14px;             /* cards             */
+  --radius-xl: 18px;             /* auth / modals     */
   --radius-full: 9999px;
 
   /* ---- Spacing ---- */
@@ -149,7 +150,7 @@
   --dur-slow: 280ms;
 
   /* ---- Typography ---- */
-  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Chakra Petch', 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 
   /* ---- Legacy aliases (older names, kept so any selector using them still resolves) ---- */
@@ -158,7 +159,7 @@
   --border-hover: var(--border-strong);
   --border-focus: var(--focus-ring);
   --muted-dark: var(--text-placeholder);
-  --primary-glow: rgba(99, 102, 241, 0.35);
+  --primary-glow: rgba(124, 92, 255, 0.4);
   --accent-cyan: var(--info);
   --accent-cyan-glow: rgba(34, 211, 238, 0.3);
   --success-bg: var(--success-soft);
@@ -193,8 +194,6 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   background-color: var(--bg);
-  background-image: var(--bg-gradient);
-  background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-body);
   font-size: 15px;
@@ -205,7 +204,7 @@ body {
 }
 
 ::selection {
-  background: rgba(99, 102, 241, 0.4);
+  background: rgba(124, 92, 255, 0.45);
   color: var(--text-strong);
 }
 
@@ -362,13 +361,13 @@ button {
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 12px 26px -8px rgba(99, 102, 241, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  box-shadow: 0 12px 26px -8px rgba(124, 92, 255, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.24);
   filter: brightness(1.05);
 }
 
 .btn-primary:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 4px 12px -4px rgba(99, 102, 241, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 12px -4px rgba(124, 92, 255, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   filter: brightness(0.97);
 }
 
@@ -598,27 +597,24 @@ textarea {
   width: 560px;
   height: 560px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(124, 92, 255, 0.2) 0%, transparent 70%);
   top: 10%;
   left: 50%;
   transform: translateX(-50%);
-  filter: blur(48px);
   pointer-events: none;
 }
 
 .auth-card {
   width: 100%;
   max-width: 420px;
-  background: rgba(17, 22, 40, 0.82);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  background: rgba(13, 16, 34, 0.94);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-xl);
   padding: 36px 32px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  box-shadow: var(--shadow-3), 0 0 0 1px rgba(99, 102, 241, 0.08), var(--highlight);
+  box-shadow: var(--shadow-3), 0 0 0 1px rgba(124, 92, 255, 0.08), var(--highlight);
   position: relative;
   z-index: 1;
   animation: floatUp 0.45s var(--ease-out);
@@ -684,8 +680,6 @@ textarea {
   min-height: 64px;
   padding: 10px var(--space-8);
   background: var(--surface-glass);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
   border-bottom: 1px solid var(--border);
 }
 
@@ -1850,9 +1844,8 @@ textarea {
   font-weight: 600;
 }
 
-.leaderboard-table tbody tr:nth-child(1) td:first-child { color: var(--rank-gold); }
-.leaderboard-table tbody tr:nth-child(2) td:first-child { color: var(--rank-silver); }
-.leaderboard-table tbody tr:nth-child(3) td:first-child { color: var(--rank-bronze); }
+/* No gold/silver/bronze row colours here: the top three sit on the podium
+   above the table (pages/user/Leaderboard.jsx), so the table starts at #4. */
 
 /* "You" row — declared after :hover so the highlight survives hover */
 .leaderboard-table tbody tr.me td {
@@ -1862,7 +1855,7 @@ textarea {
 }
 
 .leaderboard-table tbody tr.me:hover td {
-  background: rgba(99, 102, 241, 0.22);
+  background: rgba(124, 92, 255, 0.22);
 }
 
 .leaderboard-table tbody tr.me td:first-child {
@@ -2131,6 +2124,87 @@ textarea {
   0%, 100% { transform: translateX(0); }
   20%, 60% { transform: translateX(-4px); }
   40%, 80% { transform: translateX(4px); }
+}
+
+/* ---- Game feel ----------------------------------------------------
+   Motion whose job is feedback, not decoration. Each one marks a moment
+   the player needs to feel: an answer landing, a score moving, an
+   opponent acting, a match beginning or ending.
+   Every selector that uses these is switched off in the reduced-motion
+   block at the end of this section.
+   ------------------------------------------------------------------- */
+
+/* A value changed — score ticking up, HUD bar growing. */
+@keyframes pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+/* Answer graded by the server. Colour carries the meaning; the flash
+   carries the timing, so the player knows WHICH tap was graded. */
+@keyframes flash-correct {
+  0% { box-shadow: 0 0 0 0 var(--success-border); }
+  35% { box-shadow: 0 0 0 6px var(--success-soft); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@keyframes flash-wrong {
+  0% { box-shadow: 0 0 0 0 var(--error-border); }
+  35% { box-shadow: 0 0 0 6px var(--error-soft); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* "+150" leaving the option and heading for the scoreboard. */
+@keyframes score-fly {
+  0% { opacity: 0; transform: translateY(0) scale(0.8); }
+  15% { opacity: 1; transform: translateY(-6px) scale(1.1); }
+  100% { opacity: 0; transform: translateY(-46px) scale(1); }
+}
+
+/* Countdown ring. --ring-circumference is set per instance by the
+   component, since the dash length depends on the radius. */
+@keyframes ring-sweep {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: var(--ring-circumference, 100); }
+}
+
+/* Opponent found — the two player cards arrive from opposite sides. */
+@keyframes vs-slam-left {
+  0% { opacity: 0; transform: translateX(-40px) scale(0.94); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes vs-slam-right {
+  0% { opacity: 0; transform: translateX(40px) scale(0.94); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* 3 · 2 · 1 */
+@keyframes countdown-pop {
+  0% { opacity: 0; transform: scale(1.8); }
+  30% { opacity: 1; transform: scale(1); }
+  70% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.85); }
+}
+
+/* Opponent just answered — their HUD row acknowledges it. */
+@keyframes hud-pulse {
+  0% { box-shadow: 0 0 0 0 var(--info-border); }
+  50% { box-shadow: 0 0 0 5px var(--info-soft); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+/* Victory only. */
+@keyframes confetti-fall {
+  0% { opacity: 1; transform: translateY(-10vh) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+}
+
+/* Loading placeholders (design_system.md §16). */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 /* -------------------------------------------------------------
@@ -2945,6 +3019,58 @@ a.kpi-card:hover {
   .btn-ghost:active:not(:disabled),
   .action-card:hover,
   .dot.active {
+    transform: none;
+  }
+}
+
+/* ===================================================================
+   GAME FEEL — shared controls
+   =================================================================== */
+
+/* Sound toggle (design_system.md §22). Sized to the 44px touch-target
+   minimum from the accessibility checklist (§27). */
+.sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0;
+  font-size: 17px;
+  line-height: 1;
+  color: var(--text-secondary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background-color var(--dur) ease, border-color var(--dur) ease, transform var(--dur-fast) ease;
+}
+
+.sound-toggle:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+}
+
+.sound-toggle:active {
+  transform: scale(0.94);
+}
+
+.sound-toggle[aria-pressed='false'] {
+  color: var(--muted);
+}
+
+@media (max-width: 560px) {
+  .sound-toggle {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sound-toggle:active {
     transform: none;
   }
 }

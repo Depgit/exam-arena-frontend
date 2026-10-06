@@ -21,7 +21,23 @@ export const challengeFriend = (userId, body) => api.post(`/api/v1/friends/${use
 export const closeChallenge = (matchId) => api.delete(`/api/v1/friends/challenges/${matchId}`)
 
 // ---- Subjects ----
-export const getSubjects = () => api.get('/api/v1/subjects')
+// Categories almost never change, yet nearly every page asks for them on
+// mount. Share one in-flight/settled request across the session instead of
+// refetching on each navigation; a failed request is dropped so the next
+// caller retries.
+let subjectsRequest = null
+export const getSubjects = () => {
+  if (!subjectsRequest) {
+    subjectsRequest = api.get('/api/v1/subjects').catch((err) => {
+      subjectsRequest = null
+      throw err
+    })
+  }
+  return subjectsRequest
+}
+const invalidateSubjects = () => {
+  subjectsRequest = null
+}
 
 // ---- Topics ----
 // Pass a category id to get only that category's topics (the usual case).
@@ -65,4 +81,9 @@ export const getAdminStats = () => api.get('/api/v1/admin/stats')
 export const getFlaggedQuestions = (status = 'open') => api.get('/api/v1/admin/flags', { params: { status } })
 export const reviewQuestionFlags = (questionId, body) => api.put(`/api/v1/admin/flags/${questionId}`, body)
 export const setCategorySortOrder = (id, sortOrder) =>
-  api.put(`/api/v1/admin/categories/${id}/sort-order`, { sort_order: sortOrder })
+  api
+    .put(`/api/v1/admin/categories/${id}/sort-order`, { sort_order: sortOrder })
+    .then((res) => {
+      invalidateSubjects()
+      return res
+    })

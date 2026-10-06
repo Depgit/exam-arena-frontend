@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { getSubjects, startPractice, submitPracticeAnswer, endPractice } from '../../api/endpoints'
-import FlagQuestionButton from '../../components/FlagQuestionButton'
+import QuestionCard, { KeyHint, ProgressDots, sortOptions, useAnswerKeys } from '../../components/game/QuestionCard'
+import * as sfx from '../../lib/sfx'
+import { haptic, HAPTIC } from '../../lib/haptics'
+
+const DIFFICULTIES = [['', 'Mixed'], ['easy', 'Easy'], ['medium', 'Medium'], ['hard', 'Hard']]
+const COUNTS = [5, 10, 20, 30]
 
 export default function Practice() {
   const [subjects, setSubjects] = useState([])
@@ -14,8 +18,8 @@ export default function Practice() {
   const [selected, setSelected] = useState('')
   const [error, setError] = useState('')
   const [summary, setSummary] = useState(null) // { answered, correct }
+  const [results, setResults] = useState({}) // questionId → is_correct, for the progress dots
   const startRef = useRef(Date.now())
-  const navigate = useNavigate()
 
   useEffect(() => {
     getSubjects().then(({ data }) => {
@@ -41,6 +45,7 @@ export default function Practice() {
       setCurrent(0)
       setFeedback(null)
       setSummary({ answered: 0, correct: 0 })
+      setResults({})
     } catch (err) {
       setError(err.message)
     }
@@ -49,6 +54,7 @@ export default function Practice() {
   // Choosing an option is a draft; "Check answer" submits it.
   function handleSelect(optionId) {
     if (feedback) return
+    sfx.play('select')
     setSelected(optionId)
   }
 
@@ -62,6 +68,9 @@ export default function Practice() {
         time_taken_ms: Date.now() - startRef.current,
       })
       setFeedback(data)
+      setResults((r) => ({ ...r, [question.id]: data.is_correct }))
+      sfx.play(data.is_correct ? 'correct' : 'wrong')
+      haptic(data.is_correct ? HAPTIC.success : HAPTIC.error)
       setSummary((s) => ({ answered: s.answered + 1, correct: s.correct + (data.is_correct ? 1 : 0) }))
     } catch (err) {
       setError(err.message)
@@ -82,45 +91,88 @@ export default function Practice() {
     }
   }
 
+  const activeQuestion = session?.questions[current]
+  const onLast = session ? current >= session.questions.length - 1 : false
+  useAnswerKeys({
+    enabled: !!activeQuestion,
+    options: sortOptions(activeQuestion),
+    onPick: handleSelect,
+    onEnter: !feedback ? (selected ? handleCheck : undefined) : onLast ? handleFinish : handleNext,
+  })
+
   if (!session) {
     return (
       <div className="page">
-        <h1>Practice Mode</h1>
+        <header className="page-head">
+          <span className="eyebrow">Training ground</span>
+          <h1>Practice</h1>
+          <p className="muted">Solo drills with instant feedback. Your rating is never affected.</p>
+        </header>
         {error && <div className="alert-error">{error}</div>}
         {summary && (
           <div className="alert-success">
             Session complete — {summary.correct}/{summary.answered} correct.
           </div>
         )}
-        <div className="form-card">
-          <label>
-            Exam category
-            <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-              {subjects && subjects.map((s) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Difficulty
-            <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-              <option value="">Mixed</option>
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-            </select>
-          </label>
-          <label>
-            Number of questions
-            <input
-              type="number"
-              min={1}
-              max={50}
-              value={questionCount}
-              onChange={(e) => setQuestionCount(e.target.value)}
-            />
-          </label>
-          <button className="btn-primary" onClick={handleStart} disabled={!categoryId}>
+
+        <section>
+          <h2>Exam category</h2>
+          <div className="tile-picker">
+            {subjects && subjects.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                className={`tile-option ${categoryId === s.id ? 'selected' : ''}`}
+                aria-pressed={categoryId === s.id}
+                onClick={() => setCategoryId(s.id)}
+              >
+                <strong>{s.name}</strong>
+                {s.code && <span>{s.code}</span>}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h2>Difficulty</h2>
+          <div className="segmented">
+            {DIFFICULTIES.map(([v, label]) => (
+              <button
+                key={v || 'mixed'}
+                type="button"
+                className={`segmented-btn ${v ? `seg-${v}` : ''} ${difficulty === v ? 'selected' : ''}`}
+                aria-pressed={difficulty === v}
+                onClick={() => setDifficulty(v)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h2>Questions</h2>
+          <div className="segmented">
+            {COUNTS.map((n) => (
+              <button
+                key={n}
+                type="button"
+                className={`segmented-btn ${Number(questionCount) === n ? 'selected' : ''}`}
+                aria-pressed={Number(questionCount) === n}
+                onClick={() => setQuestionCount(n)}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <div className="find-bar">
+          <div>
+            <strong>{subjects.find((s) => s.id === categoryId)?.name || 'Pick a category'}</strong>
+            <span className="muted"> · {difficulty || 'mixed'} · {questionCount} questions</span>
+          </div>
+          <button className="btn-primary btn-xl" onClick={handleStart} disabled={!categoryId}>
             Start practice
           </button>
         </div>
@@ -133,52 +185,52 @@ export default function Practice() {
 
   if (!question) {
     return (
-      <div className="page">
-        <h1>Session complete</h1>
-        <p>{summary.correct}/{summary.answered} correct.</p>
-        <button className="btn-primary" onClick={handleFinish}>Done</button>
+      <div className="page match-results-page outcome-victory">
+        <div className="results-header">
+          <div className="results-trophy" aria-hidden="true">🎯</div>
+          <h1 className="results-title">Session complete</h1>
+          <p className="muted">{summary.correct}/{summary.answered} correct</p>
+        </div>
+        <div className="results-actions">
+          <button className="btn-primary btn-xl" onClick={handleFinish}>Done</button>
+        </div>
       </div>
     )
   }
 
+  const accuracy = summary.answered ? Math.round((summary.correct / summary.answered) * 100) : null
+
   return (
-    <div className="page">
-      <h1>Practice — Question {current + 1} / {session.questions.length}</h1>
+    <div className="page match-page">
+      <div className="practice-hud">
+        <span className="eyebrow">🎯 Practice</span>
+        <div className="match-progress">
+          <span style={{ width: `${(summary.answered / session.questions.length) * 100}%` }} />
+        </div>
+        <span className="practice-score">
+          ✓ {summary.correct}
+          {accuracy != null && <small> · {accuracy}%</small>}
+        </span>
+      </div>
       {error && <div className="alert-error">{error}</div>}
-      <div className="question-card">
-        <div className="question-card-head">
-          <span className={`badge badge-${question.difficulty}`}>{question.difficulty}</span>
-          <FlagQuestionButton questionId={question.id} />
-        </div>
-        <p className="question-body">{question.body}</p>
-        <div className="options">
-          {question?.options
-            .slice()
-            .sort((a, b) => a.order_index - b.order_index)
-            .map((opt) => {
-              const isSelected = selected === opt.id
-              const showResult = !!feedback && isSelected
-              return (
-                <button
-                  key={opt.id}
-                  className={`option-btn ${isSelected ? 'selected' : ''} ${showResult ? (feedback.is_correct ? 'correct' : 'incorrect') : ''
-                    }`}
-                  onClick={() => handleSelect(opt.id)}
-                  disabled={!!feedback}
-                  aria-pressed={isSelected}
-                >
-                  {opt.option_text}
-                </button>
-              )
-            })}
-        </div>
-        {!feedback && selected && (
-          <div className="answer-actions">
-            <p className="muted">You can change your answer until you check it.</p>
-            <button type="button" className="btn-ghost small" onClick={() => setSelected('')}>
-              Clear selection
-            </button>
-          </div>
+      <QuestionCard
+        key={question.id}
+        question={question}
+        index={current}
+        total={session.questions.length}
+        selectedId={selected}
+        onSelect={handleSelect}
+        locked={!!feedback}
+        resultFor={(opt) => (feedback && opt.id === selected ? (feedback.is_correct ? 'correct' : 'incorrect') : '')}
+      >
+        {!feedback && (
+          <KeyHint action="check">
+            {selected && (
+              <button type="button" className="btn-ghost small" onClick={() => setSelected('')}>
+                Clear
+              </button>
+            )}
+          </KeyHint>
         )}
         {feedback && (
           <div className={`feedback-box ${feedback.is_correct ? 'correct' : 'incorrect'}`}>
@@ -186,16 +238,23 @@ export default function Practice() {
             {feedback.explanation && <p>{feedback.explanation}</p>}
           </div>
         )}
-      </div>
+      </QuestionCard>
       <div className="match-nav">
+        <ProgressDots
+          questions={session.questions}
+          current={current}
+          stateOf={(q) => (results[q.id] == null ? '' : results[q.id] ? 'right' : 'wrong')}
+        />
+        <div className="nav-buttons">
+        <button className="btn-ghost" onClick={handleFinish}>Quit</button>
         {!feedback && (
-          <button className="btn-primary" onClick={handleCheck} disabled={!selected}>
+          <button className="btn-primary btn-lg" onClick={handleCheck} disabled={!selected}>
             Check answer
           </button>
         )}
-        {feedback && !isLast && <button className="btn-primary" onClick={handleNext}>Next question</button>}
-        {feedback && isLast && <button className="btn-primary" onClick={handleFinish}>Finish session</button>}
-        <button className="btn-ghost" onClick={handleFinish}>Quit early</button>
+        {feedback && !isLast && <button className="btn-primary btn-lg" onClick={handleNext}>Next question →</button>}
+        {feedback && isLast && <button className="btn-primary btn-lg" onClick={handleFinish}>Finish session</button>}
+        </div>
       </div>
     </div>
   )

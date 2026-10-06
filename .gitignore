@@ -1,4 +1,24 @@
+# Dependencies & build output
 node_modules
-.env
-.vite
 dist
+.vite
+.netlify
+
+# Local env — set VITE_* in the Netlify dashboard instead
+.env
+.env.*
+!.env.example
+
+# Local backups & tooling
+_backup_src_before_redesign/
+.claude/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor junk
+.DS_Store
+__MACOSX/
+.idea/
+*.swp
