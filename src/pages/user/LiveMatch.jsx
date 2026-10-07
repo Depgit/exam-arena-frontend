@@ -18,7 +18,10 @@ function HudPlayer({ player, score, isMe, side, pulse }) {
     <div className={`hud-player hud-${side} ${isMe ? 'me' : ''} ${pulse ? 'hud-pulse' : ''}`}>
       <Avatar name={player?.username} size={40} />
       <div className="hud-player-info">
-        <span className="hud-name">{player?.username}{isMe ? ' (you)' : ''}</span>
+        <span className="hud-name">
+          {player?.username}
+          {isMe && <span className="hud-you"> (you)</span>}
+        </span>
         {player?.rating != null && <RankBadge rating={player.rating} size="sm" />}
       </div>
       <span className="hud-score" key={score}>{shown}</span>

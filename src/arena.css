@@ -2017,3 +2017,318 @@ button.podium-spot:hover .podium-name {
     transform: none;
   }
 }
+
+/* ===================================================================
+   MOBILE LAYOUT (≤ 760px)
+   Phones get a one-row top bar and a bottom tab bar (hidden during a
+   live match), compact cards, and tables trimmed to what fits.
+   Kept last in the file so it wins over the desktop rules above.
+   =================================================================== */
+.bottom-nav,
+.guest-banner-short {
+  display: none;
+}
+
+.lb-player-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Slide-in animations (match found, VS) start off-centre; on phones that
+   moment would widen the page for good. clip (unlike hidden) doesn't make
+   a scroll container, so sticky elements keep working. */
+.app-main {
+  overflow-x: clip;
+}
+
+/* Touch screens have no keyboard: drop the A–D / Enter hint. */
+@media (hover: none) and (pointer: coarse) {
+  .key-hint {
+    display: none;
+  }
+
+  .answer-actions {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 760px) {
+  /* ── Top bar: a single row ── */
+  .navbar {
+    flex-wrap: nowrap;
+    min-height: 56px;
+    gap: var(--space-2);
+    padding: calc(8px + env(safe-area-inset-top)) var(--space-4) 8px;
+  }
+
+  .navbar-links {
+    display: none;
+  }
+
+  .brand-mark {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .brand-text {
+    font-size: 1rem;
+    letter-spacing: 0.06em;
+  }
+
+  .navbar-right {
+    margin-left: auto;
+    gap: 6px;
+  }
+
+  .navbar-user {
+    padding: 2px;
+    max-width: none;
+  }
+
+  .navbar-user-name {
+    display: none;
+  }
+
+  .navbar-right .sound-toggle,
+  .navbar-right .icon-btn {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+  }
+
+  /* ── Bottom tab bar ── */
+  .bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 120;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 2px;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    background: rgba(6, 8, 18, 0.97);
+    border-top: 1px solid rgba(124, 92, 255, 0.25);
+    box-shadow: 0 -10px 30px -18px rgba(124, 92, 255, 0.6);
+  }
+
+  .bottom-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 52px;
+    padding: 4px 2px;
+    font-family: var(--font-display);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    color: var(--muted);
+    border-radius: 10px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .bottom-nav-icon {
+    font-size: 20px;
+    line-height: 1;
+    filter: grayscale(0.7);
+    opacity: 0.75;
+    transition: transform var(--dur) var(--ease-out), opacity var(--dur) ease;
+  }
+
+  .bottom-nav-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bottom-nav a.active {
+    color: var(--text-strong);
+    background: linear-gradient(180deg, rgba(124, 92, 255, 0.24), rgba(124, 92, 255, 0.06));
+  }
+
+  .bottom-nav a.active .bottom-nav-icon {
+    filter: none;
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  /* Room for the tab bar, and keep floating UI above it. */
+  .app-main {
+    padding: var(--space-5) var(--space-4) calc(92px + env(safe-area-inset-bottom));
+  }
+
+  .server-wake {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+
+  .toast-stack {
+    left: var(--space-4);
+    right: var(--space-4);
+    bottom: calc(84px + env(safe-area-inset-bottom));
+    width: auto;
+  }
+
+  /* ── Demo banner: one line ── */
+  .guest-banner {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    padding: 6px var(--space-4);
+    font-size: 12.5px;
+    text-align: left;
+  }
+
+  .guest-banner-long {
+    display: none;
+  }
+
+  .guest-banner-short {
+    display: inline;
+  }
+
+  /* ── Page headings ── */
+  .page-head h1,
+  .lobby-player-info h1 {
+    font-size: 1.55rem;
+  }
+
+  /* ── Lobby ── */
+  .dashboard-sidebar {
+    order: 0; /* modes and daily first; top 10 below */
+  }
+
+  .lobby-hero {
+    gap: var(--space-4);
+  }
+
+  .lobby-player {
+    gap: var(--space-4);
+  }
+
+  .kpi-strip {
+    gap: var(--space-2);
+  }
+
+  .kpi-tile {
+    padding: 10px 14px;
+  }
+
+  .kpi-tile strong {
+    font-size: 1.4rem;
+  }
+
+  .mode-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .mode-grid .action-card {
+    min-height: 0;
+    padding: 14px;
+    gap: 4px;
+  }
+
+  .mode-grid .action-card p {
+    display: none;
+  }
+
+  .mode-grid .action-card h3 {
+    font-size: 0.95rem;
+  }
+
+  .mode-grid .action-icon {
+    width: 36px;
+    height: 36px;
+    margin-bottom: 4px;
+    font-size: 18px;
+  }
+
+  .mode-tag {
+    padding-top: 4px;
+  }
+
+  .daily-card-main h2 {
+    font-size: 0.95rem;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Matchmaking: the CTA sits in the page flow ── */
+  .find-bar {
+    position: static;
+    padding: var(--space-3);
+  }
+
+  .find-bar .btn-primary {
+    width: 100%;
+  }
+
+  /* ── Leaderboard: rank, player, rating ── */
+  .leaderboard-table {
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  .leaderboard-table th:nth-child(3),
+  .leaderboard-table td:nth-child(3),
+  .leaderboard-table th:nth-child(5),
+  .leaderboard-table td:nth-child(5) {
+    display: none;
+  }
+
+  .leaderboard-table th:nth-child(1),
+  .leaderboard-table td:nth-child(1) {
+    width: 56px;
+  }
+
+  .leaderboard-table th:nth-child(4),
+  .leaderboard-table td:nth-child(4) {
+    width: 84px;
+    text-align: right;
+  }
+
+  .lb-player {
+    display: flex;
+    min-width: 0;
+  }
+
+  .podium {
+    gap: var(--space-2);
+  }
+
+  .podium-name {
+    font-size: 13px;
+  }
+
+  /* ── Match HUD: names fit, "(you)" dropped ── */
+  .hud-you {
+    display: none;
+  }
+
+  .hud-player-info {
+    width: 100%;
+  }
+
+  .hud-name {
+    display: block;
+    text-align: center;
+  }
+
+  /* ── Results ── */
+  .results-trophy {
+    font-size: 52px;
+  }
+
+  .match-results-page .btn-primary {
+    min-width: 0;
+    width: 100%;
+  }
+}

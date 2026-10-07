@@ -58,7 +58,8 @@ export default function Matchmaking() {
     const started = Date.now()
     const clock = setInterval(() => setElapsed(Math.floor((Date.now() - started) / 1000)), 1000)
     const interval = setInterval(() => {
-      getQueueStats().then(({ data }) => setQueueStats(data.pools)).catch(() => { })
+      // pools can be null/absent when nobody is queued.
+      getQueueStats().then(({ data }) => setQueueStats(data?.pools ?? {})).catch(() => { })
       count++
       if (count > MAX_POLLS) {
         clearInterval(interval)

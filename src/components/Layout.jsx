@@ -11,10 +11,16 @@ export default function Layout() {
       <Navbar />
       {isGuest && (
         <div className="guest-banner" role="status">
-          <span>
+          <span className="guest-banner-long">
             🎮 You're exploring a <strong>demo account</strong> — play anything. Demo progress is cleared after a few days.
           </span>
-          <Link to="/register">Create a real account →</Link>
+          <span className="guest-banner-short">
+            🎮 <strong>Demo account</strong> · resets in a few days
+          </span>
+          <Link to="/register">
+            <span className="guest-banner-long">Create a real account →</span>
+            <span className="guest-banner-short">Sign up →</span>
+          </Link>
         </div>
       )}
       <main className="app-main">

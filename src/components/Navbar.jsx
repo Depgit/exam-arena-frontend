@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useWebSocket } from '../context/WebSocketContext'
 import SoundToggle from './SoundToggle'
@@ -13,6 +13,16 @@ const userLinks = [
   ['/app/daily', 'Daily', '📅'],
   ['/app/leaderboard', 'Ranks', '🏆'],
 ]
+// Phones get a bottom tab bar with the five most-used screens; Daily and
+// Friend Match stay reachable from the Lobby.
+const userTabs = [
+  ['/app/dashboard', 'Lobby', '🏠'],
+  ['/app/matchmaking', 'Play', '⚔️'],
+  ['/app/practice', 'Practice', '🎯'],
+  ['/app/friends', 'Friends', '👥'],
+  ['/app/leaderboard', 'Ranks', '🏆'],
+]
+
 const adminLinks = [
   ['/admin/dashboard', 'Overview', '📊'],
   ['/admin/questions/new', 'Create Question', '✏️'],
@@ -24,11 +34,16 @@ export default function Navbar() {
   const { user, isAdmin, logout } = useAuth()
   const { connected } = useWebSocket()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
 
   const links = isAdmin ? adminLinks : userLinks
+  const tabs = isAdmin ? adminLinks : userTabs
+  // A live match gets the whole screen on phones.
+  const inMatch = pathname.startsWith('/app/match/')
   const name = user?.display_name || user?.username
 
   return (
+    <>
     <nav className="navbar">
       <Link to={isAdmin ? '/admin/dashboard' : '/app/dashboard'} className="navbar-brand">
         <span className="brand-mark" aria-hidden="true">⚡</span>
@@ -80,5 +95,17 @@ export default function Navbar() {
         </button>
       </div>
     </nav>
+
+    {!inMatch && (
+      <nav className="bottom-nav" aria-label="Main">
+        {tabs.map(([to, label, icon]) => (
+          <NavLink key={to} to={to} className={({ isActive }) => (isActive ? 'active' : '')}>
+            <span className="bottom-nav-icon" aria-hidden="true">{icon}</span>
+            <span className="bottom-nav-label">{label}</span>
+          </NavLink>
+        ))}
+      </nav>
+    )}
+    </>
   )
 }

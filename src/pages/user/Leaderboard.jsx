@@ -113,7 +113,7 @@ export default function Leaderboard() {
                   <td>
                     <span className="lb-player">
                       <Avatar name={name} size={28} />
-                      {name}
+                      <span className="lb-player-name">{name}</span>
                     </span>
                   </td>
                   <td><RankBadge rating={e.rating} size="sm" showRating={false} /></td>
