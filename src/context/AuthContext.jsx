@@ -12,11 +12,11 @@ export function AuthProvider({ children }) {
     const raw = localStorage.getItem(USER_KEY)
     return raw ? JSON.parse(raw) : null
   })
-  const [loading, setLoading] = useState(true)
+  // With a saved session we can render straight away and confirm it in the
+  // background; only a first visit with a token but no saved user must wait.
+  const [loading, setLoading] = useState(() => !!localStorage.getItem(TOKEN_KEY) && !localStorage.getItem(USER_KEY))
 
   useEffect(() => {
-    // Validate the stored token on load by fetching the current profile.
-    // If it's expired/invalid, clear local auth state.
     async function bootstrap() {
       if (!token) {
         setLoading(false)
@@ -26,8 +26,10 @@ export function AuthProvider({ children }) {
         const { data } = await getMe()
         setUser(data)
         localStorage.setItem(USER_KEY, JSON.stringify(data))
-      } catch {
-        logout()
+      } catch (err) {
+        // Only a definite rejection ends the session. A sleeping/waking
+        // server, a timeout or a network blip must not log the player out.
+        if (err?.status === 401 || err?.status === 403) logout()
       } finally {
         setLoading(false)
       }

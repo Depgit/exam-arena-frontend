@@ -87,12 +87,18 @@ export default function Profile() {
   const { userId } = useParams()
   const profileId = userId || user.id
   const isMe = profileId === user.id
-  const [profile, setProfile] = useState(null)
-  const [stats, setStats] = useState([])
+  const knownProfile = (id) => {
+    const p = getUserProfile.peek(id)?.data
+    return p ? { ...p, ratings: p.ratings ?? [] } : null
+  }
+  const [profile, setProfile] = useState(() => knownProfile(profileId))
+  const [stats, setStats] = useState(() => getUserStats.peek(profileId)?.data ?? [])
   const [error, setError] = useState('')
 
   useEffect(() => {
-    setProfile(null)
+    // Show this player's last-known profile right away, then refresh.
+    setProfile(knownProfile(profileId))
+    setStats(getUserStats.peek(profileId)?.data ?? [])
     setError('')
     Promise.all([getUserProfile(profileId), getUserStats(profileId)])
       .then(([p, s]) => {

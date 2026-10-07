@@ -1135,6 +1135,39 @@ kbd {
   min-width: 260px;
 }
 
+/* ── Bot opponent ────────────────────────────────────────────────── */
+.find-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.bot-offer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-6);
+  background: var(--surface-1);
+  border: 1px solid var(--info-border);
+  border-radius: 12px;
+  animation: fadeIn var(--dur-slow) var(--ease-out);
+}
+
+.bot-offer > span {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-strong);
+}
+
+.unrated-note {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--neon-cyan);
+}
+
 /* ── VS intro ────────────────────────────────────────────────────── */
 .vs-screen {
   position: fixed;
@@ -2003,6 +2036,15 @@ button.podium-spot:hover .podium-name {
   .find-bar .btn-primary {
     width: 100%;
   }
+
+  .find-actions {
+    width: 100%;
+    flex-direction: column-reverse;
+  }
+
+  .find-actions .btn-ghost {
+    width: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2286,6 +2328,15 @@ button.podium-spot:hover .podium-name {
   }
 
   .find-bar .btn-primary {
+    width: 100%;
+  }
+
+  .find-actions {
+    width: 100%;
+    flex-direction: column-reverse;
+  }
+
+  .find-actions .btn-ghost {
     width: 100%;
   }
 

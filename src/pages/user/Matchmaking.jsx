@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getSubjects, joinQueue, leaveQueue, getQueueStats } from '../../api/endpoints'
+import { getSubjects, joinQueue, leaveQueue, getQueueStats, playBot } from '../../api/endpoints'
 import { useWebSocket, useWSListener } from '../../context/WebSocketContext'
 import { useSmoothCountdown } from '../../hooks/useSmoothCountdown'
 import { useAuth } from '../../context/AuthContext'
@@ -9,6 +9,7 @@ import * as sfx from '../../lib/sfx'
 import { haptic, HAPTIC } from '../../lib/haptics'
 
 const POLL_MS = 2000
+const BOT_OFFER_AFTER_S = 10 // seconds of searching before offering a bot
 const MAX_POLLS = 15 // ~30s, then give up and tell the player
 
 const MODES = [
@@ -64,7 +65,7 @@ export default function Matchmaking() {
       if (count > MAX_POLLS) {
         clearInterval(interval)
         handleLeave()
-        setError('No opponent found right now. Try again, or switch to Arena for a faster match.')
+        setError('No opponent found right now — play the bot below, or try again in a bit.')
       }
     }, POLL_MS)
     return () => {
@@ -152,6 +153,27 @@ export default function Matchmaking() {
     }
   }
 
+  // Nobody around: battle a bot instead. The match_start listener above
+  // takes us into the match; if the socket is slow, fall back to the id
+  // from the response (LiveMatch loads itself over REST).
+  const [botBusy, setBotBusy] = useState(false)
+  async function handleBot() {
+    if (!categoryId || botBusy) return
+    setError('')
+    setBotBusy(true)
+    sfx.play('select')
+    try {
+      const { data } = await playBot({ exam_category_id: categoryId })
+      setQueued(false)
+      setTimeout(() => {
+        if (!window.location.pathname.startsWith('/app/match/')) navigate(`/app/match/${data.match_id}`)
+      }, 1500)
+    } catch (err) {
+      setError(err.message)
+      setBotBusy(false)
+    }
+  }
+
   async function handleLeave() {
     try {
       await leaveQueue()
@@ -234,6 +256,15 @@ export default function Matchmaking() {
           {!found && (
             <button className="btn-ghost" onClick={handleLeave}>Cancel search</button>
           )}
+          {!found && elapsed >= BOT_OFFER_AFTER_S && (
+            <div className="bot-offer">
+              <span>No one around right now?</span>
+              <button className="btn-primary" onClick={handleBot} disabled={botBusy}>
+                {botBusy ? 'Starting…' : '🤖 Play vs Bot'}
+              </button>
+              <small className="muted">Unrated — your rating won't change.</small>
+            </div>
+          )}
           {Object.keys(queueStats).length > 0 && (
             <ul className="queue-stats">
               {Object.entries(queueStats).map(([pool, count]) => (
@@ -303,9 +334,14 @@ export default function Matchmaking() {
           <strong>{matchType === 'arena' ? 'Arena' : 'Ranked'}</strong>
           <span className="muted"> · {category?.name || 'Pick a category'}</span>
         </div>
-        <button className="btn-primary btn-xl" onClick={handleJoin} disabled={!categoryId}>
-          Find match
-        </button>
+        <div className="find-actions">
+          <button className="btn-ghost" onClick={handleBot} disabled={!categoryId || botBusy} title="Unrated match against a bot">
+            {botBusy ? 'Starting…' : '🤖 vs Bot'}
+          </button>
+          <button className="btn-primary btn-xl" onClick={handleJoin} disabled={!categoryId}>
+            Find match
+          </button>
+        </div>
       </div>
     </div>
   )

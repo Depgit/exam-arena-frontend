@@ -81,6 +81,7 @@ export default function LiveMatch() {
   // VS splash only for a fresh match (arrived via match_start), not a refresh.
   const [intro, setIntro] = useState(Boolean(location.state?.players?.length))
   const questionStartRef = useRef(Date.now())
+  const isBotMatch = location.state?.match_type === 'bot' || players.some((p) => p.is_bot)
 
   // If we arrived here without router state (e.g. page refresh), hydrate
   // from the REST endpoint instead. Completed matches show final results.
@@ -282,6 +283,7 @@ export default function LiveMatch() {
           </div>
           <h1 className="results-title">{title}</h1>
           <p className="muted">{mine?.correct != null ? `${mine.correct}/${mine.total} correct` : ''}</p>
+          {isBotMatch && <p className="unrated-note">🤖 Unrated · bot match — your rating didn't change</p>}
         </div>
 
         <div className="results-list">

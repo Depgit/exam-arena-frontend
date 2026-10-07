@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import { Link, Outlet } from 'react-router-dom'
 import Navbar from './Navbar'
 import FriendNotifications from './FriendNotifications'
@@ -6,6 +6,25 @@ import { useAuth } from '../context/AuthContext'
 
 export default function Layout() {
   const { isAdmin, isGuest } = useAuth()
+
+  // Download the other pages' code while the browser is idle, so opening a
+  // page never waits on a chunk download. Same chunks App.jsx lazy-loads.
+  useEffect(() => {
+    if (isAdmin) return
+    const preload = () => {
+      import('../pages/user/Matchmaking')
+      import('../pages/user/LiveMatch')
+      import('../pages/user/Practice')
+      import('../pages/user/Leaderboard')
+      import('../pages/user/Profile')
+      import('../pages/user/Friends')
+      import('../pages/user/DailyChallenge')
+      import('../pages/user/FriendMatch')
+    }
+    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1500))
+    const id = idle(preload)
+    return () => (window.cancelIdleCallback || clearTimeout)(id)
+  }, [isAdmin])
   return (
     <div className="app-shell">
       <Navbar />

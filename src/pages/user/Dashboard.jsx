@@ -6,12 +6,13 @@ import { Avatar, RankBadge, tierFor } from '../../components/game/game'
 import { formatDuration } from './DailyChallenge'
 
 function DailyChallengeCard() {
-  const [daily, setDaily] = useState(null)
+  // Last visit's data first (instant), then the fresh copy.
+  const [daily, setDaily] = useState(() => getDailyChallenge.peek()?.data ?? null)
 
   useEffect(() => {
     getDailyChallenge()
       .then(({ data }) => setDaily(data))
-      .catch(() => setDaily(null))
+      .catch(() => {}) // keep whatever we're already showing
   }, [])
 
   if (!daily) return null
@@ -69,40 +70,50 @@ function DailyChallengeCard() {
 export default function Dashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [subjects, setSubjects] = useState([])
-  const [stats, setStats] = useState([])
-  const [ratings, setRatings] = useState([])
-  const [leaderboard, setLeaderboard] = useState([])
-  const [lbCategory, setLbCategory] = useState(null)
+  // Everything starts from the last visit (stale-while-revalidate), so the
+  // lobby renders instantly and refreshes in place.
+  const knownSubjects = getSubjects.peek()?.data ?? []
+  const [subjects, setSubjects] = useState(knownSubjects)
+  const [stats, setStats] = useState(() => getUserStats.peek(user.id)?.data ?? [])
+  const [ratings, setRatings] = useState(() => getUserProfile.peek(user.id)?.data?.ratings ?? [])
+  const [lbCategory, setLbCategory] = useState(knownSubjects[0] ?? null)
+  const [leaderboard, setLeaderboard] = useState(() =>
+    knownSubjects[0] ? getLeaderboard.peek(knownSubjects[0].code, { limit: 10 })?.data ?? [] : []
+  )
   const [error, setError] = useState('')
 
   useEffect(() => {
-    async function load() {
-      try {
-        const [{ data: subs }, { data: st }, profile] = await Promise.all([
-          getSubjects(),
-          getUserStats(user.id),
-          // Ratings are a nice-to-have for the player card; never block the lobby on them.
-          getUserProfile(user.id).catch(() => null),
-        ])
-        setSubjects(subs)
-        setStats(st ?? [])
-        setRatings(profile?.data?.ratings ?? [])
-        // Load leaderboard for the first available subject
-        if (subs && subs.length > 0) {
+    const loadBoard = (sub) =>
+      getLeaderboard(sub.code, { limit: 10 })
+        .then(({ data }) => setLeaderboard(data ?? []))
+        .catch(() => {})
+    // If we already know the categories, don't wait for them before
+    // asking for the leaderboard: fire everything at once.
+    if (knownSubjects[0]) loadBoard(knownSubjects[0])
+
+    getSubjects()
+      .then(({ data: subs }) => {
+        setSubjects(subs ?? [])
+        if (subs?.length && subs[0].code !== knownSubjects[0]?.code) {
           setLbCategory(subs[0])
-          const { data: lb } = await getLeaderboard(subs[0].code, { limit: 10 })
-          setLeaderboard(lb ?? [])
+          loadBoard(subs[0])
         }
-      } catch (err) {
-        setError(err.message)
-      }
-    }
-    load()
+      })
+      .catch((err) => setError(err.message))
+    getUserStats(user.id)
+      .then(({ data }) => setStats(data ?? []))
+      .catch((err) => setError(err.message))
+    // Ratings are a nice-to-have for the player card; never block on them.
+    getUserProfile(user.id)
+      .then(({ data }) => setRatings(data?.ratings ?? []))
+      .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.id])
 
   async function switchLeaderboard(sub) {
     setLbCategory(sub)
+    const known = getLeaderboard.peek(sub.code, { limit: 10 })?.data
+    if (known) setLeaderboard(known)
     try {
       const { data: lb } = await getLeaderboard(sub.code, { limit: 10 })
       setLeaderboard(lb ?? [])

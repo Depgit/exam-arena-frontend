@@ -7,9 +7,13 @@ import { Avatar, RankBadge } from '../../components/game/game'
 const PODIUM_ORDER = [1, 0, 2] // silver · gold · bronze, gold in the middle
 
 export default function Leaderboard() {
-  const [subjects, setSubjects] = useState([])
-  const [categoryCode, setCategoryCode] = useState('')
-  const [entries, setEntries] = useState([])
+  const knownSubjects = getSubjects.peek()?.data ?? []
+  const [subjects, setSubjects] = useState(knownSubjects)
+  const [categoryCode, setCategoryCode] = useState(knownSubjects[0]?.code ?? '')
+  // Last-seen standings while the live ones load (they're always refetched).
+  const [entries, setEntries] = useState(() =>
+    knownSubjects[0] ? getLeaderboard.peek(knownSubjects[0].code, { limit: 50 })?.data ?? [] : []
+  )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { user } = useAuth()
@@ -19,12 +23,14 @@ export default function Leaderboard() {
   useEffect(() => {
     getSubjects().then(({ data }) => {
       setSubjects(data)
-      if (data.length) setCategoryCode(data[0].code)
+      if (data.length) setCategoryCode((current) => current || data[0].code)
     })
   }, [])
 
   useEffect(() => {
     if (!categoryCode) return
+    const known = getLeaderboard.peek(categoryCode, { limit: 50 })?.data
+    if (known) setEntries(known)
     setLoading(true)
     getLeaderboard(categoryCode, { limit: 50 })
       .then(({ data }) => setEntries(data ?? []))
