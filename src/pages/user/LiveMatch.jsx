@@ -11,6 +11,8 @@ import * as sfx from '../../lib/sfx'
 import { haptic, HAPTIC } from '../../lib/haptics'
 
 const INTRO_MS = 1400
+// How long to wait for the server's ack before sending an answer again.
+const RESEND_AFTER_MS = 3000
 
 function HudPlayer({ player, score, isMe, side, pulse }) {
   const shown = useCountUp(score ?? 0, { duration: 500 })
@@ -45,7 +47,7 @@ export default function LiveMatch() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { send } = useWebSocket()
+  const { send, connected } = useWebSocket()
 
   const [questions, setQuestions] = useState(location.state?.questions || [])
   const [players, setPlayers] = useState(location.state?.players || [])
@@ -58,6 +60,14 @@ export default function LiveMatch() {
   const [scoreboard, setScoreboard] = useState([])
   const [answeredIds, setAnsweredIds] = useState(new Set()) // acknowledged by the server
   const [sentIds, setSentIds] = useState(new Set()) // sent, maybe not yet acknowledged
+  // Answers the server hasn't acknowledged yet: questionId → { payload, sentAt }.
+  // A send only reaches the server if the socket is open at that instant, so
+  // anything locked in during a disconnect would otherwise be lost silently —
+  // the player sees "locked in", the server never counts it, and the match
+  // can't finish early. We keep resending until a score_update acks it; the
+  // server ignores (and re-acks) duplicates, so resending is always safe.
+  const outboxRef = useRef(new Map())
+  const [unacked, setUnacked] = useState(0)
   // questionId → { correct, points } for this player's graded answers.
   const [graded, setGraded] = useState({})
   const [current, setCurrent] = useState(0)
@@ -121,6 +131,10 @@ export default function LiveMatch() {
     if (payload.match_id !== matchId) return
     setScoreboard(payload.scoreboard || [])
     if (payload.user_id === user.id) {
+      outboxRef.current.delete(payload.question_id)
+      setUnacked(outboxRef.current.size)
+      // A re-ack for an answer we already have results for: nothing new.
+      if (graded[payload.question_id]) return
       setAnsweredIds((prev) => new Set(prev).add(payload.question_id))
       setGraded((g) => ({ ...g, [payload.question_id]: { correct: payload.is_correct, points: payload.points_earned } }))
       setFloater({
@@ -191,12 +205,15 @@ export default function LiveMatch() {
     if (!question) return
     let sent = null
     if (!alreadyAnswered && selected) {
-      send('submit_answer', {
+      const payload = {
         match_id: matchId,
         question_id: question.id,
         option_id: selected,
         time_taken_ms: Date.now() - questionStartRef.current,
-      })
+      }
+      // sentAt 0 = never reached an open socket; the retry loop sends it ASAP.
+      outboxRef.current.set(question.id, { payload, sentAt: send('submit_answer', payload) ? Date.now() : 0 })
+      setUnacked(outboxRef.current.size)
       sent = question.id
       setSentIds((prev) => new Set(prev).add(question.id))
     }
@@ -207,6 +224,23 @@ export default function LiveMatch() {
     const firstOpen = questions.findIndex((q) => q.id !== sent && !isLocked(q.id))
     if (firstOpen !== -1) setCurrent(firstOpen)
   }
+
+  // Resend unacknowledged answers: right after reconnecting, and every few
+  // seconds while any are still waiting.
+  useEffect(() => {
+    if (!connected || results) return
+    const flush = (force) => {
+      const now = Date.now()
+      for (const entry of outboxRef.current.values()) {
+        if (force || now - entry.sentAt > RESEND_AFTER_MS) {
+          if (send('submit_answer', entry.payload)) entry.sentAt = now
+        }
+      }
+    }
+    flush(true)
+    const id = setInterval(() => flush(false), 1000)
+    return () => clearInterval(id)
+  }, [connected, results, send])
 
   const nextDisabled = isLast && (alreadyAnswered || !selected)
   const dotState = (q) => {
@@ -326,6 +360,7 @@ export default function LiveMatch() {
       <HudPlayer player={me} score={scoreOf(user.id)} isMe side="left" />
       <div className="hud-center">
         <TimerRing remaining={remaining} total={timerSeconds} />
+        {!connected && <span className="hud-offline" role="status">Reconnecting…</span>}
       </div>
       {opponent ? (
         <HudPlayer player={opponent} score={scoreOf(opponent.user_id)} side="right" pulse={opponentPulse} key={opponentPulse} />
@@ -342,8 +377,20 @@ export default function LiveMatch() {
         {hud}
         <div className="waiting-all-done">
           <div className="spinner" />
-          <h2>All questions locked in</h2>
-          <p className="muted">Waiting for your opponent… the match ends when they finish or the timer runs out.</p>
+          {unacked > 0 ? (
+            <>
+              <h2>{connected ? 'Sending your answers…' : 'Reconnecting…'}</h2>
+              <p className="muted">
+                {unacked} answer{unacked === 1 ? '' : 's'} not confirmed by the server yet — they'll be sent
+                automatically{connected ? '' : ' as soon as the connection is back'}.
+              </p>
+            </>
+          ) : (
+            <>
+              <h2>All answers in</h2>
+              <p className="muted">Waiting for your opponent… the match ends when they finish or the timer runs out.</p>
+            </>
+          )}
           <ProgressDots questions={questions} current={-1} stateOf={dotState} />
         </div>
       </div>
@@ -377,7 +424,9 @@ export default function LiveMatch() {
               ? graded[question.id].correct
                 ? `✓ Correct · +${graded[question.id].points}`
                 : '✗ Wrong answer'
-              : '⏳ Locked in…'}
+              : connected
+                ? '⏳ Sending…'
+                : '⚠️ Reconnecting — your answer will be sent'}
           </p>
         ) : (
           <KeyHint action="lock in">
