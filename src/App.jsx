@@ -5,6 +5,7 @@ import { WebSocketProvider } from './context/WebSocketContext'
 import { SettingsProvider } from './context/SettingsContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
+import ServerWakeNotice from './components/ServerWakeNotice'
 
 // Every page is its own chunk: a player never downloads the admin console,
 // and the first screen paints without waiting on pages nobody opened yet.
@@ -78,6 +79,7 @@ export default function App() {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
+            <ServerWakeNotice />
           </WebSocketProvider>
         </SettingsProvider>
       </AuthProvider>

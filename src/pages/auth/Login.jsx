@@ -7,7 +7,8 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
-  const { login } = useAuth()
+  const [guestBusy, setGuestBusy] = useState(false)
+  const { login, loginAsGuest } = useAuth()
   const navigate = useNavigate()
 
   async function handleSubmit(e) {
@@ -21,6 +22,19 @@ export default function Login() {
       setError(err.message)
     } finally {
       setBusy(false)
+    }
+  }
+
+  async function handleGuest() {
+    setError('')
+    setGuestBusy(true)
+    try {
+      await loginAsGuest()
+      navigate('/app/dashboard')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setGuestBusy(false)
     }
   }
 
@@ -45,6 +59,10 @@ export default function Login() {
         </label>
         <button className="btn-primary btn-xl" type="submit" disabled={busy}>
           {busy ? 'Entering arena…' : 'Enter the arena'}
+        </button>
+        <div className="auth-divider"><span>or</span></div>
+        <button type="button" className="btn-ghost btn-demo" onClick={handleGuest} disabled={guestBusy || busy}>
+          {guestBusy ? 'Starting demo…' : '🎮 Try the demo — no sign-up'}
         </button>
         <p className="auth-switch">
           New challenger? <Link to="/register">Create an account</Link>

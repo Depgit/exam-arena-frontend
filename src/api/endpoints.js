@@ -75,6 +75,8 @@ const writes = (prefixes, request) =>
 // ---- Auth ----
 export const registerUser = (body) => api.post('/api/v1/auth/register', body)
 export const loginUser = (body) => api.post('/api/v1/auth/login', body)
+// One-click demo: the server creates a fresh guest account for this visitor.
+export const loginGuest = () => api.post('/api/v1/auth/guest')
 export const getMe = () => api.get('/api/v1/auth/me')
 
 // ---- Users ----

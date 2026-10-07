@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
-import { loginUser, registerUser, getMe, clearCache } from '../api/endpoints'
+import { loginUser, loginGuest, registerUser, getMe, clearCache } from '../api/endpoints'
 
 const AuthContext = createContext(null)
 
@@ -50,6 +50,12 @@ export function AuthProvider({ children }) {
     return data.user
   }, [])
 
+  const loginAsGuest = useCallback(async () => {
+    const { data } = await loginGuest()
+    persist(data.token, data.user)
+    return data.user
+  }, [])
+
   const register = useCallback(async (username, email, password) => {
     const { data } = await registerUser({ username, email, password })
     persist(data.token, data.user)
@@ -73,11 +79,13 @@ export function AuthProvider({ children }) {
       isAdmin: user?.role === 'admin',
       isAuthenticated: !!token && !!user,
       loading,
+      isGuest: !!user?.is_guest,
       login,
+      loginAsGuest,
       register,
       logout,
     }),
-    [token, user, loading, login, register, logout]
+    [token, user, loading, login, loginAsGuest, register, logout]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
