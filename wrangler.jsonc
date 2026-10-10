@@ -1,0 +1,15 @@
+// Cloudflare deployment for the Mind Race frontend.
+//
+// The site is plain static files built by `npm run build` into dist/.
+// With this file present, Cloudflare serves them as-is instead of trying
+// its automatic Vite setup (which needs Vite 6+).
+{
+  "name": "mindrace",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    // Every path (/app/dashboard, /app/profile/<id>, …) is a page of the
+    // React app, so unknown paths get index.html instead of a 404.
+    "not_found_handling": "single-page-application"
+  }
+}
