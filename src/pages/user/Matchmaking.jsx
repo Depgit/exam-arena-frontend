@@ -308,7 +308,7 @@ export default function Matchmaking() {
       </section>
 
       <section>
-        <h2>Exam category</h2>
+        <h2>Category</h2>
         <div className="tile-picker">
           {subjects?.map((s) => (
             <button

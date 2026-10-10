@@ -203,7 +203,7 @@ export default function Dashboard() {
             <Link to="/app/leaderboard" className="action-card leaderboard-card">
               <div className="action-icon">🏆</div>
               <h3>Leaderboard</h3>
-              <p>See who rules each exam category.</p>
+              <p>See who rules each category.</p>
               <span className="mode-tag">Ranks</span>
             </Link>
           </div>

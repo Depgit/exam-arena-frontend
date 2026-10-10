@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useServerWake } from '../lib/serverWake'
+import { SERVER_URL, useServerWake } from '../lib/serverWake'
 
 /**
  * Small floating notice shown only when the backend is slow to answer
@@ -11,7 +11,7 @@ export default function ServerWakeNotice() {
   const [showReady, setShowReady] = useState(false)
 
   useEffect(() => {
-    if (status === 'waking' || status === 'unreachable') setWasSlow(true)
+    if (status === 'waking' || status === 'unreachable' || status === 'wrong-server') setWasSlow(true)
     if (status === 'ready' && wasSlow) {
       // Only confirm "awake" if we told the player it was asleep.
       setShowReady(true)
@@ -31,13 +31,24 @@ export default function ServerWakeNotice() {
       </div>
     )
   }
+  if (status === 'wrong-server') {
+    return (
+      <div className="server-wake is-error" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <div>
+          <strong>That's not the game server</strong>
+          <span>Something else is answering at {SERVER_URL}. Check the API address, or what's running on that port.</span>
+        </div>
+      </div>
+    )
+  }
   if (status === 'unreachable') {
     return (
       <div className="server-wake is-error" role="alert">
         <span aria-hidden="true">⚠️</span>
         <div>
           <strong>Can't reach the game server</strong>
-          <span>Still trying… check your connection. {elapsed}s</span>
+          <span>Nothing answers at {SERVER_URL} — is the backend running? Still trying… {elapsed}s</span>
         </div>
       </div>
     )

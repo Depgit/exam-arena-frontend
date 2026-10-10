@@ -48,7 +48,7 @@ export default function Navbar() {
       <Link to={isAdmin ? '/admin/dashboard' : '/app/dashboard'} className="navbar-brand">
         <span className="brand-mark" aria-hidden="true">⚡</span>
         <span className="brand-text">
-          EXAM<span>ARENA</span>
+          MIND<span>RACE</span>
         </span>
         {isAdmin && <span className="brand-tag">Admin</span>}
       </Link>

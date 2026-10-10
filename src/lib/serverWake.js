@@ -12,7 +12,10 @@ import { BASE_URL } from '../api/client'
  *
  *   'checking'    → request in flight, not slow yet (show nothing)
  *   'waking'      → slower than SLOW_MS: the server is booting
- *   'unreachable' → still failing after GIVE_UP_MS; we keep retrying
+ *   'unreachable' → nothing answers (a local backend that isn't running,
+ *                   or a remote one still down after GIVE_UP_MS); retrying
+ *   'wrong-server'→ something answered, but not the game server (e.g.
+ *                   another app on the same port): waiting won't help
  *   'ready'       → it answered
  */
 
@@ -21,6 +24,10 @@ const GIVE_UP_MS = 90_000
 const RETRY_MS = 3000
 
 let status = 'checking'
+
+// A local backend never "sleeps": if it doesn't answer, it isn't running.
+const IS_LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/.test(BASE_URL)
+export const SERVER_URL = BASE_URL
 let startedAt = 0
 let started = false
 const listeners = new Set()
@@ -43,8 +50,17 @@ async function ping() {
       set('ready')
       return
     }
+    // 502/503/504 is what a booting host returns; anything else (404…)
+    // means a different app is answering at this address.
+    if (res.status < 500) {
+      set('wrong-server')
+      setTimeout(ping, 15_000)
+      return
+    }
   } catch {
-    // Network error / timeout while the instance is starting — retry below.
+    // Network error / timeout. Remote: probably still booting, retry below.
+    // Local: the backend simply isn't running.
+    if (IS_LOCAL) set('unreachable')
   }
   if (Date.now() - startedAt > GIVE_UP_MS) set('unreachable')
   setTimeout(ping, status === 'unreachable' ? 15_000 : RETRY_MS)

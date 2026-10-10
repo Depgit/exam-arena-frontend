@@ -1,5 +1,5 @@
 /* ===================================================================
-   EXAM ARENA — GAME LAYER
+   MIND RACE — GAME LAYER
    Loaded after styles.css. styles.css owns tokens, forms and the admin
    console; this file owns everything that should feel like a game:
    HUDs, lobby, matchmaking, match screen, results, ranks.
@@ -472,6 +472,12 @@ kbd {
 }
 
 /* ── Server wake-up notice (free hosting cold start) ───────────────── */
+@media (max-width: 760px) {
+  .auth-page ~ .server-wake {
+    bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  }
+}
+
 .server-wake {
   position: fixed;
   left: 50%;
@@ -2229,6 +2235,7 @@ button.podium-spot:hover .podium-name {
 
   .server-wake {
     bottom: calc(84px + env(safe-area-inset-bottom));
+    width: calc(100% - 2 * var(--space-4));
   }
 
   .toast-stack {

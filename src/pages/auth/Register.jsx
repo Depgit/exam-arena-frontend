@@ -16,7 +16,8 @@ export default function Register() {
     setError('')
     setBusy(true)
     try {
-      const user = await register(username, email, password)
+      // Keyboards often add a trailing space; the server trims too.
+      const user = await register(username.trim(), email.trim(), password)
       navigate(user.role === 'admin' ? '/admin/dashboard' : '/app/dashboard')
     } catch (err) {
       setError(err.message)
@@ -32,7 +33,7 @@ export default function Register() {
       </div>
       <form className="auth-card" onSubmit={handleSubmit}>
         <div className="auth-logo">
-          EXAM<span>ARENA</span>
+          MIND<span>RACE</span>
         </div>
         <p className="auth-subtitle">Create your player — you start at Silver (1200)</p>
         {error && <div className="alert-error">{error}</div>}

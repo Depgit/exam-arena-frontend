@@ -116,7 +116,7 @@ export default function Practice() {
         )}
 
         <section>
-          <h2>Exam category</h2>
+          <h2>Category</h2>
           <div className="tile-picker">
             {subjects && subjects.map((s) => (
               <button

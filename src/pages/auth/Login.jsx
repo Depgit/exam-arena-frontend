@@ -45,9 +45,9 @@ export default function Login() {
       </div>
       <form className="auth-card" onSubmit={handleSubmit}>
         <div className="auth-logo">
-          EXAM<span>ARENA</span>
+          MIND<span>RACE</span>
         </div>
-        <p className="auth-subtitle">1v1 exam battles · climb the ranks</p>
+        <p className="auth-subtitle">1v1 math & logic battles · climb the ranks</p>
         {error && <div className="alert-error">{error}</div>}
         <label>
           Username or email
@@ -58,7 +58,7 @@ export default function Login() {
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
         </label>
         <button className="btn-primary btn-xl" type="submit" disabled={busy}>
-          {busy ? 'Entering arena…' : 'Enter the arena'}
+          {busy ? 'Starting…' : 'Enter the race'}
         </button>
         <div className="auth-divider"><span>or</span></div>
         <button type="button" className="btn-ghost btn-demo" onClick={handleGuest} disabled={guestBusy || busy}>
