@@ -134,6 +134,8 @@ export const getMe = () => api.get('/api/v1/auth/me')
 // ---- Users ----
 export const getUserProfile = withPeek((id) => cachedGet(`${USERS}${id}`, { ttl: 60 * SEC }), (id) => `${USERS}${id}`)
 export const getUserStats = withPeek((id) => cachedGet(`${USERS}${id}/stats`, { ttl: 60 * SEC }), (id) => `${USERS}${id}/stats`)
+// Player search for "add a friend" suggestions (always live, never cached).
+export const searchPlayers = (q) => api.get('/api/v1/users/search', { params: { q } })
 export const getUserMatchHistory = (id) => cachedGet(`${USERS}${id}/matches`, { ttl: 60 * SEC })
 
 // ---- Friends ----

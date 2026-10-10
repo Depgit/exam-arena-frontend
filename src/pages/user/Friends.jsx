@@ -8,8 +8,12 @@ import {
   removeFriend,
   challengeFriend,
   closeChallenge,
+  searchPlayers,
 } from '../../api/endpoints'
 import { useWSListener } from '../../context/WebSocketContext'
+import { Avatar } from '../../components/game/game'
+
+const SEARCH_DELAY_MS = 250
 
 const nameOf = (f) => f.display_name || f.username
 
@@ -18,6 +22,9 @@ export default function Friends() {
   const [subjects, setSubjects] = useState([])
   const [categoryId, setCategoryId] = useState('')
   const [username, setUsername] = useState('')
+  const [matches, setMatches] = useState([])
+  const [searching, setSearching] = useState(false)
+  const searchSeq = useRef(0)
   const [challenge, setChallenge] = useState(null) // { match_id, room_code, friend }
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -56,6 +63,42 @@ export default function Friends() {
     setNotice('')
     setError(`${payload.by_username} declined your challenge.`)
   })
+
+  // Suggest players while typing (after a short pause). A sequence number
+  // drops answers that arrive after a newer search was started.
+  useEffect(() => {
+    const q = username.trim()
+    if (q.length < 2) {
+      setMatches([])
+      setSearching(false)
+      return
+    }
+    setSearching(true)
+    const seq = ++searchSeq.current
+    const t = setTimeout(() => {
+      searchPlayers(q)
+        .then(({ data }) => seq === searchSeq.current && setMatches(data ?? []))
+        .catch(() => seq === searchSeq.current && setMatches([]))
+        .finally(() => seq === searchSeq.current && setSearching(false))
+    }, SEARCH_DELAY_MS)
+    return () => clearTimeout(t)
+  }, [username])
+
+  // Where you stand with a player, from the friends list already loaded.
+  function relationTo(userId) {
+    if (list.friends?.some((f) => f.user_id === userId)) return { kind: 'friends' }
+    const incoming = list.incoming?.find((f) => f.user_id === userId)
+    if (incoming) return { kind: 'incoming', friendshipId: incoming.friendship_id }
+    if (list.outgoing?.some((f) => f.user_id === userId)) return { kind: 'sent' }
+    return { kind: 'none' }
+  }
+
+  function addPlayer(player) {
+    run(async () => {
+      const { data } = await sendFriendRequest(player.username)
+      setNotice(data.message)
+    })
+  }
 
   // Wrap an action so errors and notices land in the page banners.
   async function run(action, successMessage) {
@@ -127,15 +170,44 @@ export default function Friends() {
           <h3>Add a friend</h3>
           <form onSubmit={handleAdd}>
             <label>
-              Username
+              Find a player
               <input
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="their username"
+                placeholder="Type at least 2 letters of their name"
+                autoComplete="off"
+                spellCheck={false}
                 required
               />
             </label>
-            <button className="btn-primary" type="submit">Send request</button>
+            {username.trim().length >= 2 && (
+              <ul className="player-suggestions" aria-live="polite">
+                {matches.map((p) => {
+                  const rel = relationTo(p.user_id)
+                  return (
+                    <li key={p.user_id}>
+                      <Avatar name={p.display_name || p.username} size={32} />
+                      <span className="player-suggestion-name">
+                        <strong>{p.display_name || p.username}</strong>
+                        <span className="muted">@{p.username}</span>
+                      </span>
+                      {rel.kind === 'none' && (
+                        <button type="button" className="btn-primary small" onClick={() => addPlayer(p)}>Add</button>
+                      )}
+                      {rel.kind === 'incoming' && (
+                        <button type="button" className="btn-primary small" onClick={() => run(() => acceptFriendRequest(rel.friendshipId))}>Accept</button>
+                      )}
+                      {rel.kind === 'sent' && <span className="suggestion-state">Request sent</span>}
+                      {rel.kind === 'friends' && <span className="suggestion-state is-friend">✓ Friends</span>}
+                    </li>
+                  )
+                })}
+                {!searching && matches.length === 0 && (
+                  <li className="player-suggestions-empty muted">No players match “{username.trim()}”.</li>
+                )}
+                {searching && matches.length === 0 && <li className="player-suggestions-empty muted">Searching…</li>}
+              </ul>
+            )}
           </form>
         </div>
 
