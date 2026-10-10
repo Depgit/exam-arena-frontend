@@ -171,6 +171,8 @@ export const getQueueStats = () => api.get('/api/v1/matches/queue/stats')
 
 // ---- Matches ----
 export const getMatch = (id) => api.get(`/api/v1/matches/${id}`)
+// { match_id } of the match this player is in right now, or { match_id: null }.
+export const getCurrentMatch = () => api.get('/api/v1/matches/current')
 export const createFriendMatch = (body) => api.post('/api/v1/matches/friend', body)
 // Unrated match against a bot; the match arrives as a match_start event.
 export const playBot = (body) => api.post('/api/v1/matches/bot', body)

@@ -93,6 +93,16 @@ export default function LiveMatch() {
         if (data.match?.timer_seconds) setTimerSeconds(data.match.timer_seconds)
         if (data.live_scores) setScoreboard(data.live_scores)
         if (data.players?.length && players.length === 0) setPlayers(data.players)
+        // Reopened mid-match: restore our answers and the clock, and start on
+        // the first question we haven't answered yet.
+        if (data.remaining_seconds != null) setServerRemaining(data.remaining_seconds)
+        if (data.my_answers) {
+          const mine = data.my_answers
+          setAnsweredIds(new Set(Object.keys(mine)))
+          setGraded(mine)
+          const firstOpen = (data.questions || []).findIndex((q) => !mine[q.id])
+          if (firstOpen > 0) setCurrent(firstOpen)
+        }
         if (data.match?.status === 'completed') {
           setResults(
             data.players.map((p) => ({

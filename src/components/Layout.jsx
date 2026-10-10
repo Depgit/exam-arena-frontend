@@ -3,6 +3,7 @@ import { Link, Outlet } from 'react-router-dom'
 import Navbar from './Navbar'
 import FriendNotifications from './FriendNotifications'
 import ChatDrawer from './chat/ChatDrawer'
+import ResumeMatch from './ResumeMatch'
 import { useAuth } from '../context/AuthContext'
 
 export default function Layout() {
@@ -29,6 +30,7 @@ export default function Layout() {
   return (
     <div className="app-shell">
       <Navbar />
+      <ResumeMatch />
       {isGuest && (
         <div className="guest-banner" role="status">
           <span className="guest-banner-long">
