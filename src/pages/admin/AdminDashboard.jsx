@@ -40,7 +40,7 @@ export default function AdminDashboard() {
           <div className="kpi-card">
             <span className="kpi-label">Active users · 24h</span>
             <strong className="kpi-value">{stats.active_users_24h}</strong>
-            <span className="muted">of {stats.users} registered</span>
+            <span className="muted">of {stats.users} players{stats.demo_users ? ` · ${stats.demo_users} demo` : ''}</span>
           </div>
           <div className="kpi-card">
             <span className="kpi-label">Active users · 7 days</span>

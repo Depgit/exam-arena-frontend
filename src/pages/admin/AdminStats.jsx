@@ -18,7 +18,8 @@ export default function AdminStats() {
       {stats && (
         <div className="stats-grid">
           <div className="stat-card">
-            <div className="stat-row"><span>Users</span><strong>{stats.users}</strong></div>
+            <div className="stat-row"><span>Players</span><strong>{stats.users}</strong></div>
+            {stats.demo_users != null && <div className="stat-row"><span>Demo accounts</span><strong>{stats.demo_users}</strong></div>}
           </div>
           <div className="stat-card">
             <div className="stat-row"><span>Live now</span><strong>{stats.live_users}</strong></div>
