@@ -2,6 +2,7 @@ import { Suspense, useEffect } from 'react'
 import { Link, Outlet } from 'react-router-dom'
 import Navbar from './Navbar'
 import FriendNotifications from './FriendNotifications'
+import ChatDrawer from './chat/ChatDrawer'
 import { useAuth } from '../context/AuthContext'
 
 export default function Layout() {
@@ -31,13 +32,13 @@ export default function Layout() {
       {isGuest && (
         <div className="guest-banner" role="status">
           <span className="guest-banner-long">
-            🎮 You're exploring a <strong>demo account</strong> — play anything. Demo progress is cleared after a few days.
+            👀 You're looking around on a <strong>demo account</strong> — create a free account to play.
           </span>
           <span className="guest-banner-short">
-            🎮 <strong>Demo account</strong> · resets in a few days
+            👀 <strong>Demo</strong> · sign up free to play
           </span>
           <Link to="/register">
-            <span className="guest-banner-long">Create a real account →</span>
+            <span className="guest-banner-long">Create free account →</span>
             <span className="guest-banner-short">Sign up →</span>
           </Link>
         </div>
@@ -55,6 +56,7 @@ export default function Layout() {
         </Suspense>
       </main>
       {!isAdmin && <FriendNotifications />}
+      {!isAdmin && <ChatDrawer />}
     </div>
   )
 }

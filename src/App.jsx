@@ -3,9 +3,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { WebSocketProvider } from './context/WebSocketContext'
 import { SettingsProvider } from './context/SettingsContext'
+import { ChatProvider } from './context/ChatContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import ServerWakeNotice from './components/ServerWakeNotice'
+import PlayOnly from './components/PlayOnly'
 
 // Every page is its own chunk: a player never downloads the admin console,
 // and the first screen paints without waiting on pages nobody opened yet.
@@ -46,6 +48,7 @@ export default function App() {
       <AuthProvider>
         <SettingsProvider>
           <WebSocketProvider>
+          <ChatProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<RootRedirect />} />
@@ -55,15 +58,15 @@ export default function App() {
                 <Route element={<ProtectedRoute requireRole="user" />}>
                   <Route element={<Layout />}>
                     <Route path="/app/dashboard" element={<Dashboard />} />
-                    <Route path="/app/matchmaking" element={<Matchmaking />} />
-                    <Route path="/app/friend" element={<FriendMatch />} />
-                    <Route path="/app/match/:matchId" element={<LiveMatch />} />
-                    <Route path="/app/practice" element={<Practice />} />
+                    <Route path="/app/matchmaking" element={<PlayOnly what="playing a match"><Matchmaking /></PlayOnly>} />
+                    <Route path="/app/friend" element={<PlayOnly what="playing a friend match"><FriendMatch /></PlayOnly>} />
+                    <Route path="/app/match/:matchId" element={<PlayOnly what="playing a match"><LiveMatch /></PlayOnly>} />
+                    <Route path="/app/practice" element={<PlayOnly what="practice"><Practice /></PlayOnly>} />
                     <Route path="/app/leaderboard" element={<Leaderboard />} />
                     <Route path="/app/profile" element={<Profile />} />
                     <Route path="/app/profile/:userId" element={<Profile />} />
                     <Route path="/app/friends" element={<Friends />} />
-                    <Route path="/app/daily" element={<DailyChallenge />} />
+                    <Route path="/app/daily" element={<PlayOnly what="the daily challenge"><DailyChallenge /></PlayOnly>} />
                   </Route>
                 </Route>
 
@@ -80,6 +83,7 @@ export default function App() {
               </Routes>
             </Suspense>
             <ServerWakeNotice />
+          </ChatProvider>
           </WebSocketProvider>
         </SettingsProvider>
       </AuthProvider>

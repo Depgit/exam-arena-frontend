@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { getSubjects, getUserStats, getUserProfile, getLeaderboard, getDailyChallenge } from '../../api/endpoints'
 import { Avatar, RankBadge, tierFor } from '../../components/game/game'
+import ChatPanel from '../../components/chat/ChatPanel'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { formatDuration } from './DailyChallenge'
 
 function DailyChallengeCard() {
@@ -81,6 +83,8 @@ export default function Dashboard() {
     knownSubjects[0] ? getLeaderboard.peek(knownSubjects[0].code, { limit: 10 })?.data ?? [] : []
   )
   const [error, setError] = useState('')
+  // Desktop shows the chat under the Top 10; phones use the floating chat button.
+  const wide = useMediaQuery('(min-width: 901px)')
 
   useEffect(() => {
     const loadBoard = (sub) =>
@@ -281,6 +285,7 @@ export default function Dashboard() {
               )}
             </ol>
           </div>
+          {wide && <ChatPanel />}
         </aside>
       </div>
     </div>

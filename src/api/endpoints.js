@@ -149,6 +149,11 @@ export const challengeFriend = (userId, body) => api.post(`/api/v1/friends/${use
 // Declines (invited friend) or cancels (challenger) an open challenge.
 export const closeChallenge = (matchId) => api.delete(`/api/v1/friends/challenges/${matchId}`)
 
+// ---- Global chat ----
+// Recent messages (always live); new ones arrive as "chat_message" events.
+export const getChat = () => api.get('/api/v1/chat')
+export const sendChat = (body) => api.post('/api/v1/chat', { body })
+
 // ---- Subjects ----
 // Categories almost never change; keep them for the whole session.
 export const getSubjects = withPeek(() => cachedGet('/api/v1/subjects', { ttl: Infinity }), () => '/api/v1/subjects')

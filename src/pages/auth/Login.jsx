@@ -62,7 +62,7 @@ export default function Login() {
         </button>
         <div className="auth-divider"><span>or</span></div>
         <button type="button" className="btn-ghost btn-demo" onClick={handleGuest} disabled={guestBusy || busy}>
-          {guestBusy ? 'Starting demo…' : '🎮 Try the demo — no sign-up'}
+          {guestBusy ? 'Opening…' : '👀 Look around first — no sign-up'}
         </button>
         <p className="auth-switch">
           New challenger? <Link to="/register">Create an account</Link>
