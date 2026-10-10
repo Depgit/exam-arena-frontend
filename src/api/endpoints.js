@@ -130,6 +130,8 @@ export const loginUser = (body) => api.post('/api/v1/auth/login', body)
 // One-click demo: the server creates a fresh guest account for this visitor.
 export const loginGuest = () => api.post('/api/v1/auth/guest')
 export const getMe = () => api.get('/api/v1/auth/me')
+// Change your own details (display name; the username is permanent).
+export const updateMe = (body) => api.patch('/api/v1/users/me', body)
 // Sign in with Google's ID token; a new player gets { needs_username } and
 // sends it again with { username }.
 export const loginGoogle = (body) => api.post('/api/v1/auth/google', body)

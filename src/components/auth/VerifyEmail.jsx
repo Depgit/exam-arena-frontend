@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { sendVerificationCode, verifyEmailCode } from '../../api/endpoints'
 import { useAuth } from '../../context/AuthContext'
+import CodeInput from './CodeInput'
 
 const RESEND_SECONDS = 60
 const CODE_VALID_MS = 15 * 60 * 1000
@@ -38,7 +39,6 @@ export default function VerifyEmail({ onVerified }) {
   const [cooldown, setCooldown] = useState(0)
   const [editing, setEditing] = useState(false)
   const [newEmail, setNewEmail] = useState(user?.email || '')
-  const inputRef = useRef(null)
 
   // First time this card shows: make sure a code is on its way. Sign-up
   // already sent one (the server then answers "wait N seconds", which is
@@ -77,17 +77,11 @@ export default function VerifyEmail({ onVerified }) {
     } catch (err) {
       setError(err.message)
       setCode('')
-      inputRef.current?.focus()
     } finally {
       setBusy(false)
     }
   }
 
-  function onChange(e) {
-    const digits = e.target.value.replace(/\D/g, '').slice(0, 6)
-    setCode(digits)
-    if (digits.length === 6 && !busy) verify(digits)
-  }
 
   async function resend(email) {
     setError('')
@@ -109,43 +103,45 @@ export default function VerifyEmail({ onVerified }) {
 
   return (
     <div className="verify-card">
-      <span className="verify-icon" aria-hidden="true">📧</span>
-      <h1>Check your email</h1>
-      <p className="muted">
-        We sent a 6-digit code to <strong className="verify-email">{user?.email}</strong>. Enter it to start playing.
-      </p>
-
-      {error && <div className="alert-error">{error}</div>}
-      {info && !error && <div className="alert-success">{info}</div>}
+      <div className="verify-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2.5" />
+          <path d="m3.5 7 8.5 6 8.5-6" />
+        </svg>
+      </div>
+      <h1>Verify your email</h1>
 
       {!editing ? (
         <>
-          <input
-            ref={inputRef}
-            className="verify-code"
-            value={code}
-            onChange={onChange}
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            placeholder="••••••"
-            aria-label="6-digit code"
-            maxLength={6}
-            autoFocus
-            disabled={busy}
-          />
-          <button className="btn-primary btn-lg" onClick={() => verify(code)} disabled={busy || code.length !== 6}>
-            {busy ? 'Checking…' : 'Verify'}
-          </button>
-          <div className="verify-links">
-            <button type="button" className="btn-link" onClick={() => resend()} disabled={cooldown > 0}>
-              {cooldown > 0 ? `Resend code in ${cooldown}s` : 'Resend code'}
-            </button>
-            <span aria-hidden="true">·</span>
-            <button type="button" className="btn-link" onClick={() => setEditing(true)}>
-              Wrong email?
+          <p className="verify-lead">Enter the 6-digit code we sent to</p>
+          <div className="verify-address">
+            <span>{user?.email}</span>
+            <button type="button" className="btn-link" onClick={() => { setEditing(true); setError(''); setInfo('') }}>
+              Change
             </button>
           </div>
-          <p className="verify-hint muted">Can't find it? Check your spam or promotions folder.</p>
+
+          <CodeInput value={code} onChange={(v) => { setCode(v); setError('') }} onComplete={(v) => !busy && verify(v)} disabled={busy} invalid={!!error} />
+
+          <div className="verify-status" aria-live="polite">
+            {error ? <span className="verify-error">{error.charAt(0).toUpperCase() + error.slice(1)}</span> : info ? <span className="verify-info">{info}</span> : busy ? <span className="muted">Checking…</span> : null}
+          </div>
+
+          <button className="btn-primary btn-lg verify-submit" onClick={() => verify(code)} disabled={busy || code.length !== 6}>
+            {busy ? 'Checking…' : 'Verify & play'}
+          </button>
+
+          <p className="verify-resend">
+            Didn't get it?{' '}
+            {cooldown > 0 ? (
+              <span className="muted">Resend in 0:{String(cooldown).padStart(2, '0')}</span>
+            ) : (
+              <button type="button" className="btn-link" onClick={() => resend()}>
+                Resend code
+              </button>
+            )}
+          </p>
+          <p className="verify-hint">Check your spam or promotions folder too. The code works for 15 minutes.</p>
         </>
       ) : (
         <form
@@ -155,18 +151,18 @@ export default function VerifyEmail({ onVerified }) {
             resend(newEmail.trim())
           }}
         >
+          <p className="verify-lead">Typo in your email? Fix it and we'll send a new code there.</p>
+          {error && <div className="alert-error">{error}</div>}
           <label>
-            Correct email
+            Email
             <input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} required autoFocus autoComplete="email" />
           </label>
-          <div className="verify-links">
-            <button className="btn-primary" type="submit" disabled={cooldown > 0}>
-              {cooldown > 0 ? `Send in ${cooldown}s` : 'Send code here'}
-            </button>
-            <button type="button" className="btn-ghost" onClick={() => setEditing(false)}>
-              Cancel
-            </button>
-          </div>
+          <button className="btn-primary btn-lg" type="submit" disabled={cooldown > 0}>
+            {cooldown > 0 ? `Send code in ${cooldown}s` : 'Send code'}
+          </button>
+          <button type="button" className="btn-ghost" onClick={() => { setEditing(false); setError('') }}>
+            Back
+          </button>
         </form>
       )}
     </div>

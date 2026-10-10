@@ -3066,3 +3066,261 @@ button.podium-spot:hover .podium-name {
     font-size: 26px;
   }
 }
+
+/* ── Verify email, v2: six code boxes ────────────────────────────── */
+.verify-card {
+  gap: var(--space-2);
+  max-width: 420px;
+  padding: var(--space-8) var(--space-6) var(--space-6);
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgba(124, 92, 255, 0.16), transparent 70%),
+    var(--surface-1);
+}
+
+.verify-badge {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--space-2);
+  color: #fff;
+  background: linear-gradient(135deg, #7c5cff, #c04bff);
+  border-radius: 18px;
+  box-shadow: 0 12px 30px -10px rgba(124, 92, 255, 0.7);
+}
+
+.verify-card h1 {
+  font-size: clamp(1.35rem, 1.1rem + 1vw, 1.7rem);
+}
+
+.verify-lead {
+  color: var(--muted);
+  font-size: 14.5px;
+}
+
+.verify-address {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+  padding: 6px 8px 6px 14px;
+  font-weight: 600;
+  color: var(--text-strong);
+  background: var(--surface-inset, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.verify-address > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.verify-address .btn-link {
+  flex: none;
+  font-size: 13px;
+}
+
+.code-input {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+  margin-top: var(--space-4);
+}
+
+.code-box {
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 4 / 5;
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-strong);
+  background: var(--surface-inset, rgba(255, 255, 255, 0.03));
+  border: 1.5px solid var(--border-strong, rgba(255, 255, 255, 0.14));
+  border-radius: 12px;
+  caret-color: #7c5cff;
+  transition: border-color var(--dur) ease, box-shadow var(--dur) ease, transform var(--dur) ease;
+}
+
+.code-box:focus {
+  outline: none;
+  border-color: #7c5cff;
+  box-shadow: 0 0 0 4px rgba(124, 92, 255, 0.22);
+}
+
+.code-box.filled {
+  border-color: rgba(124, 92, 255, 0.6);
+}
+
+.code-input.invalid .code-box {
+  border-color: var(--error-border);
+  animation: code-shake 0.35s ease;
+}
+
+@keyframes code-shake {
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+.verify-status {
+  min-height: 22px;
+  font-size: 13.5px;
+}
+
+.verify-error {
+  color: var(--error-fg);
+}
+
+.verify-info {
+  color: var(--neon-cyan);
+}
+
+.verify-submit {
+  width: 100%;
+  max-width: 340px;
+}
+
+.verify-resend {
+  margin-top: var(--space-2) !important;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.verify-hint {
+  font-size: 12.5px;
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+.verify-change {
+  gap: var(--space-3);
+}
+
+.verify-change .verify-lead {
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .code-input.invalid .code-box {
+    animation: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .code-input {
+    gap: 6px;
+  }
+
+  .code-box {
+    font-size: 22px;
+    border-radius: 10px;
+  }
+}
+
+/* ── Edit profile dialog ─────────────────────────────────────────── */
+.profile-dialog {
+  align-items: stretch;
+  gap: var(--space-4);
+  width: min(460px, 100%);
+  text-align: left;
+  border-color: rgba(124, 92, 255, 0.35);
+}
+
+.profile-dialog-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.profile-dialog-head h2 {
+  margin: 0;
+}
+
+.profile-dialog-head p {
+  margin: 2px 0 0;
+  max-width: none;
+  font-size: 13.5px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary, var(--muted));
+}
+
+.field-count {
+  font-weight: 500;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.field-count.over {
+  color: var(--error-fg);
+}
+
+.field-help {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.field-locked {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 12px;
+  color: var(--text-secondary, var(--muted));
+  background: var(--surface-inset, rgba(255, 255, 255, 0.03));
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.field-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lock-tag,
+.verified-tag,
+.unverified-tag {
+  flex: none;
+  padding: 2px 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: 999px;
+}
+
+.lock-tag {
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.verified-tag {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.unverified-tag {
+  color: var(--error-fg);
+  background: var(--error-soft);
+}
+
+.profile-dialog .leave-actions {
+  justify-content: flex-end;
+}

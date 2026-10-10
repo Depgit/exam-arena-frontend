@@ -81,10 +81,12 @@ function FriendButton({ userId, username }) {
   )
 }
 import { Avatar, RankBadge, tierFor } from '../../components/game/game'
+import EditProfileDialog from '../../components/EditProfileDialog'
 
 export default function Profile() {
-  const { user } = useAuth()
+  const { user, isGuest } = useAuth()
   const { userId } = useParams()
+  const [editing, setEditing] = useState(false)
   const profileId = userId || user.id
   const isMe = profileId === user.id
   const knownProfile = (id) => {
@@ -145,7 +147,18 @@ export default function Profile() {
         {!isMe && profile.user.role !== 'admin' && (
           <FriendButton userId={profileId} username={profile.user.username} />
         )}
+        {isMe && !isGuest && (
+          <div className="profile-actions">
+            <button className="btn-ghost" onClick={() => setEditing(true)}>✏️ Edit profile</button>
+          </div>
+        )}
       </section>
+      {editing && (
+        <EditProfileDialog
+          onClose={() => setEditing(false)}
+          onSaved={(me) => setProfile((p) => ({ ...p, user: { ...p.user, display_name: me.display_name } }))}
+        />
+      )}
 
       <div className="kpi-strip">
         <div className="kpi-tile"><span>Matches</span><strong>{totals.matches}</strong></div>

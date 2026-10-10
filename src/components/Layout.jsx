@@ -1,5 +1,5 @@
 import { Suspense, useEffect } from 'react'
-import { Link, Outlet } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 import Navbar from './Navbar'
 import FriendNotifications from './FriendNotifications'
 import ChatDrawer from './chat/ChatDrawer'
@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext'
 
 export default function Layout() {
   const { isAdmin, isGuest, needsVerification } = useAuth()
+  const { pathname } = useLocation()
 
   // Download the other pages' code while the browser is idle, so opening a
   // page never waits on a chunk download. Same chunks App.jsx lazy-loads.
@@ -45,7 +46,7 @@ export default function Layout() {
           </Link>
         </div>
       )}
-      {!isGuest && needsVerification && (
+      {!isGuest && needsVerification && pathname !== '/app/verify' && (
         <div className="guest-banner verify-banner" role="status">
           <span>
             📧 <strong>Verify your email</strong> to play and chat — we sent you a 6-digit code.
