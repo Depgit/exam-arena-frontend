@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import GoogleButton from '../../components/auth/GoogleButton'
+import GoogleUsernameStep from '../../components/auth/GoogleUsernameStep'
+import { useGoogleSignIn } from '../../components/auth/useGoogleSignIn'
 
 export default function Login() {
   const [loginId, setLoginId] = useState('')
@@ -10,6 +13,7 @@ export default function Login() {
   const [guestBusy, setGuestBusy] = useState(false)
   const { login, loginAsGuest } = useAuth()
   const navigate = useNavigate()
+  const google = useGoogleSignIn(setError)
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -17,7 +21,7 @@ export default function Login() {
     setBusy(true)
     try {
       const user = await login(loginId, password)
-      navigate(user.role === 'admin' ? '/admin/dashboard' : '/app/dashboard')
+      navigate(user.role === 'admin' ? '/admin/dashboard' : user.needs_email_verification ? '/app/verify' : '/app/dashboard')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -38,6 +42,17 @@ export default function Login() {
     }
   }
 
+  if (google.pending) {
+    return (
+      <div className="auth-page">
+        <div className="auth-hero" aria-hidden="true">
+          <span className="auth-hero-mark">⚡</span>
+        </div>
+        <GoogleUsernameStep pending={google.pending} onSubmit={google.finish} onCancel={google.cancel} />
+      </div>
+    )
+  }
+
   return (
     <div className="auth-page">
       <div className="auth-hero" aria-hidden="true">
@@ -49,6 +64,8 @@ export default function Login() {
         </div>
         <p className="auth-subtitle">1v1 math & logic battles · climb the ranks</p>
         {error && <div className="alert-error">{error}</div>}
+        <GoogleButton onCredential={google.onCredential} text="signin_with" />
+        <div className="auth-divider"><span>or with email</span></div>
         <label>
           Username or email
           <input value={loginId} onChange={(e) => setLoginId(e.target.value)} required autoFocus autoComplete="username" />

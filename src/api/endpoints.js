@@ -130,6 +130,12 @@ export const loginUser = (body) => api.post('/api/v1/auth/login', body)
 // One-click demo: the server creates a fresh guest account for this visitor.
 export const loginGuest = () => api.post('/api/v1/auth/guest')
 export const getMe = () => api.get('/api/v1/auth/me')
+// Sign in with Google's ID token; a new player gets { needs_username } and
+// sends it again with { username }.
+export const loginGoogle = (body) => api.post('/api/v1/auth/google', body)
+// Email verification: send (or resend, optionally to a corrected address) and check the code.
+export const sendVerificationCode = (email) => api.post('/api/v1/auth/verify-email/send', email ? { email } : {})
+export const verifyEmailCode = (code) => api.post('/api/v1/auth/verify-email', { code })
 
 // ---- Users ----
 export const getUserProfile = withPeek((id) => cachedGet(`${USERS}${id}`, { ttl: 60 * SEC }), (id) => `${USERS}${id}`)

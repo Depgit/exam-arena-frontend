@@ -24,6 +24,7 @@ const Leaderboard = lazy(() => import('./pages/user/Leaderboard'))
 const Profile = lazy(() => import('./pages/user/Profile'))
 const Friends = lazy(() => import('./pages/user/Friends'))
 const DailyChallenge = lazy(() => import('./pages/user/DailyChallenge'))
+const Verify = lazy(() => import('./pages/user/Verify'))
 
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const CreateQuestion = lazy(() => import('./pages/admin/CreateQuestion'))
@@ -67,6 +68,7 @@ export default function App() {
                     <Route path="/app/profile" element={<Profile />} />
                     <Route path="/app/profile/:userId" element={<Profile />} />
                     <Route path="/app/friends" element={<Friends />} />
+                    <Route path="/app/verify" element={<Verify />} />
                     <Route path="/app/daily" element={<PlayOnly what="the daily challenge"><DailyChallenge /></PlayOnly>} />
                   </Route>
                 </Route>

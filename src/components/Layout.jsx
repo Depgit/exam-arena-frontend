@@ -7,7 +7,7 @@ import ResumeMatch from './ResumeMatch'
 import { useAuth } from '../context/AuthContext'
 
 export default function Layout() {
-  const { isAdmin, isGuest } = useAuth()
+  const { isAdmin, isGuest, needsVerification } = useAuth()
 
   // Download the other pages' code while the browser is idle, so opening a
   // page never waits on a chunk download. Same chunks App.jsx lazy-loads.
@@ -43,6 +43,14 @@ export default function Layout() {
             <span className="guest-banner-long">Create free account →</span>
             <span className="guest-banner-short">Sign up →</span>
           </Link>
+        </div>
+      )}
+      {!isGuest && needsVerification && (
+        <div className="guest-banner verify-banner" role="status">
+          <span>
+            📧 <strong>Verify your email</strong> to play and chat — we sent you a 6-digit code.
+          </span>
+          <Link to="/app/verify">Enter code →</Link>
         </div>
       )}
       <main className="app-main">

@@ -2945,3 +2945,124 @@ button.podium-spot:hover .podium-name {
     width: 100%;
   }
 }
+
+/* ── Google sign-in & email verification ─────────────────────────── */
+.google-btn {
+  display: flex;
+  justify-content: center;
+  min-height: 44px; /* reserve space so the card doesn't jump when it loads */
+}
+
+.google-failed {
+  margin: 0;
+  font-size: 13px;
+  text-align: center;
+}
+
+.google-email {
+  margin: -6px 0 0;
+  font-size: 13px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.verify-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 440px;
+  margin: var(--space-8) auto;
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+  background: var(--surface-1);
+  border: 1px solid rgba(124, 92, 255, 0.35);
+  border-radius: 14px;
+  box-shadow: var(--shadow-2);
+}
+
+.verify-card h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 1.1rem + 1.2vw, 1.8rem);
+}
+
+.verify-card p {
+  margin: 0;
+}
+
+.verify-icon {
+  font-size: 40px;
+}
+
+.verify-email {
+  color: var(--text-strong);
+  overflow-wrap: anywhere;
+}
+
+.verify-code {
+  width: min(260px, 100%);
+  padding: 12px 0;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.45em;
+  text-indent: 0.45em; /* balance the trailing letter-spacing */
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.verify-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2) var(--space-3);
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.btn-link {
+  padding: 2px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--neon-cyan);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-link:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+.btn-link:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.verify-hint {
+  font-size: 12.5px;
+}
+
+.verify-change {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: left;
+}
+
+.verify-banner {
+  background: linear-gradient(90deg, rgba(124, 92, 255, 0.14), rgba(34, 228, 255, 0.08));
+}
+
+@media (max-width: 600px) {
+  .verify-card {
+    margin: var(--space-4) auto;
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .verify-code {
+    font-size: 26px;
+  }
+}

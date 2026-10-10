@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
-import { loginUser, loginGuest, registerUser, getMe, clearCache } from '../api/endpoints'
+import { loginUser, loginGuest, loginGoogle, registerUser, getMe, clearCache } from '../api/endpoints'
 
 const AuthContext = createContext(null)
 
@@ -64,6 +64,23 @@ export function AuthProvider({ children }) {
     return data.user
   }, [])
 
+  // Returns { user } once signed in, or { needsUsername, suggested, email,
+  // name } for a first-time Google player (call again with a username).
+  const loginWithGoogle = useCallback(async (credential, username) => {
+    const { data } = await loginGoogle({ credential, ...(username ? { username } : {}) })
+    if (data.needs_username) {
+      return { needsUsername: true, suggested: data.suggested_username, email: data.email, name: data.name }
+    }
+    persist(data.token, data.user)
+    return { user: data.user }
+  }, [])
+
+  // Replace the signed-in user's details (e.g. after verifying their email).
+  const updateUser = useCallback((newUser) => {
+    localStorage.setItem(USER_KEY, JSON.stringify(newUser))
+    setUser(newUser)
+  }, [])
+
   const logout = useCallback(() => {
     clearCache()
     localStorage.removeItem(TOKEN_KEY)
@@ -82,12 +99,16 @@ export function AuthProvider({ children }) {
       isAuthenticated: !!token && !!user,
       loading,
       isGuest: !!user?.is_guest,
+      // Must verify their email before playing or chatting.
+      needsVerification: !!user?.needs_email_verification,
       login,
       loginAsGuest,
+      loginWithGoogle,
       register,
+      updateUser,
       logout,
     }),
-    [token, user, loading, login, loginAsGuest, register, logout]
+    [token, user, loading, login, loginAsGuest, loginWithGoogle, register, updateUser, logout]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

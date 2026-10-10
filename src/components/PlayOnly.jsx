@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import VerifyEmail from './auth/VerifyEmail'
 
 /**
  * Guards the play pages (matches, practice, daily challenge).
@@ -9,8 +10,16 @@ import { useAuth } from '../context/AuthContext'
  * show an invitation to create a free account.
  */
 export default function PlayOnly({ what, children }) {
-  const { isGuest, logout } = useAuth()
+  const { isGuest, needsVerification, logout } = useAuth()
   const navigate = useNavigate()
+  // Signed up but email not verified yet: verify right here, then play.
+  if (!isGuest && needsVerification) {
+    return (
+      <div className="page">
+        <VerifyEmail />
+      </div>
+    )
+  }
   if (!isGuest) return children
 
   // Leave the demo session first, so signing up or logging in starts clean.

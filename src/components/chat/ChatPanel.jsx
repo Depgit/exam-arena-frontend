@@ -13,7 +13,7 @@ function timeOf(iso) {
 
 /** The chat view: messages plus the input. Used in the Lobby and the sheet. */
 export default function ChatPanel({ onClose }) {
-  const { user, isGuest, logout } = useAuth()
+  const { user, isGuest, needsVerification, logout } = useAuth()
   const { messages, send, viewOpened } = useChat()
   const navigate = useNavigate()
   const [text, setText] = useState('')
@@ -84,6 +84,11 @@ export default function ChatPanel({ onClose }) {
         <div className="chat-guest">
           <span>Demo accounts can read but not chat.</span>
           <button type="button" className="btn-primary small" onClick={() => { logout(); navigate('/register') }}>Sign up to chat</button>
+        </div>
+      ) : needsVerification ? (
+        <div className="chat-guest">
+          <span>Verify your email to join the chat.</span>
+          <button type="button" className="btn-primary small" onClick={() => navigate('/app/verify')}>Enter code</button>
         </div>
       ) : (
         <form className="chat-input" onSubmit={submit}>
