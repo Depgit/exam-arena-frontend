@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import { getMatch } from '../../api/endpoints'
+import LeaveMatchDialog from '../../components/game/LeaveMatchDialog'
 import { useAuth } from '../../context/AuthContext'
 import { useWebSocket, useWSListener } from '../../context/WebSocketContext'
 import { useSmoothCountdown } from '../../hooks/useSmoothCountdown'
@@ -75,6 +76,8 @@ export default function LiveMatch() {
   // cleared, and is sent (and scored) when the player presses Next.
   const [selections, setSelections] = useState({})
   const [results, setResults] = useState(null)
+  const [leftBy, setLeftBy] = useState('') // who left the match early, if anyone
+  const [confirmLeave, setConfirmLeave] = useState(false)
   const [error, setError] = useState('')
   const [floater, setFloater] = useState(null) // { id, text, kind }
   const [opponentPulse, setOpponentPulse] = useState(0)
@@ -167,6 +170,8 @@ export default function LiveMatch() {
 
   useWSListener('match_end', (payload) => {
     if (payload.match_id !== matchId) return
+    setConfirmLeave(false)
+    setLeftBy(payload.left_by || '')
     setResults(payload.results)
     const me = payload.results?.find((r) => r.user_id === user.id)
     const tied = payload.results?.filter((r) => r.rank === 1).length > 1
@@ -283,15 +288,18 @@ export default function LiveMatch() {
     const won = mine?.rank === 1 && !isDraw
     const outcome = isDraw ? 'draw' : won ? 'victory' : mine ? 'defeat' : 'over'
     const title = { draw: 'Draw', victory: 'Victory', defeat: 'Defeat', over: 'Match over' }[outcome]
+    const iLeft = leftBy === user.id
+    const leftNote = !leftBy ? '' : iLeft ? 'You left the match — your opponent wins.' : 'Your opponent left the match — the win is yours.'
 
     return (
       <div className={`page match-results-page outcome-${outcome}`}>
         {won && <Confetti />}
         <div className="results-header">
           <div className="results-trophy" aria-hidden="true">
-            {isDraw ? '🤝' : won ? '🏆' : mine ? '💀' : '⚔️'}
+            {iLeft ? '🏳️' : isDraw ? '🤝' : won ? '🏆' : mine ? '💀' : '⚔️'}
           </div>
-          <h1 className="results-title">{title}</h1>
+          <h1 className="results-title">{iLeft ? 'You left' : title}</h1>
+          {leftNote && <p className="left-note">{leftNote}</p>}
           <p className="muted">{mine?.correct != null ? `${mine.correct}/${mine.total} correct` : ''}</p>
           {isBotMatch && <p className="unrated-note">🤖 Unrated · bot match — your rating didn't change</p>}
         </div>
@@ -306,6 +314,7 @@ export default function LiveMatch() {
                 <div className="result-info">
                   <span className="result-name">
                     {r.username}{isMe ? ' (you)' : ''}
+                    {r.left && <span className="left-tag">left</span>}
                   </span>
                   {r.total != null && (
                     <span className="muted result-accuracy">{r.correct}/{r.total} correct</span>
@@ -373,6 +382,9 @@ export default function LiveMatch() {
       <div className="hud-center">
         <TimerRing remaining={remaining} total={timerSeconds} />
         {!connected && <span className="hud-offline" role="status">Reconnecting…</span>}
+        <button type="button" className="hud-leave" onClick={() => setConfirmLeave(true)} title="Leave the match — your opponent wins">
+          🏳️ Leave
+        </button>
       </div>
       {opponent ? (
         <HudPlayer player={opponent} score={scoreOf(opponent.user_id)} side="right" pulse={opponentPulse} key={opponentPulse} />
@@ -380,6 +392,15 @@ export default function LiveMatch() {
         <div className="hud-player hud-right" />
       )}
     </div>
+  )
+
+  const leaveDialog = confirmLeave && (
+    <LeaveMatchDialog
+      matchId={matchId}
+      rated={!isBotMatch}
+      onClose={() => setConfirmLeave(false)}
+      onLeft={() => setConfirmLeave(false)}
+    />
   )
 
   // ── All questions answered — waiting for opponent ────────────────────
@@ -405,6 +426,7 @@ export default function LiveMatch() {
           )}
           <ProgressDots questions={questions} current={-1} stateOf={dotState} />
         </div>
+        {leaveDialog}
       </div>
     )
   }
@@ -461,6 +483,7 @@ export default function LiveMatch() {
           {nextLabel}
         </button>
       </div>
+      {leaveDialog}
     </div>
   )
 }

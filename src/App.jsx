@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import ServerWakeNotice from './components/ServerWakeNotice'
 import PlayOnly from './components/PlayOnly'
+import NotInMatch from './components/NotInMatch'
 
 // Every page is its own chunk: a player never downloads the admin console,
 // and the first screen paints without waiting on pages nobody opened yet.
@@ -58,8 +59,8 @@ export default function App() {
                 <Route element={<ProtectedRoute requireRole="user" />}>
                   <Route element={<Layout />}>
                     <Route path="/app/dashboard" element={<Dashboard />} />
-                    <Route path="/app/matchmaking" element={<PlayOnly what="playing a match"><Matchmaking /></PlayOnly>} />
-                    <Route path="/app/friend" element={<PlayOnly what="playing a friend match"><FriendMatch /></PlayOnly>} />
+                    <Route path="/app/matchmaking" element={<PlayOnly what="playing a match"><NotInMatch><Matchmaking /></NotInMatch></PlayOnly>} />
+                    <Route path="/app/friend" element={<PlayOnly what="playing a friend match"><NotInMatch><FriendMatch /></NotInMatch></PlayOnly>} />
                     <Route path="/app/match/:matchId" element={<PlayOnly what="playing a match"><LiveMatch /></PlayOnly>} />
                     <Route path="/app/practice" element={<PlayOnly what="practice"><Practice /></PlayOnly>} />
                     <Route path="/app/leaderboard" element={<Leaderboard />} />

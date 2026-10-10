@@ -2826,3 +2826,122 @@ button.podium-spot:hover .podium-name {
     width: 100%;
   }
 }
+
+/* ── Leaving a match ─────────────────────────────────────────────── */
+.hud-leave {
+  padding: 2px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--dur) ease, border-color var(--dur) ease, background var(--dur) ease;
+}
+
+.hud-leave:hover,
+.hud-leave:focus-visible {
+  color: var(--error-fg);
+  border-color: var(--error-border);
+  background: var(--error-soft);
+}
+
+.leave-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgba(3, 4, 10, 0.68);
+  animation: fadeIn var(--dur) ease;
+}
+
+.leave-dialog {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  width: min(420px, 100%);
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+  background: var(--card-gradient);
+  border: 1px solid var(--error-border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-3);
+  animation: pop 0.25s var(--ease-out);
+}
+
+.leave-icon {
+  font-size: 36px;
+}
+
+.leave-dialog h2 {
+  margin: 0;
+}
+
+.leave-dialog p {
+  margin: 0;
+  max-width: 34ch;
+}
+
+.leave-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.btn-danger {
+  padding: 10px 18px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--error-strong);
+  border: 1px solid var(--error-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: filter var(--dur) ease;
+}
+
+.btn-danger:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.btn-danger:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.left-note {
+  margin: 0;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.left-tag {
+  margin-left: 8px;
+  padding: 1px 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--error-fg);
+  background: var(--error-soft);
+  border: 1px solid var(--error-border);
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+@media (max-width: 600px) {
+  .leave-actions {
+    flex-direction: column-reverse;
+    width: 100%;
+  }
+
+  .leave-actions button {
+    width: 100%;
+  }
+}
