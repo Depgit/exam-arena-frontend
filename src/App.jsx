@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { WebSocketProvider } from './context/WebSocketContext'
 import { SettingsProvider } from './context/SettingsContext'
@@ -18,11 +18,22 @@ const Register = lazy(() => import('./pages/auth/Register'))
 const Challenge = lazy(() => import('./pages/Challenge'))
 const Result = lazy(() => import('./pages/Result'))
 const Invite = lazy(() => import('./pages/Invite'))
+const GroupInvite = lazy(() => import('./pages/GroupInvite'))
 const InvitePage = lazy(() => import('./pages/user/InvitePage'))
+
+// A new match id must get a fresh match screen. React Router keeps the same
+// component when only :matchId changes — e.g. a rematch starting while the
+// player is still on the last match's results — and the old results would
+// stay on screen instead of the new match.
+function LiveMatchPage() {
+  const { matchId } = useParams()
+  return <LiveMatch key={matchId} />
+}
 
 const Dashboard = lazy(() => import('./pages/user/Dashboard'))
 const Matchmaking = lazy(() => import('./pages/user/Matchmaking'))
 const FriendMatch = lazy(() => import('./pages/user/FriendMatch'))
+const GroupRace = lazy(() => import('./pages/user/GroupRace'))
 const LiveMatch = lazy(() => import('./pages/user/LiveMatch'))
 const Practice = lazy(() => import('./pages/user/Practice'))
 const Leaderboard = lazy(() => import('./pages/user/Leaderboard'))
@@ -66,13 +77,15 @@ export default function App() {
                 <Route path="/c/:code" element={<Challenge />} />
                 <Route path="/r/:matchId" element={<Result />} />
                 <Route path="/i/:code" element={<Invite />} />
+                <Route path="/g/:code" element={<GroupInvite />} />
 
                 <Route element={<ProtectedRoute requireRole="user" />}>
                   <Route element={<Layout />}>
                     <Route path="/app/dashboard" element={<Dashboard />} />
                     <Route path="/app/matchmaking" element={<PlayOnly what="playing a match"><NotInMatch><Matchmaking /></NotInMatch></PlayOnly>} />
                     <Route path="/app/friend" element={<PlayOnly what="playing a friend match"><NotInMatch><FriendMatch /></NotInMatch></PlayOnly>} />
-                    <Route path="/app/match/:matchId" element={<PlayOnly what="playing a match"><LiveMatch /></PlayOnly>} />
+                    <Route path="/app/group" element={<PlayOnly what="a Group Race"><NotInMatch><GroupRace /></NotInMatch></PlayOnly>} />
+                    <Route path="/app/match/:matchId" element={<PlayOnly what="playing a match"><LiveMatchPage /></PlayOnly>} />
                     <Route path="/app/practice" element={<PlayOnly what="practice"><Practice /></PlayOnly>} />
                     <Route path="/app/leaderboard" element={<Leaderboard />} />
                     <Route path="/app/profile" element={<Profile />} />

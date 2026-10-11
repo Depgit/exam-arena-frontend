@@ -176,20 +176,20 @@ export default function Dashboard() {
 
           <h2 className="lobby-heading">More ways to play</h2>
           <div className="mode-row">
+            <Link to="/app/group" className="mode-chip mode-chip-new">
+              <span aria-hidden="true">👥</span>
+              <strong>Group Race <em className="new-tag">New</em></strong>
+              <small>Up to 8 players</small>
+            </Link>
             <Link to="/app/friend" className="mode-chip">
               <span aria-hidden="true">🎮</span>
               <strong>Friend match</strong>
-              <small>Private room</small>
+              <small>Private 1v1</small>
             </Link>
             <Link to="/app/practice" className="mode-chip">
               <span aria-hidden="true">🎯</span>
               <strong>Practice</strong>
               <small>No rating</small>
-            </Link>
-            <Link to="/app/matchmaking" className="mode-chip">
-              <span aria-hidden="true">🤖</span>
-              <strong>vs Bot</strong>
-              <small>Warm up</small>
             </Link>
             <Link to="/app/leaderboard" className="mode-chip">
               <span aria-hidden="true">🏆</span>

@@ -86,6 +86,10 @@ export function AuthProvider({ children }) {
     setUser(newUser)
   }, [])
 
+  // Switch to a new token for the same account (after a username change:
+  // the username lives in the token). The live connection follows it.
+  const renewSession = useCallback((newToken, newUser) => persist(newToken, newUser), [])
+
   const logout = useCallback(() => {
     clearCache()
     localStorage.removeItem(TOKEN_KEY)
@@ -111,9 +115,10 @@ export function AuthProvider({ children }) {
       loginWithGoogle,
       register,
       updateUser,
+      renewSession,
       logout,
     }),
-    [token, user, loading, login, loginAsGuest, loginWithGoogle, register, updateUser, logout]
+    [token, user, loading, login, loginAsGuest, loginWithGoogle, register, updateUser, renewSession, logout]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

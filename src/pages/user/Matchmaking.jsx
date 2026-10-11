@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { getSubjects, joinQueue, leaveQueue, getQueueStats, playBot, getNight } from '../../api/endpoints'
 import { useWebSocket, useWSListener } from '../../context/WebSocketContext'
 import { useSmoothCountdown } from '../../hooks/useSmoothCountdown'
@@ -324,6 +324,14 @@ export default function Matchmaking() {
             </button>
           ))}
         </div>
+        <Link className="group-promo" to={`/app/group${categoryId ? `?category=${categoryId}` : ''}`}>
+          <span className="group-promo-icon" aria-hidden="true">👥</span>
+          <span className="group-promo-text">
+            <strong>Group Race <em className="new-tag">New</em></strong>
+            <span className="muted">Up to 8 players, one race · starts 15s after you join</span>
+          </span>
+          <span aria-hidden="true">→</span>
+        </Link>
       </section>
 
       <section>

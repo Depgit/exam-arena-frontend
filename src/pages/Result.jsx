@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { Avatar } from '../components/game/game'
 import { track } from '../lib/analytics'
 
-const MODE = { ranked: 'Ranked', arena: 'Arena', friend: 'Friend', bot: 'Bot' }
+const MODE = { ranked: 'Ranked', arena: 'Arena', friend: 'Friend', group: 'Group Race', bot: 'Bot' }
 
 /**
  * mindrace.in/r/<match> — a finished match's result, for anyone: the link

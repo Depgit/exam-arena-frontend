@@ -3,7 +3,7 @@ import { getAdminLiveUsers } from '../../api/endpoints'
 import { Avatar } from '../game/game'
 
 const REFRESH_MS = 10_000
-const TYPE = { ranked: 'Ranked', arena: 'Arena', friend: 'Friend', bot: 'Bot match' }
+const TYPE = { ranked: 'Ranked', arena: 'Arena', friend: 'Friend', group: 'Group Race', bot: 'Bot match' }
 
 // "3m", "1h 12m", "45s"
 function duration(seconds) {

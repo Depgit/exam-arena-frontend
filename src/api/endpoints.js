@@ -139,6 +139,8 @@ export const getMyReferrals = () => api.get('/api/v1/referrals/me')
 export const getAdminReferrals = () => api.get('/api/v1/admin/referrals')
 // Change your own details (display name; the username is permanent).
 export const updateMe = (body) => api.patch('/api/v1/users/me', body)
+// New username (once every 14 days). Returns { token, user }: switch to the token.
+export const changeUsername = (username) => writes([USERS], api.patch('/api/v1/auth/username', { username }))
 // Sign in with Google's ID token; a new player gets { needs_username } and
 // sends it again with { username }.
 export const loginGoogle = (body) => api.post('/api/v1/auth/google', body)
@@ -200,6 +202,18 @@ export const playBot = (body) => api.post('/api/v1/matches/bot', body)
 export const joinFriendMatch = (body) => api.post('/api/v1/matches/friend/join', body)
 // Who is behind a challenge link (public — works before logging in).
 export const getRoomInvite = (code) => api.get(`/api/v1/matches/friend/${encodeURIComponent(code)}`)
+
+// ---- Group Race (up to 8 players) ----
+// Each returns { room }; later changes arrive as "group_update" events and
+// the race itself as "match_start".
+export const quickGroup = (body) => api.post('/api/v1/groups/quick', body)
+export const createGroupRoom = (body) => api.post('/api/v1/groups', body)
+export const joinGroupRoom = (code) => api.post(`/api/v1/groups/${encodeURIComponent(code)}/join`)
+export const startGroupRoom = (code) => api.post(`/api/v1/groups/${encodeURIComponent(code)}/start`)
+export const getMyGroupRoom = () => api.get('/api/v1/groups/me')
+export const leaveGroupRoom = () => api.delete('/api/v1/groups/me')
+// What's behind a /g/CODE link (public — works before logging in).
+export const getGroupInvite = (code) => api.get(`/api/v1/groups/${encodeURIComponent(code)}`)
 
 // ---- Daily challenge ----
 export const getDailyChallenge = withPeek(() => cachedGet(DAILY, { ttl: 30 * SEC }), () => DAILY)

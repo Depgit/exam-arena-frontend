@@ -1,17 +1,35 @@
 import { useEffect, useState } from 'react'
-import { updateMe } from '../api/endpoints'
+import { changeUsername, updateMe } from '../api/endpoints'
 import { useAuth } from '../context/AuthContext'
 import { Avatar } from './game/game'
 
 const MAX_NAME = 30
+const USERNAME_COOLDOWN_DAYS = 14
+
+// Same rules as the server (auth.validateUsername).
+function usernameProblem(name) {
+  if (/\s/.test(name)) return "Usernames can't contain spaces."
+  if (name.length < 3 || name.length > 30) return 'Use 3–30 characters.'
+  if (/^(bot\.|guest_)/i.test(name)) return 'That username is reserved.'
+  return ''
+}
+
+// When the username may change again, or null if it may change now.
+function nextUsernameChange(changedAt) {
+  if (!changedAt) return null
+  const next = new Date(new Date(changedAt).getTime() + USERNAME_COOLDOWN_DAYS * 864e5)
+  return next > new Date() ? next : null
+}
 
 /**
  * Edit your own profile. The display name (what other players see) can
- * change any time; the username is permanent, so it's shown locked.
+ * change any time; the username once every 14 days.
  */
 export default function EditProfileDialog({ onClose, onSaved }) {
-  const { user, updateUser } = useAuth()
+  const { user, updateUser, renewSession } = useAuth()
   const [name, setName] = useState(user.display_name || user.username)
+  const [username, setUsername] = useState(user.username)
+  const lockedUntil = nextUsernameChange(user.username_changed_at)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -22,17 +40,28 @@ export default function EditProfileDialog({ onClose, onSaved }) {
   }, [busy, onClose])
 
   const trimmed = name.trim().replace(/\s+/g, ' ')
-  const unchanged = trimmed === (user.display_name || user.username)
+  const nameChanged = trimmed !== (user.display_name || user.username)
+  const newUsername = username.trim()
+  const usernameChanged = newUsername !== user.username
+  const usernameError = usernameChanged ? usernameProblem(newUsername) : ''
 
   async function save(e) {
     e.preventDefault()
-    if (unchanged) return onClose()
+    if (!nameChanged && !usernameChanged) return onClose()
     setBusy(true)
     setError('')
     try {
-      const { data } = await updateMe({ display_name: trimmed })
-      const next = { ...user, display_name: data.display_name }
-      updateUser(next)
+      let next = user
+      if (usernameChanged) {
+        const { data } = await changeUsername(newUsername)
+        renewSession(data.token, data.user)
+        next = data.user
+      }
+      if (nameChanged) {
+        const { data } = await updateMe({ display_name: trimmed })
+        next = { ...next, display_name: data.display_name }
+        updateUser(next)
+      }
       onSaved?.(next)
       onClose()
     } catch (err) {
@@ -77,14 +106,40 @@ export default function EditProfileDialog({ onClose, onSaved }) {
           <span className="field-help">Shown on leaderboards, in matches and in chat. Leave empty to use your username.</span>
         </label>
 
-        <div className="field">
-          <span className="field-label">Username</span>
-          <div className="field-locked">
-            <span>@{user.username}</span>
-            <span className="lock-tag" aria-label="can't be changed">🔒 permanent</span>
+        {lockedUntil ? (
+          <div className="field">
+            <span className="field-label">Username</span>
+            <div className="field-locked">
+              <span>@{user.username}</span>
+              <span className="lock-tag">🔒 until {lockedUntil.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+            </div>
+            <span className="field-help">You changed it recently — usernames can change once every {USERNAME_COOLDOWN_DAYS} days.</span>
           </div>
-          <span className="field-help">Usernames can't be changed — friends find you by it.</span>
-        </div>
+        ) : (
+          <label className="field">
+            <span className="field-label">Username</span>
+            <div className="username-input">
+              <span aria-hidden="true">@</span>
+              <input
+                value={username}
+                onChange={(e) => setUsername(e.target.value.replace(/\s/g, ''))}
+                maxLength={30}
+                autoComplete="username"
+                autoCapitalize="none"
+                spellCheck={false}
+              />
+            </div>
+            {usernameError ? (
+              <span className="field-help field-error">{usernameError}</span>
+            ) : usernameChanged ? (
+              <span className="field-help field-warn">
+                ⚠️ After this you can't change it again for {USERNAME_COOLDOWN_DAYS} days. Your old invite links keep working.
+              </span>
+            ) : (
+              <span className="field-help">Friends find you by it. You can change it once every {USERNAME_COOLDOWN_DAYS} days.</span>
+            )}
+          </label>
+        )}
 
         {user.email && (
           <div className="field">
@@ -105,7 +160,7 @@ export default function EditProfileDialog({ onClose, onSaved }) {
           <button type="button" className="btn-ghost" onClick={onClose} disabled={busy}>
             Cancel
           </button>
-          <button type="submit" className="btn-primary" disabled={busy || trimmed.length > MAX_NAME || (trimmed.length === 1)}>
+          <button type="submit" className="btn-primary" disabled={busy || trimmed.length > MAX_NAME || trimmed.length === 1 || !!usernameError}>
             {busy ? 'Saving…' : 'Save'}
           </button>
         </div>

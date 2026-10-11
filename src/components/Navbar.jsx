@@ -9,6 +9,7 @@ import { Avatar } from './game/game'
 const userLinks = [
   ['/app/dashboard', 'Lobby', '🏠'],
   ['/app/matchmaking', 'Play', '⚔️'],
+  ['/app/group', 'Group Race', '🏁'],
   ['/app/friend', 'Friend Match', '🎮'],
   ['/app/friends', 'Friends', '👥'],
   ['/app/practice', 'Practice', '🎯'],

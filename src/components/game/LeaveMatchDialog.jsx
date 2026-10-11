@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { leaveMatch } from '../../api/endpoints'
 
 /**
- * "Leave match?" confirmation. Leaving ends the match at once and the
- * opponent wins; the server sends match_end to both players as usual.
+ * "Leave match?" confirmation. Leaving a 1v1 ends the match at once and the
+ * opponent wins; the server sends match_end to both players as usual. A
+ * Group Race (group) goes on without the leaver.
  */
-export default function LeaveMatchDialog({ matchId, rated, onClose, onLeft }) {
+export default function LeaveMatchDialog({ matchId, rated, group, onClose, onLeft }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -41,10 +42,11 @@ export default function LeaveMatchDialog({ matchId, rated, onClose, onLeft }) {
         onClick={(e) => e.stopPropagation()}
       >
         <span className="leave-icon" aria-hidden="true">🏳️</span>
-        <h2 id="leave-title">Leave this match?</h2>
+        <h2 id="leave-title">{group ? 'Leave this race?' : 'Leave this match?'}</h2>
         <p className="muted">
-          The match ends now and your opponent wins.
-          {rated ? ' It counts as a loss for your rating.' : ''}
+          {group
+            ? 'The race goes on without you and you finish last.'
+            : `The match ends now and your opponent wins.${rated ? ' It counts as a loss for your rating.' : ''}`}
         </p>
         {error && <div className="alert-error">{error}</div>}
         <div className="leave-actions">
@@ -52,7 +54,7 @@ export default function LeaveMatchDialog({ matchId, rated, onClose, onLeft }) {
             Keep playing
           </button>
           <button className="btn-danger" onClick={confirm} disabled={busy}>
-            {busy ? 'Leaving…' : 'Leave match'}
+            {busy ? 'Leaving…' : group ? 'Leave race' : 'Leave match'}
           </button>
         </div>
       </div>

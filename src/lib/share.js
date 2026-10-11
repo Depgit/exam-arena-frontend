@@ -31,7 +31,7 @@ export function dailyShareText({ date, correct, total, timeMs, rank, participant
   return lines.join('\n')
 }
 
-const MODE = { ranked: 'Ranked', arena: 'Arena', friend: 'Friend', bot: 'Bot' }
+const MODE = { ranked: 'Ranked', arena: 'Arena', friend: 'Friend', group: 'Group Race', bot: 'Bot' }
 
 // outcome: 'victory' | 'defeat' | 'draw'
 export function matchShareText({ outcome, me, opponent, mode, isBot, url = SITE }) {
@@ -47,6 +47,17 @@ export function matchShareText({ outcome, me, opponent, mode, isBot, url = SITE 
         : `⚔️ Lost a close one to ${vs} ${tally}${where} on Mind Race.`
   const ask = outcome === 'defeat' ? 'Rematch, anyone?' : 'Think you can beat me?'
   return `${line}\n${ask} ${url}`
+}
+
+// Group Race: "🥈 2nd of 6 in a Mind Race Group Race".
+export function groupShareText({ place, players, me, url = SITE }) {
+  const medal = { 1: '🥇', 2: '🥈', 3: '🥉' }[place] || '🏁'
+  const v = place % 100
+  const nth = place + (['th', 'st', 'nd', 'rd'][(v - 20) % 10] || ['th', 'st', 'nd', 'rd'][v] || 'th')
+  const line = place === 1
+    ? `${medal} I won a ${players}-player Group Race on Mind Race! ${me.score} pts`
+    : `${medal} ${nth} of ${players} in a Group Race on Mind Race — ${me.score} pts`
+  return `${line}\nNext race, you're in. ${url}`
 }
 
 // ── Image card ─────────────────────────────────────────────────────────
