@@ -4,7 +4,7 @@ import { getAdminGrowth } from '../../api/endpoints'
 const PERIODS = [7, 14, 30]
 const pct = (n, d) => (d ? Math.round((n / d) * 100) : null)
 const shortDate = (iso) => new Date(`${iso}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
-const SHARE_NAMES = { daily: 'Daily score', match: 'Match result', invite: 'Room invite', other: 'Other' }
+const SHARE_NAMES = { daily: 'Daily score', match: 'Match result', invite: 'Room invite', night_reminder: 'Night reminder', night_invite: 'Night invite', other: 'Other' }
 
 function Tile({ label, value, sub, hero }) {
   return (

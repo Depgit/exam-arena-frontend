@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getSubjects, joinQueue, leaveQueue, getQueueStats, playBot } from '../../api/endpoints'
+import { getSubjects, joinQueue, leaveQueue, getQueueStats, playBot, getNight } from '../../api/endpoints'
 import { useWebSocket, useWSListener } from '../../context/WebSocketContext'
 import { useSmoothCountdown } from '../../hooks/useSmoothCountdown'
 import { useAuth } from '../../context/AuthContext'
@@ -10,6 +10,9 @@ import { haptic, HAPTIC } from '../../lib/haptics'
 
 const POLL_MS = 2000
 const BOT_OFFER_AFTER_S = 10 // seconds of searching before offering a bot
+// During Mind Race Night everyone is here to meet people: hold the bot
+// offer back so players find each other first.
+const BOT_OFFER_NIGHT_S = 45
 const MAX_POLLS = 15 // ~30s, then give up and tell the player
 
 const MODES = [
@@ -35,6 +38,7 @@ export default function Matchmaking() {
   const [queued, setQueued] = useState(false)
   const [elapsed, setElapsed] = useState(0)
   const [queueStats, setQueueStats] = useState({})
+  const [nightLive, setNightLive] = useState(false)
   const [error, setError] = useState('')
   const [found, setFound] = useState(false)
   const [notice, setNotice] = useState('')
@@ -51,6 +55,15 @@ export default function Matchmaking() {
       setSubjects(data)
       if (data.length) setCategoryId(data[0].id)
     })
+    // Mind Race Night: Arena (anyone vs anyone) pairs fastest.
+    getNight()
+      .then(({ data }) => {
+        if (data.phase === 'live') {
+          setNightLive(true)
+          setMatchType('arena')
+        }
+      })
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -256,7 +269,7 @@ export default function Matchmaking() {
           {!found && (
             <button className="btn-ghost" onClick={handleLeave}>Cancel search</button>
           )}
-          {!found && elapsed >= BOT_OFFER_AFTER_S && (
+          {!found && elapsed >= (nightLive ? BOT_OFFER_NIGHT_S : BOT_OFFER_AFTER_S) && (
             <div className="bot-offer">
               <span>No one around right now?</span>
               <button className="btn-primary" onClick={handleBot} disabled={botBusy}>
@@ -283,6 +296,12 @@ export default function Matchmaking() {
         <span className="eyebrow">Battle</span>
         <h1>Choose your battle</h1>
       </header>
+      {nightLive && (
+        <div className="night-strip" role="status">
+          <span className="night-pulse" aria-hidden="true" /> <strong>Mind Race Night is live</strong> — Arena is selected so you
+          meet someone fast. Wins tonight count for the night's leaderboard.
+        </div>
+      )}
       {error && <div className="alert-error">{error}</div>}
 
       <section>

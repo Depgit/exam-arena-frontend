@@ -15,11 +15,18 @@ export default function FriendNotifications() {
   // shown here (other pages show their own match_failed errors).
   const joiningRef = useRef(false)
 
-  function pushNotice(text) {
+  function pushNotice(text, action, ms = 6000) {
     const id = `${Date.now()}-${Math.random()}`
-    setNotices((n) => [...n, { id, text }])
-    setTimeout(() => setNotices((n) => n.filter((x) => x.id !== id)), 6000)
+    setNotices((n) => [...n, { id, text, action }])
+    setTimeout(() => setNotices((n) => n.filter((x) => x.id !== id)), ms)
   }
+
+  // Mind Race Night alerts: 5 minutes before, at the start, at the end.
+  useWSListener('night_event', (payload) => {
+    if (payload.kind === 'soon') pushNotice('🌙 Mind Race Night starts in 5 minutes — get ready!', { label: 'Lobby', to: '/app/dashboard' }, 15000)
+    if (payload.kind === 'live') pushNotice('⚡ Mind Race Night is live — everyone is playing now!', { label: 'Join', to: '/app/matchmaking' }, 20000)
+    if (payload.kind === 'ended') pushNotice("🌙 Mind Race Night is over — see tonight's champion in the Lobby.", { label: 'See', to: '/app/dashboard' }, 12000)
+  })
 
   const dropChallenge = (matchId) => setChallenges((c) => c.filter((x) => x.match_id !== matchId))
 
@@ -105,8 +112,21 @@ export default function FriendNotifications() {
         </div>
       ))}
       {notices && notices.map((n) => (
-        <div key={n.id} className="toast">
+        <div key={n.id} className={`toast ${n.action ? 'toast-challenge' : ''}`}>
           <span>{n.text}</span>
+          {n.action && (
+            <div className="toast-actions">
+              <button
+                className="btn-primary small"
+                onClick={() => {
+                  setNotices((all) => all.filter((x) => x.id !== n.id))
+                  navigate(n.action.to)
+                }}
+              >
+                {n.action.label}
+              </button>
+            </div>
+          )}
         </div>
       ))}
     </div>

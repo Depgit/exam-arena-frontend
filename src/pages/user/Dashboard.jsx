@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { getSubjects, getUserStats, getUserProfile, getLeaderboard, getDailyChallenge } from '../../api/endpoints'
+import NightBanner from '../../components/NightBanner'
 import { Avatar, RankBadge, tierFor } from '../../components/game/game'
 import ChatPanel from '../../components/chat/ChatPanel'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
@@ -141,6 +142,8 @@ export default function Dashboard() {
   return (
     <div className="page dashboard-page">
       {error && <div className="alert-error">{error}</div>}
+
+      <NightBanner />
 
       {/* ── Player card + primary CTA ─────────────────────────── */}
       <section className="lobby-hero">

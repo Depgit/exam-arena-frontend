@@ -4028,3 +4028,228 @@ button.podium-spot:hover .podium-name {
 .growth-page .form-card {
   max-width: none;
 }
+
+/* ── Mind Race Night ─────────────────────────────────────────────── */
+.night-card {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--space-4) var(--space-6);
+  margin-bottom: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  overflow: hidden;
+  border: 1px solid rgba(124, 92, 255, 0.45);
+  border-radius: 16px;
+  background:
+    radial-gradient(80% 140% at 100% 0%, rgba(34, 228, 255, 0.12), transparent 60%),
+    radial-gradient(90% 160% at 0% 100%, rgba(124, 92, 255, 0.28), transparent 65%),
+    #0c0f24;
+}
+
+.night-card::after {
+  /* a few stars */
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 22%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 38% 12%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1.5px 1.5px at 66% 30%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 84% 14%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 92% 62%, rgba(255, 255, 255, 0.45), transparent);
+}
+
+.night-card.live {
+  border-color: rgba(52, 211, 153, 0.55);
+  box-shadow: 0 0 40px -16px rgba(52, 211, 153, 0.6);
+}
+
+.night-main {
+  display: flex;
+  flex: 1 1 320px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  z-index: 1;
+}
+
+.night-main h2 {
+  margin: 0;
+  font-size: clamp(1.25rem, 1rem + 1.1vw, 1.7rem);
+  line-height: 1.2;
+}
+
+.night-accent {
+  color: var(--neon-cyan);
+}
+
+.night-crown {
+  font-size: 0.75em;
+  color: #ffd43b;
+}
+
+.night-sub {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.night-count {
+  font-family: var(--font-heading);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-strong);
+}
+
+.night-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.night-actions a {
+  text-decoration: none;
+}
+
+.night-ics {
+  font-size: 13px;
+}
+
+.night-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(52, 211, 153, 0.5);
+  border-radius: 999px;
+}
+
+.night-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #34d399;
+  border-radius: 50%;
+  animation: night-pulse 1.4s ease-out infinite;
+}
+
+@keyframes night-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+  100% { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); }
+}
+
+.night-join {
+  margin-top: var(--space-1);
+  text-decoration: none;
+}
+
+.night-board {
+  display: flex;
+  flex: 1 1 240px;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 360px;
+  z-index: 1;
+}
+
+.night-board-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.night-board ol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.night-board li {
+  display: grid;
+  grid-template-columns: 30px auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 10px;
+  font-size: 14px;
+  background: rgba(9, 11, 26, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.night-rank {
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.night-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.night-score {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.night-score small {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.night-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--space-4);
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  border-radius: 12px;
+}
+
+@media (max-width: 600px) {
+  .night-card {
+    padding: var(--space-4);
+  }
+
+  .night-board {
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .night-pulse {
+    animation: none;
+  }
+}
+
+.night-main h2 {
+  display: block;
+}
+
+.night-main h2::before {
+  display: none;
+}
+
+.night-crown {
+  display: inline-block;
+}
