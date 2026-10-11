@@ -3,7 +3,7 @@ import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import { getMatch } from '../../api/endpoints'
 import LeaveMatchDialog from '../../components/game/LeaveMatchDialog'
 import ShareButtons from '../../components/share/ShareButtons'
-import { drawResultCard, matchShareText } from '../../lib/share'
+import { SITE, drawResultCard, matchShareText } from '../../lib/share'
 import { useAuth } from '../../context/AuthContext'
 import { useWebSocket, useWSListener } from '../../context/WebSocketContext'
 import { useSmoothCountdown } from '../../hooks/useSmoothCountdown'
@@ -362,7 +362,8 @@ export default function LiveMatch() {
               <span className="muted">Send it to friends — they can jump in at mindrace.in.</span>
             </div>
             <ShareButtons
-              text={matchShareText({ outcome, me: mine, opponent: rival, mode, isBot: isBotMatch })}
+              kind="match"
+              text={matchShareText({ outcome, me: mine, opponent: rival, mode, isBot: isBotMatch, url: `${SITE}/r/${matchId}?ref=result` })}
               filename="mindrace-result.png"
               makeImage={() =>
                 drawResultCard({

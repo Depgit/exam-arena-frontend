@@ -261,6 +261,7 @@ export default function DailyChallenge() {
               <span className="muted">Share your score — spoilers stay hidden, only ✓/✕ squares.</span>
             </div>
             <ShareButtons
+              kind="daily"
               label="Share score"
               filename={`mindrace-daily-${dailyNumber(overview.date) ?? overview.date}.png`}
               text={dailyShareText({

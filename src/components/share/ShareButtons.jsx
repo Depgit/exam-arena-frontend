@@ -1,11 +1,12 @@
 import { useState } from 'react'
+import { track } from '../../lib/analytics'
 
 /**
  * Share a result: the phone's share sheet (WhatsApp, Instagram, …) with an
  * image card when the browser supports sharing files, plus direct WhatsApp
  * and copy buttons. makeImage is an async () => Blob, called on demand.
  */
-export default function ShareButtons({ text, makeImage, filename = 'mindrace.png', label = 'Share result' }) {
+export default function ShareButtons({ text, makeImage, filename = 'mindrace.png', label = 'Share result', kind = 'other' }) {
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState('')
   const canShare = typeof navigator !== 'undefined' && !!navigator.share
@@ -15,7 +16,10 @@ export default function ShareButtons({ text, makeImage, filename = 'mindrace.png
     setTimeout(() => setNote(''), 2000)
   }
 
+  const sent = (channel) => track('share_clicked', { kind, channel })
+
   async function share() {
+    sent('native')
     setBusy(true)
     try {
       let file = null
@@ -36,6 +40,7 @@ export default function ShareButtons({ text, makeImage, filename = 'mindrace.png
   }
 
   async function copy() {
+    sent('copy')
     try {
       await navigator.clipboard.writeText(text)
       flash('✓ Copied — paste it anywhere')
@@ -45,6 +50,7 @@ export default function ShareButtons({ text, makeImage, filename = 'mindrace.png
   }
 
   async function download() {
+    sent('image')
     setBusy(true)
     try {
       const blob = await makeImage()
@@ -72,6 +78,7 @@ export default function ShareButtons({ text, makeImage, filename = 'mindrace.png
           href={`https://wa.me/?text=${encodeURIComponent(text)}`}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => sent('whatsapp')}
         >
           WhatsApp
         </a>

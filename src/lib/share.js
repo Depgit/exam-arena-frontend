@@ -27,14 +27,14 @@ export function dailyShareText({ date, correct, total, timeMs, rank, participant
   const lines = [`Mind Race Daily${n ? ` #${n}` : ''} 🧠 ${correct}/${total} · ${formatClock(timeMs)}`]
   if (review?.length) lines.push(emojiGrid(review))
   if (rank > 0) lines.push(`Rank #${rank} of ${participants}`)
-  lines.push(`Can you beat it? ${SITE}`)
+  lines.push(`Can you beat it? ${SITE}/?ref=daily`)
   return lines.join('\n')
 }
 
 const MODE = { ranked: 'Ranked', arena: 'Arena', friend: 'Friend', bot: 'Bot' }
 
 // outcome: 'victory' | 'defeat' | 'draw'
-export function matchShareText({ outcome, me, opponent, mode, isBot }) {
+export function matchShareText({ outcome, me, opponent, mode, isBot, url = SITE }) {
   const vs = isBot ? opponent?.username || 'a bot' : `@${opponent?.username || 'someone'}`
   const tally = me.correct != null && opponent?.correct != null ? `${me.correct}–${opponent.correct}` : `${me.score}–${opponent?.score ?? 0} pts`
   const where = mode && !isBot ? ` in a ${MODE[mode] || mode} match` : ''
@@ -46,7 +46,7 @@ export function matchShareText({ outcome, me, opponent, mode, isBot }) {
         ? `🤝 ${tally} draw against ${vs}${where} on Mind Race!`
         : `⚔️ Lost a close one to ${vs} ${tally}${where} on Mind Race.`
   const ask = outcome === 'defeat' ? 'Rematch, anyone?' : 'Think you can beat me?'
-  return `${line}\n${ask} ${SITE}`
+  return `${line}\n${ask} ${url}`
 }
 
 // ── Image card ─────────────────────────────────────────────────────────

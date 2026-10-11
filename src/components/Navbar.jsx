@@ -25,6 +25,7 @@ const userTabs = [
 
 const adminLinks = [
   ['/admin/dashboard', 'Overview', '📊'],
+  ['/admin/growth', 'Growth', '📈'],
   ['/admin/questions/new', 'Create Question', '✏️'],
   ['/admin/flags', 'Flagged', '🚩'],
   ['/admin/stats', 'System', '🖥️'],

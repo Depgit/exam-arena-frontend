@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { useWSListener } from '../context/WebSocketContext'
 import { Avatar } from '../components/game/game'
 import VerifyEmail from '../components/auth/VerifyEmail'
+import { track } from '../lib/analytics'
 
 /**
  * mindrace.in/c/AB12CD — a friend's challenge link. Shows who's
@@ -24,6 +25,7 @@ export default function Challenge() {
   useEffect(() => () => clearTimeout(fallback.current), [])
 
   useEffect(() => {
+    track('challenge_opened')
     getRoomInvite(code)
       .then(({ data }) => setInvite(data))
       .catch((err) => setError(err.message))

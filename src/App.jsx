@@ -15,6 +15,7 @@ import NotInMatch from './components/NotInMatch'
 const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
 const Challenge = lazy(() => import('./pages/Challenge'))
+const Result = lazy(() => import('./pages/Result'))
 
 const Dashboard = lazy(() => import('./pages/user/Dashboard'))
 const Matchmaking = lazy(() => import('./pages/user/Matchmaking'))
@@ -31,6 +32,7 @@ const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const CreateQuestion = lazy(() => import('./pages/admin/CreateQuestion'))
 const AdminStats = lazy(() => import('./pages/admin/AdminStats'))
 const AdminFlags = lazy(() => import('./pages/admin/AdminFlags'))
+const AdminGrowth = lazy(() => import('./pages/admin/AdminGrowth'))
 
 const PageLoader = () => (
   <div className="page-center">
@@ -58,6 +60,7 @@ export default function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/c/:code" element={<Challenge />} />
+                <Route path="/r/:matchId" element={<Result />} />
 
                 <Route element={<ProtectedRoute requireRole="user" />}>
                   <Route element={<Layout />}>
@@ -80,6 +83,7 @@ export default function App() {
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/admin/questions/new" element={<CreateQuestion />} />
                     <Route path="/admin/stats" element={<AdminStats />} />
+                    <Route path="/admin/growth" element={<AdminGrowth />} />
                     <Route path="/admin/flags" element={<AdminFlags />} />
                   </Route>
                 </Route>

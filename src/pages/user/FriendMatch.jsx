@@ -110,8 +110,9 @@ export default function FriendMatch() {
                 <span>or send a link — one tap and they're in:</span>
                 <code>{`${window.location.host}/c/${roomCode}`}</code>
                 <ShareButtons
+                  kind="invite"
                   label="Send invite"
-                  text={`⚔️ ${user?.display_name || user?.username} challenges you to a ${subjects.find((s) => s.id === categoryId)?.name || ''} battle on Mind Race! Tap to accept 👉 ${window.location.origin}/c/${roomCode}`}
+                  text={`⚔️ ${user?.display_name || user?.username} challenges you to a ${subjects.find((s) => s.id === categoryId)?.name || ''} battle on Mind Race! Tap to accept 👉 ${window.location.origin}/c/${roomCode}?ref=invite`}
                 />
               </div>
               <div className="waiting-line">

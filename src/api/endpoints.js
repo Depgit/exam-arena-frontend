@@ -223,6 +223,10 @@ export const publishQuestion = (id) => writes([ADMIN_STATS], api.put(`/api/v1/ad
 export const getAdminStats = ({ fresh = false } = {}) => cachedGet(ADMIN_STATS, { ttl: 15 * SEC, fresh })
 // Who is connected right now, and whether they're in a match (always fresh).
 export const getAdminLiveUsers = () => api.get('/api/v1/admin/live-users')
+// Growth report: visitors, demo, sign-ups, matches, next-day return (always fresh).
+export const getAdminGrowth = (days = 14) => api.get('/api/v1/admin/growth', { params: { days } })
+// A finished match's public result (shared result links).
+export const getPublicResult = (matchId) => api.get(`/api/v1/results/${encodeURIComponent(matchId)}`)
 export const getFlaggedQuestions = (status = 'open') => cachedGet(ADMIN_FLAGS, { params: { status }, ttl: 30 * SEC })
 export const reviewQuestionFlags = (questionId, body) =>
   writes([ADMIN_FLAGS, ADMIN_STATS], api.put(`/api/v1/admin/flags/${questionId}`, body))
