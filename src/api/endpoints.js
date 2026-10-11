@@ -219,6 +219,8 @@ export const publishQuestion = (id) => writes([ADMIN_STATS], api.put(`/api/v1/ad
 // Navigation reuses this for 15s; AdminDashboard's 15s poll passes
 // { fresh: true } so a tick landing just before expiry can't show old numbers.
 export const getAdminStats = ({ fresh = false } = {}) => cachedGet(ADMIN_STATS, { ttl: 15 * SEC, fresh })
+// Who is connected right now, and whether they're in a match (always fresh).
+export const getAdminLiveUsers = () => api.get('/api/v1/admin/live-users')
 export const getFlaggedQuestions = (status = 'open') => cachedGet(ADMIN_FLAGS, { params: { status }, ttl: 30 * SEC })
 export const reviewQuestionFlags = (questionId, body) =>
   writes([ADMIN_FLAGS, ADMIN_STATS], api.put(`/api/v1/admin/flags/${questionId}`, body))

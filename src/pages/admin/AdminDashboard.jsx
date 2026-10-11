@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { getAdminStats } from '../../api/endpoints'
+import LivePlayersDialog from '../../components/admin/LivePlayersDialog'
 
 const REFRESH_MS = 15_000
 
@@ -9,6 +10,7 @@ export default function AdminDashboard() {
   const { user } = useAuth()
   const [stats, setStats] = useState(null)
   const [error, setError] = useState('')
+  const [showLive, setShowLive] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -32,11 +34,11 @@ export default function AdminDashboard() {
 
       {stats && (
         <div className="kpi-grid">
-          <div className="kpi-card kpi-live">
+          <button type="button" className="kpi-card kpi-live kpi-button" onClick={() => setShowLive(true)}>
             <span className="kpi-label"><span className="ws-dot online" /> Live now</span>
             <strong className="kpi-value">{stats.live_users}</strong>
-            <span className="muted">connected right now</span>
-          </div>
+            <span className="muted">connected right now · see who →</span>
+          </button>
           <div className="kpi-card">
             <span className="kpi-label">Active users · 24h</span>
             <strong className="kpi-value">{stats.active_users_24h}</strong>
@@ -54,6 +56,8 @@ export default function AdminDashboard() {
           </Link>
         </div>
       )}
+
+      {showLive && <LivePlayersDialog onClose={() => setShowLive(false)} />}
 
       <div className="card-grid">
         <Link to="/admin/questions/new" className="action-card">
