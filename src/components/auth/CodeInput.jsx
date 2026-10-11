@@ -54,7 +54,7 @@ export default function CodeInput({ value, onChange, onComplete, disabled, inval
   }
 
   return (
-    <div className={`code-input ${invalid ? 'invalid' : ''}`} role="group" aria-label="6-digit code">
+    <div className={`otp-input ${invalid ? 'invalid' : ''}`} role="group" aria-label="6-digit code">
       {digits.map((d, i) => (
         <input
           key={i}

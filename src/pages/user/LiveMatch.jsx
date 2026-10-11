@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import { getMatch } from '../../api/endpoints'
 import LeaveMatchDialog from '../../components/game/LeaveMatchDialog'
+import ShareButtons from '../../components/share/ShareButtons'
+import { drawResultCard, matchShareText } from '../../lib/share'
 import { useAuth } from '../../context/AuthContext'
 import { useWebSocket, useWSListener } from '../../context/WebSocketContext'
 import { useSmoothCountdown } from '../../hooks/useSmoothCountdown'
@@ -289,6 +291,10 @@ export default function LiveMatch() {
     const outcome = isDraw ? 'draw' : won ? 'victory' : mine ? 'defeat' : 'over'
     const title = { draw: 'Draw', victory: 'Victory', defeat: 'Defeat', over: 'Match over' }[outcome]
     const iLeft = leftBy === user.id
+    const rival = sorted.find((r) => r.user_id !== user.id)
+    const mode = isBotMatch ? 'bot' : location.state?.match_type
+    const MODE_NAME = { ranked: 'Ranked', arena: 'Arena', friend: 'Friend', bot: 'Bot' }
+    const canShare = mine && rival && !iLeft && outcome !== 'over'
     const leftNote = !leftBy ? '' : iLeft ? 'You left the match — your opponent wins.' : 'Your opponent left the match — the win is yours.'
 
     return (
@@ -326,6 +332,32 @@ export default function LiveMatch() {
             )
           })}
         </div>
+
+        {canShare && (
+          <div className="share-panel">
+            <div>
+              <strong>{won ? 'Brag a little' : isDraw ? 'Share the draw' : 'Call for a rematch'}</strong>
+              <span className="muted">Send it to friends — they can jump in at mindrace.in.</span>
+            </div>
+            <ShareButtons
+              text={matchShareText({ outcome, me: mine, opponent: rival, mode, isBot: isBotMatch })}
+              filename="mindrace-result.png"
+              makeImage={() =>
+                drawResultCard({
+                  eyebrow: `${MODE_NAME[mode] || ''} match`.trim(),
+                  title: title,
+                  subtitle: `vs ${isBotMatch ? rival.username : '@' + rival.username}`,
+                  stats: [
+                    ['Score', `${mine.score}–${rival.score}`],
+                    ...(mine.correct != null ? [['Correct', `${mine.correct}/${mine.total}`]] : []),
+                    ...(mine.elo_delta != null ? [['Rating', `${mine.elo_delta > 0 ? '+' : ''}${mine.elo_delta}`]] : []),
+                  ],
+                  accent: won ? '#ffd43b' : isDraw ? '#a5b4fc' : '#f87171',
+                })
+              }
+            />
+          </div>
+        )}
 
         <div className="results-actions">
           <button className="btn-primary btn-xl" onClick={() => navigate('/app/matchmaking')}>

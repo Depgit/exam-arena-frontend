@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { nextPath } from '../../lib/nextPath'
 import { useAuth } from '../../context/AuthContext'
 import GoogleButton from '../../components/auth/GoogleButton'
 import GoogleUsernameStep from '../../components/auth/GoogleUsernameStep'
@@ -13,6 +14,7 @@ export default function Register() {
   const [busy, setBusy] = useState(false)
   const { register } = useAuth()
   const navigate = useNavigate()
+  const { search } = useLocation()
   const google = useGoogleSignIn(setError)
 
   async function handleSubmit(e) {
@@ -22,7 +24,7 @@ export default function Register() {
     try {
       // Keyboards often add a trailing space; the server trims too.
       const user = await register(username.trim(), email.trim(), password)
-      navigate(user.role === 'admin' ? '/admin/dashboard' : user.needs_email_verification ? '/app/verify' : '/app/dashboard')
+      navigate(user.role === 'admin' ? '/admin/dashboard' : nextPath(search, user.needs_email_verification ? '/app/verify' : '/app/dashboard'))
     } catch (err) {
       setError(err.message)
     } finally {
@@ -70,7 +72,7 @@ export default function Register() {
           {busy ? 'Creating player…' : 'Create player'}
         </button>
         <p className="auth-switch">
-          Already a player? <Link to="/login">Log in</Link>
+          Already a player? <Link to={`/login${search}`}>Log in</Link>
         </p>
       </form>
     </div>

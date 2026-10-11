@@ -187,6 +187,8 @@ export const createFriendMatch = (body) => api.post('/api/v1/matches/friend', bo
 // Unrated match against a bot; the match arrives as a match_start event.
 export const playBot = (body) => api.post('/api/v1/matches/bot', body)
 export const joinFriendMatch = (body) => api.post('/api/v1/matches/friend/join', body)
+// Who is behind a challenge link (public — works before logging in).
+export const getRoomInvite = (code) => api.get(`/api/v1/matches/friend/${encodeURIComponent(code)}`)
 
 // ---- Daily challenge ----
 export const getDailyChallenge = withPeek(() => cachedGet(DAILY, { ttl: 30 * SEC }), () => DAILY)

@@ -6,6 +6,8 @@ import FlagQuestionButton from '../../components/FlagQuestionButton'
 import QuestionCard, { KeyHint, ProgressDots, sortOptions, useAnswerKeys } from '../../components/game/QuestionCard'
 import { Avatar, TimerRing } from '../../components/game/game'
 import * as sfx from '../../lib/sfx'
+import ShareButtons from '../../components/share/ShareButtons'
+import { dailyNumber, dailyShareText, drawResultCard, formatClock } from '../../lib/share'
 
 export function formatDuration(ms) {
   const total = Math.max(0, Math.round((ms ?? 0) / 1000))
@@ -252,6 +254,40 @@ export default function DailyChallenge() {
             </div>
           )}
         </div>
+        {!result?.expired && (
+          <div className="share-panel">
+            <div>
+              <strong>Challenge your friends</strong>
+              <span className="muted">Share your score — spoilers stay hidden, only ✓/✕ squares.</span>
+            </div>
+            <ShareButtons
+              label="Share score"
+              filename={`mindrace-daily-${dailyNumber(overview.date) ?? overview.date}.png`}
+              text={dailyShareText({
+                date: overview.date,
+                correct: done.correct,
+                total: done.total,
+                timeMs: done.time_taken_ms,
+                rank,
+                participants,
+                review,
+              })}
+              makeImage={() =>
+                drawResultCard({
+                  eyebrow: `Daily challenge #${dailyNumber(overview.date) ?? ''}`,
+                  title: `${done.correct}/${done.total}`,
+                  subtitle: new Date(`${overview.date}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
+                  grid: review.map((r) => (r.is_correct ? 'right' : r.selected_option_id ? 'wrong' : 'skip')),
+                  stats: [
+                    ['Time', formatClock(done.time_taken_ms)],
+                    ...(rank > 0 ? [['Rank', `#${rank} of ${participants}`]] : []),
+                  ],
+                  accent: '#ffffff',
+                })
+              }
+            />
+          </div>
+        )}
         <p className="muted">A new challenge unlocks at midnight (IST).</p>
 
         <div className="two-col">

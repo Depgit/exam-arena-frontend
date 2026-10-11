@@ -14,6 +14,7 @@ import NotInMatch from './components/NotInMatch'
 // and the first screen paints without waiting on pages nobody opened yet.
 const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
+const Challenge = lazy(() => import('./pages/Challenge'))
 
 const Dashboard = lazy(() => import('./pages/user/Dashboard'))
 const Matchmaking = lazy(() => import('./pages/user/Matchmaking'))
@@ -56,6 +57,7 @@ export default function App() {
                 <Route path="/" element={<RootRedirect />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/c/:code" element={<Challenge />} />
 
                 <Route element={<ProtectedRoute requireRole="user" />}>
                   <Route element={<Layout />}>

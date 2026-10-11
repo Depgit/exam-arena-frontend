@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getSubjects, createFriendMatch, joinFriendMatch } from '../../api/endpoints'
 import { useWSListener } from '../../context/WebSocketContext'
+import ShareButtons from '../../components/share/ShareButtons'
+import { useAuth } from '../../context/AuthContext'
 
 export default function FriendMatch() {
   const [subjects, setSubjects] = useState([])
@@ -12,6 +14,7 @@ export default function FriendMatch() {
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   async function copyCode() {
     try {
@@ -103,6 +106,14 @@ export default function FriendMatch() {
                 {roomCode.split('').map((ch, i) => <span key={i}>{ch}</span>)}
               </button>
               <span className="muted">{copied ? '✓ Copied!' : 'Tap the code to copy'}</span>
+              <div className="invite-link">
+                <span>or send a link — one tap and they're in:</span>
+                <code>{`${window.location.host}/c/${roomCode}`}</code>
+                <ShareButtons
+                  label="Send invite"
+                  text={`⚔️ ${user?.display_name || user?.username} challenges you to a ${subjects.find((s) => s.id === categoryId)?.name || ''} battle on Mind Race! Tap to accept 👉 ${window.location.origin}/c/${roomCode}`}
+                />
+              </div>
               <div className="waiting-line">
                 <div className="spinner" />
                 Waiting for your friend to join…

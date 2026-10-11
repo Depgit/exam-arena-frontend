@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { nextPath } from '../../lib/nextPath'
 import { useAuth } from '../../context/AuthContext'
 import GoogleButton from '../../components/auth/GoogleButton'
 import GoogleUsernameStep from '../../components/auth/GoogleUsernameStep'
@@ -13,6 +14,7 @@ export default function Login() {
   const [guestBusy, setGuestBusy] = useState(false)
   const { login, loginAsGuest } = useAuth()
   const navigate = useNavigate()
+  const { search } = useLocation()
   const google = useGoogleSignIn(setError)
 
   async function handleSubmit(e) {
@@ -21,7 +23,7 @@ export default function Login() {
     setBusy(true)
     try {
       const user = await login(loginId, password)
-      navigate(user.role === 'admin' ? '/admin/dashboard' : user.needs_email_verification ? '/app/verify' : '/app/dashboard')
+      navigate(user.role === 'admin' ? '/admin/dashboard' : nextPath(search, user.needs_email_verification ? '/app/verify' : '/app/dashboard'))
     } catch (err) {
       setError(err.message)
     } finally {
@@ -82,7 +84,7 @@ export default function Login() {
           {guestBusy ? 'Opening…' : '👀 Look around first — no sign-up'}
         </button>
         <p className="auth-switch">
-          New challenger? <Link to="/register">Create an account</Link>
+          New challenger? <Link to={`/register${search}`}>Create an account</Link>
         </p>
       </form>
     </div>

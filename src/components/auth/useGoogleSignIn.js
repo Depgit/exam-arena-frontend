@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { nextPath } from '../../lib/nextPath'
 import { useAuth } from '../../context/AuthContext'
 
 /**
@@ -9,10 +10,12 @@ import { useAuth } from '../../context/AuthContext'
 export function useGoogleSignIn(setError) {
   const { loginWithGoogle } = useAuth()
   const navigate = useNavigate()
+  const { search } = useLocation()
   const [pending, setPending] = useState(null) // { credential, suggested, email, name }
 
+  // A challenge link (?next=/c/CODE) handles verification itself.
   const done = (user) =>
-    navigate(user.role === 'admin' ? '/admin/dashboard' : user.needs_email_verification ? '/app/verify' : '/app/dashboard')
+    navigate(user.role === 'admin' ? '/admin/dashboard' : nextPath(search, user.needs_email_verification ? '/app/verify' : '/app/dashboard'))
 
   async function onCredential(credential) {
     setError('')
