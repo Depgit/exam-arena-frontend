@@ -13,6 +13,12 @@ export default function ChatDrawer() {
   const [open, setOpen] = useState(false)
 
   useEffect(() => setOpen(false), [pathname]) // close when navigating
+  // Phones open the chat from the navbar's 💬 button instead of the floating one.
+  useEffect(() => {
+    const openIt = () => setOpen(true)
+    window.addEventListener('mindrace:open-chat', openIt)
+    return () => window.removeEventListener('mindrace:open-chat', openIt)
+  }, [])
   useEffect(() => {
     if (!open) return
     const onKey = (e) => e.key === 'Escape' && setOpen(false)

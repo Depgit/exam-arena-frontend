@@ -2,6 +2,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useWebSocket } from '../context/WebSocketContext'
 import { useStreak } from '../context/StreakContext'
+import { useChat } from '../context/ChatContext'
 import SoundToggle from './SoundToggle'
 import { Avatar } from './game/game'
 
@@ -36,6 +37,7 @@ export default function Navbar() {
   const { user, isAdmin, logout } = useAuth()
   const { connected } = useWebSocket()
   const { streak } = useStreak()
+  const { enabled: chatEnabled, unread } = useChat()
   const navigate = useNavigate()
   const { pathname } = useLocation()
 
@@ -82,6 +84,17 @@ export default function Navbar() {
             🔥 {streak.current}
           </Link>
         )}
+        {chatEnabled && !inMatch && (
+          <button
+            type="button"
+            className="nav-chat"
+            onClick={() => window.dispatchEvent(new Event('mindrace:open-chat'))}
+            aria-label={unread ? `Open chat, ${unread} new messages` : 'Open chat'}
+          >
+            💬
+            {unread > 0 && <span className="nav-chat-badge">{unread > 9 ? '9+' : unread}</span>}
+          </button>
+        )}
         <SoundToggle />
         {!isAdmin ? (
           <NavLink to="/app/profile" end className="navbar-user" title="View your profile">
@@ -95,7 +108,7 @@ export default function Navbar() {
           </span>
         )}
         <button
-          className="btn-ghost icon-btn"
+          className="btn-ghost icon-btn nav-logout"
           title="Log out"
           aria-label="Log out"
           onClick={() => {

@@ -84,7 +84,7 @@ import { Avatar, RankBadge, tierFor } from '../../components/game/game'
 import EditProfileDialog from '../../components/EditProfileDialog'
 
 export default function Profile() {
-  const { user, isGuest } = useAuth()
+  const { user, isGuest, logout } = useAuth()
   const { userId } = useParams()
   const [editing, setEditing] = useState(false)
   const profileId = userId || user.id
@@ -151,6 +151,7 @@ export default function Profile() {
           <div className="profile-actions">
             <button className="btn-ghost" onClick={() => setEditing(true)}>✏️ Edit profile</button>
             <Link className="btn-ghost" to="/app/invite">🎁 Invite friends</Link>
+            <button className="btn-ghost mobile-only" onClick={() => logout()}>⏻ Log out</button>
           </div>
         )}
       </section>

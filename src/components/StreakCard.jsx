@@ -9,7 +9,7 @@ const WEEKDAY = (iso) => new Date(`${iso}T00:00:00`).toLocaleDateString('en-IN',
  * Lobby card: the daily play streak, the last 7 days, and what to do today
  * — keep it alive before midnight, or come back tomorrow.
  */
-export default function StreakCard() {
+export default function StreakCard({ inline = false }) {
   const { streak } = useStreak()
   const [now, setNow] = useState(Date.now())
   useEffect(() => {
@@ -27,6 +27,33 @@ export default function StreakCard() {
   else if (atRisk) message = <>Your streak ends in <strong className="streak-left">{countdown(left)}</strong> — finish one match or the daily to keep it.</>
   else if (best > 0) message = <>Start a new streak today — your best is <strong>{best}</strong> days.</>
   else message = <>Finish a match or the daily challenge every day to build a streak.</>
+
+  if (inline) {
+    const short = today
+      ? 'Done for today ✓'
+      : atRisk
+        ? <>Ends in <strong className="streak-left">{countdown(left)}</strong></>
+        : 'Play today to start one'
+    return (
+      <div className={`streak-inline ${atRisk ? 'at-risk' : ''} ${today ? 'done' : ''}`} aria-label={`${current}-day streak`}>
+        <div className="streak-inline-top">
+          <span className="streak-inline-flame" aria-hidden="true">{current > 0 ? '🔥' : '🪵'}</span>
+          <span className="streak-inline-count">
+            <strong>{current}</strong> day streak
+          </span>
+        </div>
+        <ol className="streak-week mini" aria-label="Last 7 days">
+          {streak.week.map((d, i) => (
+            <li key={d.date} className={`${d.played ? 'on' : ''} ${i === 6 ? 'today' : ''}`} title={d.date}>
+              <span className="streak-dot" />
+              <span className="streak-day">{WEEKDAY(d.date)}</span>
+            </li>
+          ))}
+        </ol>
+        <span className="streak-inline-msg">{short}</span>
+      </div>
+    )
+  }
 
   return (
     <section className={`streak-card ${atRisk ? 'at-risk' : ''} ${today ? 'done' : ''}`} aria-label="Daily streak">

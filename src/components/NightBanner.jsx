@@ -11,7 +11,7 @@ import { track } from '../lib/analytics'
  * "join the race" panel with tonight's standings while it runs, and the
  * night's champion afterwards.
  */
-export default function NightBanner({ compact = false }) {
+export default function NightBanner({ compact = false, slim = false }) {
   const [night, setNight] = useState(null)
   const [now, setNow] = useState(Date.now())
   const skew = useRef(0) // server clock minus ours
@@ -87,6 +87,35 @@ export default function NightBanner({ compact = false }) {
             </ol>
           )}
         </div>
+      </section>
+    )
+  }
+
+  // Slim strip (Lobby) before and after the event; the full card is for live.
+  if (slim) {
+    const champ = night.phase === 'ended' ? night.standings[0] : night.last_champion
+    const until = new Date(night.starts_at).getTime() - serverNow
+    return (
+      <section className="night-strip-slim" aria-label="Mind Race Night">
+        <span className="night-moon" aria-hidden="true">🌙</span>
+        <span className="night-slim-text">
+          <strong>Mind Race Night</strong>{' '}
+          {night.phase === 'upcoming' ? (
+            <>· today {hourLabel(night.hour)} · starts in <strong className="night-count">{countdown(until)}</strong></>
+          ) : (
+            <>· back tomorrow at {hourLabel(night.hour)}</>
+          )}
+          {champ && <span className="night-slim-champ"> · 👑 {name(champ)}</span>}
+        </span>
+        <a
+          className="btn-ghost small night-slim-btn"
+          href={googleCalendarLink(night.next_starts_at, night.minutes)}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => track('share_clicked', { kind: 'night_reminder', channel: 'google_calendar' })}
+        >
+          🔔 Remind me
+        </a>
       </section>
     )
   }

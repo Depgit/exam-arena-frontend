@@ -5,12 +5,13 @@ import { useAuth } from '../context/AuthContext'
 import ShareButtons from './share/ShareButtons'
 import { Avatar } from './game/game'
 import { inviteLink } from '../lib/referral'
+import { track } from '../lib/analytics'
 
 /**
  * "Invite friends": your invite link, share buttons, and who joined.
  * full = the /app/invite page; otherwise a compact card for the Lobby.
  */
-export default function InviteCard({ full = false }) {
+export default function InviteCard({ full = false, slim = false }) {
   const { user, isGuest } = useAuth()
   const [data, setData] = useState(null)
 
@@ -23,6 +24,34 @@ export default function InviteCard({ full = false }) {
   const code = data?.code || user.username
   const link = inviteLink(code)
   const text = `⚡ I'm racing on Mind Race — 1v1 math & logic battles, 90 seconds a match. Join me and we'll be friends right away 👉 ${link}`
+
+  if (slim) {
+    async function invite() {
+      track('share_clicked', { kind: 'referral', channel: navigator.share ? 'native' : 'whatsapp' })
+      if (navigator.share) {
+        try {
+          await navigator.share({ text })
+        } catch {
+          /* closed the share sheet */
+        }
+      } else {
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener')
+      }
+    }
+    return (
+      <section className="invite-strip">
+        <span className="invite-strip-icon" aria-hidden="true">🎁</span>
+        <span className="invite-strip-text">
+          <strong>Invite friends</strong>
+          <span className="muted">
+            {data?.accepted ? `${data.accepted} joined with your link` : "You'll be friends the moment they join"}
+          </span>
+        </span>
+        <button type="button" className="btn-primary small" onClick={invite}>Invite</button>
+        <Link to="/app/invite" className="invite-strip-more" aria-label="Your invites">→</Link>
+      </section>
+    )
+  }
 
   return (
     <section className={`invite-card ${full ? 'full' : ''}`}>

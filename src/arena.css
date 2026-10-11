@@ -2659,7 +2659,7 @@ button.podium-spot:hover .podium-name {
   .toast-stack {
     left: var(--space-4);
     right: var(--space-4);
-    bottom: calc(144px + env(safe-area-inset-bottom)); /* above the chat button */
+    bottom: calc(80px + env(safe-area-inset-bottom)); /* above the chat button */
     width: auto;
   }
 
@@ -4601,5 +4601,554 @@ button.podium-spot:hover .podium-name {
 @media (prefers-reduced-motion: reduce) {
   .streak-pill.at-risk {
     animation: none;
+  }
+}
+
+/* ═══ Lobby v2: one command card, slim strips, then today ═════════ */
+.lobby {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.lobby .dashboard-main > h2 {
+  margin-top: 0;
+}
+
+/* 1 · Command card: you · streak · play */
+.lobby-command {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-6);
+  background:
+    radial-gradient(70% 140% at 0% 0%, rgba(124, 92, 255, 0.25), transparent 60%),
+    radial-gradient(60% 120% at 100% 100%, rgba(34, 228, 255, 0.1), transparent 60%),
+    var(--card-gradient);
+  border: 1px solid rgba(124, 92, 255, 0.4);
+  border-radius: 18px;
+  box-shadow: var(--shadow-2);
+}
+
+.lobby-me {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.lobby-avatar {
+  flex: none;
+  border-radius: 50%;
+}
+
+.lobby-me-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.lobby-me-info h1 {
+  margin: 0;
+  overflow: hidden;
+  font-size: clamp(1.35rem, 1rem + 1.4vw, 2rem);
+  line-height: 1.1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.lobby-me-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.lobby-stat strong {
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.lobby-play .btn-play {
+  min-height: 64px;
+}
+
+/* inline streak inside the command card */
+.streak-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-3) var(--space-4);
+  background: rgba(9, 11, 26, 0.55);
+  border: 1px solid rgba(255, 160, 50, 0.3);
+  border-radius: 14px;
+}
+
+.streak-inline.at-risk {
+  border-color: rgba(255, 160, 50, 0.75);
+}
+
+.streak-inline-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.streak-inline-flame {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.streak-inline-count {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.streak-inline-count strong {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  color: #ffb547;
+}
+
+.streak-inline-msg {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.streak-inline.done .streak-inline-msg {
+  color: #6ee7b7;
+}
+
+.streak-week.mini {
+  justify-content: space-between;
+  gap: 2px;
+  margin: 0;
+}
+
+.streak-week.mini li {
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+}
+
+.streak-week.mini .streak-dot {
+  width: 14px;
+  height: 14px;
+  font-size: 0;
+  border-radius: 50%;
+}
+
+.streak-week.mini li.on .streak-dot {
+  background: #ff9d2e;
+  border-color: #ffb547;
+  box-shadow: 0 0 8px rgba(255, 140, 0, 0.6);
+}
+
+.streak-week.mini li.today .streak-dot {
+  outline-offset: 1px;
+}
+
+.streak-week.mini .streak-day {
+  font-size: 10px;
+}
+
+/* 2 · slim Mind Race Night strip */
+.night-strip-slim {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px var(--space-4);
+  font-size: 14px;
+  color: var(--text-secondary);
+  background:
+    radial-gradient(60% 200% at 0% 50%, rgba(124, 92, 255, 0.22), transparent 70%),
+    #0c0f24;
+  border: 1px solid rgba(124, 92, 255, 0.35);
+  border-radius: 12px;
+}
+
+.night-moon {
+  font-size: 18px;
+}
+
+.night-slim-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.night-slim-text strong {
+  color: var(--text-strong);
+}
+
+.night-slim-champ {
+  color: #ffd43b;
+}
+
+.night-slim-btn {
+  flex: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* the live Night card sits in the flow, no extra margin */
+.lobby .night-card {
+  margin: 0;
+}
+
+/* 3 · Today */
+.lobby-heading {
+  margin: var(--space-2) 0 var(--space-3) !important;
+  font-size: 13px !important;
+  letter-spacing: 0.12em;
+}
+
+.today-tile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  color: var(--text);
+  text-decoration: none;
+  background:
+    radial-gradient(80% 160% at 100% 50%, rgba(34, 228, 255, 0.1), transparent 60%),
+    var(--card-gradient);
+  border: 1px solid rgba(34, 228, 255, 0.3);
+  border-radius: 14px;
+  transition: border-color var(--dur) ease, transform var(--dur) ease;
+}
+
+.today-tile:hover {
+  border-color: rgba(34, 228, 255, 0.65);
+  transform: translateY(-1px);
+}
+
+.today-tile.done {
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.today-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  font-size: 24px;
+  background: rgba(34, 228, 255, 0.1);
+  border-radius: 12px;
+}
+
+.today-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.today-text strong {
+  font-size: 15.5px;
+  color: var(--text-strong);
+}
+
+.today-go {
+  flex: none;
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--neon-cyan);
+}
+
+.mode-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.mode-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  color: var(--text);
+  text-decoration: none;
+  background: var(--card-gradient);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: border-color var(--dur) ease, transform var(--dur) ease;
+}
+
+.mode-chip:hover {
+  border-color: rgba(124, 92, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+.mode-chip > span {
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.mode-chip strong {
+  font-size: 14.5px;
+  color: var(--text-strong);
+}
+
+.mode-chip small {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* 4 · slim invite strip */
+.invite-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  background:
+    radial-gradient(60% 200% at 0% 50%, rgba(255, 212, 59, 0.12), transparent 70%),
+    var(--card-gradient);
+  border: 1px solid rgba(255, 212, 59, 0.3);
+  border-radius: 12px;
+}
+
+.invite-strip-icon {
+  font-size: 22px;
+}
+
+.invite-strip-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.invite-strip-text strong {
+  font-size: 14.5px;
+  color: var(--text-strong);
+}
+
+.invite-strip-more {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+/* tighter Top 10 */
+.lobby .lb-tab {
+  max-width: 120px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ── tablet ── */
+@media (max-width: 1100px) {
+  .lobby-command {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .lobby-play {
+    grid-column: 1 / -1;
+  }
+
+  .lobby-play .btn-play {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── phone ── */
+@media (max-width: 700px) {
+  .lobby {
+    gap: var(--space-3);
+  }
+
+  .lobby-command {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: 16px;
+  }
+
+  .lobby-me {
+    gap: var(--space-3);
+  }
+
+  .lobby-me .eyebrow {
+    display: none;
+  }
+
+  .lobby-play {
+    order: 2;
+  }
+
+  .streak-inline {
+    order: 3;
+    padding: 10px 12px;
+  }
+
+  .lobby-play .btn-play {
+    min-height: 58px;
+  }
+
+  .night-strip-slim {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .night-slim-text {
+    flex-basis: calc(100% - 40px);
+  }
+
+  .night-slim-btn {
+    margin-left: 28px;
+  }
+
+  .mode-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .mode-chip {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .mode-chip small {
+    display: none;
+  }
+
+  .today-tile {
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .today-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+  }
+
+  .invite-strip {
+    margin-top: var(--space-4);
+  }
+
+  .lobby .night-card {
+    padding: var(--space-4);
+  }
+
+  .lobby .night-card .night-board li:nth-child(n + 4) {
+    display: none;
+  }
+}
+
+.lobby-chat-heading {
+  margin-top: var(--space-5) !important;
+}
+
+.lobby .dashboard-main .chat-panel {
+  height: 400px;
+}
+
+/* ═══ Phone polish ════════════════════════════════════════════════ */
+.nav-chat {
+  position: relative;
+  display: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  font-size: 18px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.nav-chat-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  color: #fff;
+  background: var(--error-strong);
+  border-radius: 999px;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  /* chat lives in the top bar on phones; nothing floats over the page */
+  .chat-fab {
+    display: none !important;
+  }
+
+  .nav-chat {
+    display: grid;
+  }
+
+  .nav-logout {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: inline-flex;
+  }
+
+  .streak-pill {
+    padding: 4px 8px;
+  }
+
+  /* Find match stays in reach, just above the bottom bar */
+  .find-bar {
+    position: sticky !important;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    padding: var(--space-3);
+  }
+
+  .find-bar .find-actions {
+    width: 100%;
+  }
+
+  .find-bar .find-actions .btn-xl {
+    flex: 1;
+  }
+
+  /* tighter mode cards on the Play screen */
+  .mode-option {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .mode-option-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
   }
 }

@@ -24,51 +24,41 @@ function DailyChallengeCard() {
   const attempt = daily.attempt
 
   let status
-  let cta
+  let cta = 'Play →'
+  let done = false
   if (!daily.available) {
-    status = <p className="muted">No challenge today — check back tomorrow.</p>
+    status = <span className="muted">No challenge today — back tomorrow</span>
+    cta = ''
   } else if (attempt?.status === 'completed') {
+    done = true
     status = (
-      <p>
-        You scored <strong>{attempt.correct}/{attempt.total}</strong> in {formatDuration(attempt.time_taken_ms)}
-        {attempt.rank ? <> · rank <strong>#{attempt.rank}</strong> of {daily.participants}</> : null}
-      </p>
+      <span>
+        ✓ {attempt.correct}/{attempt.total} in {formatDuration(attempt.time_taken_ms)}
+        {attempt.rank ? <> · #{attempt.rank} of {daily.participants}</> : null}
+      </span>
     )
-    cta = <Link to="/app/daily" className="btn-ghost">View results</Link>
+    cta = 'Results →'
   } else if (attempt?.status === 'in_progress') {
-    status = <p>Your attempt is in progress — the clock is running.</p>
-    cta = <Link to="/app/daily" className="btn-primary">Resume challenge →</Link>
+    status = <span>In progress — the clock is running</span>
+    cta = 'Resume →'
   } else {
     status = (
-      <p>
-        {daily.question_count} questions · {Math.round(daily.time_limit_seconds / 60)} min · one attempt
-        {daily.participants > 0 && <span className="muted"> · {daily.participants} played today</span>}
-      </p>
+      <span>
+        {daily.question_count} questions · {Math.round(daily.time_limit_seconds / 60)} min
+        {daily.participants > 0 && <span className="muted"> · {daily.participants} played</span>}
+      </span>
     )
-    cta = <Link to="/app/daily" className="btn-primary">Start challenge →</Link>
   }
 
-  const top = daily.leaderboard.slice(0, 3)
   return (
-    <section className="daily-card">
-      <div className="daily-card-main">
-        <span className="daily-eyebrow">📅 Daily Challenge · {daily.date}</span>
-        <h2>Same questions for everyone today</h2>
+    <Link to="/app/daily" className={`today-tile daily-tile ${done ? 'done' : ''}`}>
+      <span className="today-icon" aria-hidden="true">📅</span>
+      <span className="today-text">
+        <strong>Daily challenge</strong>
         {status}
-        {cta}
-      </div>
-      {top && top.length > 0 && (
-        <ol className="daily-top">
-          {top?.map((e) => (
-            <li key={e.user_id}>
-              <span className="lb-rank">#{e.rank}</span>
-              <span className="lb-name">{e.display_name || e.username}</span>
-              <span className="muted">{e.correct}/{e.total} · {formatDuration(e.time_taken_ms)}</span>
-            </li>
-          ))}
-        </ol>
-      )}
-    </section>
+      </span>
+      {cta && <span className="today-go">{cta}</span>}
+    </Link>
   )
 }
 
@@ -141,117 +131,90 @@ export default function Dashboard() {
   )
   const winRate = totals.matches > 0 ? Math.round((totals.wins / totals.matches) * 100) : null
 
+  const shownBoard = wide ? leaderboard : leaderboard.slice(0, 5)
+
   return (
-    <div className="page dashboard-page">
+    <div className="page dashboard-page lobby">
       {error && <div className="alert-error">{error}</div>}
 
-      <NightBanner />
-
-      {/* ── Player card + primary CTA ─────────────────────────── */}
-      <section className="lobby-hero">
-        <div className="lobby-player">
-          <Avatar name={name} size={72} ring={best ? tierFor(best.rating).key : 'silver'} />
-          <div className="lobby-player-info">
+      {/* ── 1. You + Play: everything needed to start, in one card ───── */}
+      <section className="lobby-command">
+        <div className="lobby-me">
+          <Link to="/app/profile" className="lobby-avatar" aria-label="Your profile">
+            <Avatar name={name} size={64} ring={best ? tierFor(best.rating).key : 'silver'} />
+          </Link>
+          <div className="lobby-me-info">
             <span className="eyebrow">Welcome back</span>
             <h1>{name}</h1>
-            <div className="lobby-player-meta">
-              {best ? (
-                <>
-                  <RankBadge rating={best.rating} />
-                  <span className="muted">best in {best.exam_category_name || best.exam_category_code}</span>
-                </>
-              ) : (
-                <RankBadge rating={1200} />
-              )}
+            <div className="lobby-me-meta">
+              <RankBadge rating={best ? best.rating : 1200} size="sm" />
+              <span className="lobby-stat"><strong>{totals.matches}</strong> matches</span>
+              {winRate != null && <span className="lobby-stat"><strong>{winRate}%</strong> wins</span>}
             </div>
           </div>
         </div>
-        <div className="lobby-cta">
+        <StreakCard inline />
+        <div className="lobby-play">
           <Link to="/app/matchmaking" className="btn-play">
             <span className="btn-play-icon" aria-hidden="true">⚔️</span>
             <span>
               <strong>Play</strong>
-              <small>Find a ranked opponent</small>
+              <small>Find an opponent</small>
             </span>
           </Link>
         </div>
       </section>
 
-      <StreakCard />
-
-      <div className="kpi-strip">
-        <div className="kpi-tile"><span>Matches</span><strong>{totals.matches}</strong></div>
-        <div className="kpi-tile"><span>Wins</span><strong>{totals.wins}</strong></div>
-        <div className="kpi-tile"><span>Win rate</span><strong>{winRate == null ? '—' : `${winRate}%`}</strong></div>
-        <div className="kpi-tile kpi-fire"><span>Win streak</span><strong>{totals.streak > 0 ? `🔥 ${totals.streak}` : 0}</strong></div>
-      </div>
+      {/* ── 2. Mind Race Night: a slim strip, big only while live ────── */}
+      <NightBanner slim />
 
       <div className="dashboard-layout">
-        {/* ── Left / Main column ────────────────────────────────── */}
         <div className="dashboard-main">
+          {/* ── 3. Today ─────────────────────────────────────────────── */}
+          <h2 className="lobby-heading">Today</h2>
           <DailyChallengeCard />
-          <InviteCard />
 
-          <h2>Game modes</h2>
-          <div className="card-grid mode-grid">
-            <Link to="/app/matchmaking" className="action-card ranked">
-              <div className="action-icon">⚔️</div>
-              <h3>Ranked</h3>
-              <p>Matched against players near your rating. ELO on the line.</p>
-              <span className="mode-tag">Competitive</span>
-            </Link>
-            <Link to="/app/friend" className="action-card friend">
-              <div className="action-icon">🎮</div>
-              <h3>Friend Match</h3>
-              <p>Private room with a code. Settle it with a friend.</p>
-              <span className="mode-tag">Private</span>
-            </Link>
-            <Link to="/app/practice" className="action-card practice">
-              <div className="action-icon">🎯</div>
-              <h3>Practice</h3>
-              <p>Solo drills with instant feedback. No rating impact.</p>
-              <span className="mode-tag">Solo</span>
-            </Link>
-            <Link to="/app/leaderboard" className="action-card leaderboard-card">
-              <div className="action-icon">🏆</div>
-              <h3>Leaderboard</h3>
-              <p>See who rules each category.</p>
-              <span className="mode-tag">Ranks</span>
-            </Link>
-          </div>
-
-          <h2>Your stats by category</h2>
-          {stats && stats.length === 0 && (
-            <div className="empty-state">
+          <h2 className="lobby-heading">More ways to play</h2>
+          <div className="mode-row">
+            <Link to="/app/friend" className="mode-chip">
               <span aria-hidden="true">🎮</span>
-              <p>No stats yet — play your first match to get on the board.</p>
-              <Link to="/app/matchmaking" className="btn-primary small">Play now</Link>
-            </div>
-          )}
-          <div className="stats-grid">
-            {stats && stats.map((s) => {
-              const r = ratings.find((x) => x.exam_category_id === s.exam_category_id)
-              return (
-                <div key={s.exam_category_id} className="stat-card">
-                  <div className="stat-card-head">
-                    <h3>{s.exam_category_name || subjects.find((x) => x.id === s.exam_category_id)?.name || 'Category'}</h3>
-                    {r && <RankBadge rating={r.rating} size="sm" />}
-                  </div>
-                  <div className="stat-row"><span>Matches</span><strong>{s.total_matches}</strong></div>
-                  <div className="stat-row"><span>W / L / D</span><strong>{s.wins} / {s.losses} / {s.draws}</strong></div>
-                  <div className="stat-row"><span>Accuracy</span><strong>{s.overall_accuracy.toFixed(1)}%</strong></div>
-                  <div className="accuracy-bar"><span style={{ width: `${Math.min(100, s.overall_accuracy)}%` }} /></div>
-                </div>
-              )
-            })}
+              <strong>Friend match</strong>
+              <small>Private room</small>
+            </Link>
+            <Link to="/app/practice" className="mode-chip">
+              <span aria-hidden="true">🎯</span>
+              <strong>Practice</strong>
+              <small>No rating</small>
+            </Link>
+            <Link to="/app/matchmaking" className="mode-chip">
+              <span aria-hidden="true">🤖</span>
+              <strong>vs Bot</strong>
+              <small>Warm up</small>
+            </Link>
+            <Link to="/app/leaderboard" className="mode-chip">
+              <span aria-hidden="true">🏆</span>
+              <strong>Rankings</strong>
+              <small>All players</small>
+            </Link>
           </div>
+
+          {/* ── 4. Invite: a slim strip ───────────────────────────────── */}
+          <InviteCard slim />
+
+          {/* ── 5. Chat (desktop; phones use the floating chat button) ── */}
+          {wide && (
+            <>
+              <h2 className="lobby-heading lobby-chat-heading">Lobby chat</h2>
+              <ChatPanel />
+            </>
+          )}
         </div>
 
-        {/* ── Right column: Top 10 Leaderboard ─────────────────── */}
+        {/* ── Side: Top 10 + chat (phones: Top 5, chat via the button) ─ */}
         <aside className="dashboard-sidebar">
           <div className="lb-widget">
             <div className="lb-widget-header">
-              <h3>🏆 Top 10</h3>
+              <h3>🏆 Top {wide ? 10 : 5}</h3>
               {lbCategory && (
                 <Link to="/app/leaderboard" className="lb-see-all">See all →</Link>
               )}
@@ -264,13 +227,13 @@ export default function Dashboard() {
                     className={`lb-tab ${lbCategory?.id === s.id ? 'active' : ''}`}
                     onClick={() => switchLeaderboard(s)}
                   >
-                    {s.name.length > 8 ? s.name.slice(0, 8) + '…' : s.name}
+                    {s.name}
                   </button>
                 ))}
               </div>
             )}
             <ol className="lb-list">
-              {leaderboard?.map((entry, idx) => {
+              {shownBoard.map((entry, idx) => {
                 const isMe = entry.user_id === user.id
                 const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : null
                 return (
@@ -293,7 +256,6 @@ export default function Dashboard() {
               )}
             </ol>
           </div>
-          {wide && <ChatPanel />}
         </aside>
       </div>
     </div>
