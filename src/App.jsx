@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { WebSocketProvider } from './context/WebSocketContext'
 import { SettingsProvider } from './context/SettingsContext'
 import { ChatProvider } from './context/ChatContext'
+import { StreakProvider } from './context/StreakContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import ServerWakeNotice from './components/ServerWakeNotice'
@@ -16,6 +17,8 @@ const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
 const Challenge = lazy(() => import('./pages/Challenge'))
 const Result = lazy(() => import('./pages/Result'))
+const Invite = lazy(() => import('./pages/Invite'))
+const InvitePage = lazy(() => import('./pages/user/InvitePage'))
 
 const Dashboard = lazy(() => import('./pages/user/Dashboard'))
 const Matchmaking = lazy(() => import('./pages/user/Matchmaking'))
@@ -54,6 +57,7 @@ export default function App() {
         <SettingsProvider>
           <WebSocketProvider>
           <ChatProvider>
+          <StreakProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<RootRedirect />} />
@@ -61,6 +65,7 @@ export default function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/c/:code" element={<Challenge />} />
                 <Route path="/r/:matchId" element={<Result />} />
+                <Route path="/i/:code" element={<Invite />} />
 
                 <Route element={<ProtectedRoute requireRole="user" />}>
                   <Route element={<Layout />}>
@@ -74,6 +79,7 @@ export default function App() {
                     <Route path="/app/profile/:userId" element={<Profile />} />
                     <Route path="/app/friends" element={<Friends />} />
                     <Route path="/app/verify" element={<Verify />} />
+                    <Route path="/app/invite" element={<InvitePage />} />
                     <Route path="/app/daily" element={<PlayOnly what="the daily challenge"><DailyChallenge /></PlayOnly>} />
                   </Route>
                 </Route>
@@ -92,6 +98,7 @@ export default function App() {
               </Routes>
             </Suspense>
             <ServerWakeNotice />
+          </StreakProvider>
           </ChatProvider>
           </WebSocketProvider>
         </SettingsProvider>

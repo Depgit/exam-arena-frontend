@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { getAdminGrowth } from '../../api/endpoints'
+import { getAdminGrowth, getAdminReferrals } from '../../api/endpoints'
 
 const PERIODS = [7, 14, 30]
 const pct = (n, d) => (d ? Math.round((n / d) * 100) : null)
 const shortDate = (iso) => new Date(`${iso}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
-const SHARE_NAMES = { daily: 'Daily score', match: 'Match result', invite: 'Room invite', night_reminder: 'Night reminder', night_invite: 'Night invite', other: 'Other' }
+const SHARE_NAMES = { daily: 'Daily score', match: 'Match result', invite: 'Room invite', referral: 'Invite link', night_reminder: 'Night reminder', night_invite: 'Night invite', other: 'Other' }
 
 function Tile({ label, value, sub, hero }) {
   return (
@@ -62,6 +62,69 @@ function Ranked({ title, items, empty, names = {} }) {
         </ul>
       )}
     </div>
+  )
+}
+
+// Every player who has invited someone: accepted (signed up + verified)
+// and pending (signed up, not verified yet). Searchable by name.
+function Referrals() {
+  const [list, setList] = useState(null)
+  const [q, setQ] = useState('')
+  useEffect(() => {
+    getAdminReferrals().then(({ data }) => setList(data || [])).catch(() => setList([]))
+  }, [])
+  const needle = q.trim().toLowerCase()
+  const shown = (list || []).filter((r) => !needle || r.username.toLowerCase().includes(needle) || r.display_name.toLowerCase().includes(needle))
+  const total = (list || []).reduce((s, r) => s + r.accepted, 0)
+  return (
+    <section className="form-card">
+      <div className="growth-section-head">
+        <div>
+          <h3>Referrals</h3>
+          <p className="muted growth-hint">
+            Counted when the invited player signs up and verifies their email. {total} accepted in total.
+          </p>
+        </div>
+        <input
+          className="growth-search"
+          type="search"
+          placeholder="Find a player…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          aria-label="Find a player"
+        />
+      </div>
+      <div className="table-scroll">
+        <table className="growth-table">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>Accepted</th>
+              <th>Pending</th>
+              <th>Last accepted</th>
+            </tr>
+          </thead>
+          <tbody>
+            {list == null && (
+              <tr><td colSpan={4} className="muted">Loading…</td></tr>
+            )}
+            {list && shown.length === 0 && (
+              <tr><td colSpan={4} className="muted">{list.length ? 'No player matches.' : 'No referrals yet.'}</td></tr>
+            )}
+            {shown.map((r) => (
+              <tr key={r.user_id}>
+                <td>
+                  {r.display_name} <span className="muted">@{r.username}</span>
+                </td>
+                <td><strong>{r.accepted}</strong></td>
+                <td>{r.pending}</td>
+                <td>{r.last_accepted_at ? shortDate(r.last_accepted_at.slice(0, 10)) : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   )
 }
 
@@ -216,6 +279,8 @@ export default function AdminGrowth() {
             <Ranked title="Where visitors come from" items={g.sources} empty="No visits recorded yet." />
             <Ranked title="What gets shared" items={g.shares} empty="No shares yet." names={SHARE_NAMES} />
           </div>
+
+          <Referrals />
 
           <section className="form-card">
             <h3>Day by day</h3>

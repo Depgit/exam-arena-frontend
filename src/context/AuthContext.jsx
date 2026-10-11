@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import { loginUser, loginGuest, loginGoogle, registerUser, getMe, clearCache } from '../api/endpoints'
+import { clearReferral, getReferral } from '../lib/referral'
 
 const AuthContext = createContext(null)
 
@@ -59,7 +60,9 @@ export function AuthProvider({ children }) {
   }, [])
 
   const register = useCallback(async (username, email, password) => {
-    const { data } = await registerUser({ username, email, password })
+    const referral = getReferral()
+    const { data } = await registerUser({ username, email, password, ...(referral ? { referral_code: referral.code } : {}) })
+    clearReferral()
     persist(data.token, data.user)
     return data.user
   }, [])
@@ -67,10 +70,12 @@ export function AuthProvider({ children }) {
   // Returns { user } once signed in, or { needsUsername, suggested, email,
   // name } for a first-time Google player (call again with a username).
   const loginWithGoogle = useCallback(async (credential, username) => {
-    const { data } = await loginGoogle({ credential, ...(username ? { username } : {}) })
+    const referral = getReferral()
+    const { data } = await loginGoogle({ credential, ...(username ? { username } : {}), ...(referral ? { referral_code: referral.code } : {}) })
     if (data.needs_username) {
       return { needsUsername: true, suggested: data.suggested_username, email: data.email, name: data.name }
     }
+    clearReferral() // signed in: a new account used it; an old one never will
     persist(data.token, data.user)
     return { user: data.user }
   }, [])

@@ -32,6 +32,7 @@ function source() {
   const q = new URLSearchParams(window.location.search)
   const tagged = q.get('utm_source') || q.get('ref')
   if (tagged) return tagged.toLowerCase()
+  if (window.location.pathname.startsWith('/i/')) return 'invite_link'
   try {
     const host = document.referrer ? new URL(document.referrer).hostname : ''
     if (!host || host === window.location.hostname) return 'direct'

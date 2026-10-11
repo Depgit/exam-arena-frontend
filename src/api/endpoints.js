@@ -109,6 +109,7 @@ const EVENT_INVALIDATES = {
   friend_challenge: [FRIENDS],
   friend_challenge_cancelled: [FRIENDS],
   friend_challenge_declined: [FRIENDS],
+  referral_accepted: [FRIENDS, '/api/v1/referrals'],
   match_end: [USERS],
 }
 
@@ -132,6 +133,10 @@ export const loginGuest = () => api.post('/api/v1/auth/guest')
 export const getMe = () => api.get('/api/v1/auth/me')
 // Mind Race Night: schedule, phase, who's playing, tonight's standings.
 export const getNight = () => api.get('/api/v1/night')
+// Referrals: who an invite link is from (public), your invites, all inviters (admin).
+export const getInvite = (code) => api.get(`/api/v1/invite/${encodeURIComponent(code)}`)
+export const getMyReferrals = () => api.get('/api/v1/referrals/me')
+export const getAdminReferrals = () => api.get('/api/v1/admin/referrals')
 // Change your own details (display name; the username is permanent).
 export const updateMe = (body) => api.patch('/api/v1/users/me', body)
 // Sign in with Google's ID token; a new player gets { needs_username } and
@@ -158,6 +163,10 @@ export const removeFriend = (userId) => writes([FRIENDS], api.delete(`/api/v1/fr
 export const challengeFriend = (userId, body) => api.post(`/api/v1/friends/${userId}/challenge`, body)
 // Declines (invited friend) or cancels (challenger) an open challenge.
 export const closeChallenge = (matchId) => api.delete(`/api/v1/friends/challenges/${matchId}`)
+// Ask the opponent of a finished match to play again; { joined, match_id } if they already asked.
+export const requestRematch = (matchId) => api.post(`/api/v1/matches/${matchId}/rematch`)
+// Your daily play streak (always fresh).
+export const getMyStreak = () => api.get('/api/v1/streak/me')
 
 // ---- Global chat ----
 // Recent messages (always live); new ones arrive as "chat_message" events.

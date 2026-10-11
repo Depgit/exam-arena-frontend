@@ -21,6 +21,20 @@ export default function FriendNotifications() {
     setTimeout(() => setNotices((n) => n.filter((x) => x.id !== id)), ms)
   }
 
+  useWSListener('streak_extended', (payload) => {
+    const n = payload.current
+    const milestone = { 3: ' — nice start!', 7: ' — a full week! 🏅', 14: ' — two weeks strong!', 30: ' — a whole month! 👑' }[n] || ''
+    pushNotice(n === 1 ? '🔥 Streak started — come back tomorrow to keep it going!' : `🔥 ${n}-day streak${milestone}`)
+  })
+
+  useWSListener('referral_accepted', (payload) => {
+    pushNotice(
+      `🎉 ${payload.display_name || payload.username} joined with your invite — you're now friends! (${payload.total} total)`,
+      { label: 'See', to: '/app/invite' },
+      12000
+    )
+  })
+
   // Mind Race Night alerts: 5 minutes before, at the start, at the end.
   useWSListener('night_event', (payload) => {
     if (payload.kind === 'soon') pushNotice('🌙 Mind Race Night starts in 5 minutes — get ready!', { label: 'Lobby', to: '/app/dashboard' }, 15000)
@@ -102,7 +116,7 @@ export default function FriendNotifications() {
       {challenges && challenges.map((ch) => (
         <div key={ch.match_id} className="toast toast-challenge">
           <div className="toast-body">
-            <strong>{ch.from_username}</strong> challenged you
+            <strong>{ch.from_username}</strong> {ch.rematch ? 'wants a rematch' : 'challenged you'}
             <span className="muted"> · {ch.exam_category_name}</span>
           </div>
           <div className="toast-actions">

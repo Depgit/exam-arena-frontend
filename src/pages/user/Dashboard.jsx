@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { getSubjects, getUserStats, getUserProfile, getLeaderboard, getDailyChallenge } from '../../api/endpoints'
 import NightBanner from '../../components/NightBanner'
+import InviteCard from '../../components/InviteCard'
+import StreakCard from '../../components/StreakCard'
 import { Avatar, RankBadge, tierFor } from '../../components/game/game'
 import ChatPanel from '../../components/chat/ChatPanel'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
@@ -175,6 +177,8 @@ export default function Dashboard() {
         </div>
       </section>
 
+      <StreakCard />
+
       <div className="kpi-strip">
         <div className="kpi-tile"><span>Matches</span><strong>{totals.matches}</strong></div>
         <div className="kpi-tile"><span>Wins</span><strong>{totals.wins}</strong></div>
@@ -186,6 +190,7 @@ export default function Dashboard() {
         {/* ── Left / Main column ────────────────────────────────── */}
         <div className="dashboard-main">
           <DailyChallengeCard />
+          <InviteCard />
 
           <h2>Game modes</h2>
           <div className="card-grid mode-grid">

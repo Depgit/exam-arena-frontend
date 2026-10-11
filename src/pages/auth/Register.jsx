@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { nextPath } from '../../lib/nextPath'
+import { getReferral } from '../../lib/referral'
 import { useAuth } from '../../context/AuthContext'
 import GoogleButton from '../../components/auth/GoogleButton'
 import GoogleUsernameStep from '../../components/auth/GoogleUsernameStep'
@@ -16,6 +17,7 @@ export default function Register() {
   const navigate = useNavigate()
   const { search } = useLocation()
   const google = useGoogleSignIn(setError)
+  const [invitedBy] = useState(() => getReferral())
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -53,6 +55,9 @@ export default function Register() {
           MIND<span>RACE</span>
         </div>
         <p className="auth-subtitle">Create your player — you start at Silver (1200)</p>
+        {invitedBy && (
+          <p className="invited-pill">🎁 Invited by <strong>{invitedBy.name || invitedBy.code}</strong> — you'll be friends right away</p>
+        )}
         {error && <div className="alert-error">{error}</div>}
         <GoogleButton onCredential={google.onCredential} text="signup_with" />
         <div className="auth-divider"><span>or with email</span></div>

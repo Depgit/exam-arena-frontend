@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import {
   getUserProfile,
@@ -150,6 +150,7 @@ export default function Profile() {
         {isMe && !isGuest && (
           <div className="profile-actions">
             <button className="btn-ghost" onClick={() => setEditing(true)}>✏️ Edit profile</button>
+            <Link className="btn-ghost" to="/app/invite">🎁 Invite friends</Link>
           </div>
         )}
       </section>

@@ -1,6 +1,7 @@
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useWebSocket } from '../context/WebSocketContext'
+import { useStreak } from '../context/StreakContext'
 import SoundToggle from './SoundToggle'
 import { Avatar } from './game/game'
 
@@ -34,6 +35,7 @@ const adminLinks = [
 export default function Navbar() {
   const { user, isAdmin, logout } = useAuth()
   const { connected } = useWebSocket()
+  const { streak } = useStreak()
   const navigate = useNavigate()
   const { pathname } = useLocation()
 
@@ -71,6 +73,15 @@ export default function Navbar() {
           <span className={`ws-dot ${connected ? 'online' : 'offline'}`} />
           {connected ? 'Live' : 'Offline'}
         </span>
+        {streak?.current > 0 && (
+          <Link
+            to="/app/dashboard"
+            className={`streak-pill ${streak.at_risk ? 'at-risk' : ''}`}
+            title={streak.at_risk ? `Play today to keep your ${streak.current}-day streak` : `${streak.current}-day streak`}
+          >
+            🔥 {streak.current}
+          </Link>
+        )}
         <SoundToggle />
         {!isAdmin ? (
           <NavLink to="/app/profile" end className="navbar-user" title="View your profile">

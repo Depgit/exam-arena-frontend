@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
-import { getMatch } from '../../api/endpoints'
+import { closeChallenge, getMatch, requestRematch } from '../../api/endpoints'
 import LeaveMatchDialog from '../../components/game/LeaveMatchDialog'
 import ShareButtons from '../../components/share/ShareButtons'
 import { SITE, drawResultCard, matchShareText } from '../../lib/share'
@@ -84,6 +84,8 @@ export default function LiveMatch() {
   const [results, setResults] = useState(null)
   const [leftBy, setLeftBy] = useState('') // who left the match early, if anyone
   const [confirmLeave, setConfirmLeave] = useState(false)
+  // Rematch: null | { state: 'sending' | 'waiting' | 'declined' | 'error', roomId?, message? }
+  const [rematch, setRematch] = useState(null)
   const [error, setError] = useState('')
   const [floater, setFloater] = useState(null) // { id, text, kind }
   const [opponentPulse, setOpponentPulse] = useState(0)
@@ -201,6 +203,29 @@ export default function LiveMatch() {
     const tied = payload.results?.filter((r) => r.rank === 1).length > 1
     sfx.play(me?.rank === 1 && !tied ? 'victory' : me?.rank === 1 ? 'correct' : 'defeat')
   })
+
+  // The opponent declined our rematch.
+  useWSListener('friend_challenge_declined', (payload) => {
+    if (rematch?.roomId && payload.match_id === rematch.roomId) setRematch({ state: 'declined' })
+  })
+
+  async function askRematch() {
+    setRematch({ state: 'sending' })
+    try {
+      const { data } = await requestRematch(matchId)
+      // They had asked too: the match is starting (match_start takes us there).
+      if (data.joined) setRematch({ state: 'waiting', joined: true })
+      else setRematch({ state: 'waiting', roomId: data.match_id })
+    } catch (err) {
+      setRematch({ state: 'error', message: err.message })
+    }
+  }
+
+  async function cancelRematch() {
+    const roomId = rematch?.roomId
+    setRematch(null)
+    if (roomId) closeChallenge(roomId).catch(() => {})
+  }
 
   useWSListener('error', (payload) => {
     setError(payload.message)
@@ -379,6 +404,34 @@ export default function LiveMatch() {
                 })
               }
             />
+          </div>
+        )}
+
+        {rival && !isBotMatch && !iLeft && (
+          <div className="rematch-box" role="status">
+            {!rematch && (
+              <button className="btn-primary btn-lg rematch-btn" onClick={askRematch}>
+                🔁 Rematch {rival.username}
+              </button>
+            )}
+            {rematch?.state === 'sending' && <span className="muted">Asking {rival.username}…</span>}
+            {rematch?.state === 'waiting' && (
+              <>
+                <span className="waiting-line">
+                  <span className="spinner" />
+                  {rematch.joined ? 'Starting the rematch…' : `Waiting for ${rival.username} to accept…`}
+                </span>
+                {!rematch.joined && (
+                  <button className="btn-ghost small" onClick={cancelRematch}>Cancel</button>
+                )}
+              </>
+            )}
+            {rematch?.state === 'declined' && (
+              <span className="muted">{rival.username} said not now. <button className="btn-link" onClick={() => setRematch(null)}>Ask again</button></span>
+            )}
+            {rematch?.state === 'error' && (
+              <span className="rematch-error">{rematch.message} <button className="btn-link" onClick={() => setRematch(null)}>OK</button></span>
+            )}
           </div>
         )}
 
