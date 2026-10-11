@@ -3496,3 +3496,53 @@ button.podium-spot:hover .podium-name {
     text-align: left;
   }
 }
+
+/* ── Admin System: users split ───────────────────────────────────── */
+.users-total {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-strong);
+}
+
+.users-split {
+  height: 8px;
+  margin: var(--space-2) 0 var(--space-1);
+  overflow: hidden;
+  background: rgba(34, 228, 255, 0.35);
+  border-radius: 999px;
+}
+
+.users-split-real {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #7c5cff, #c04bff);
+  border-radius: 999px;
+}
+
+.users-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.users-dot.real {
+  background: #9b7bff;
+}
+
+.users-dot.demo {
+  background: rgba(34, 228, 255, 0.7);
+}
+
+.users-note {
+  margin: var(--space-2) 0 0;
+  font-size: 12px;
+}
+
+.admin-stats-grid {
+  align-items: start;
+}

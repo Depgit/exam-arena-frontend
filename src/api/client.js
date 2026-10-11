@@ -18,12 +18,28 @@ api.interceptors.request.use((config) => {
 // This interceptor unwraps `data` on success and normalizes errors so
 // callers can just `await api.get(...)` and use the result directly,
 // or catch `err.message` for a human-readable error string.
+// The server version that answered the latest request (X-Server-Version).
+// WebSocketContext compares it with its live connection's version: right
+// after a deploy the socket can still be on the old server while requests
+// already reach the new one, and then it must reconnect.
+const versionListeners = new Set()
+export function onServerVersion(cb) {
+  versionListeners.add(cb)
+  return () => versionListeners.delete(cb)
+}
+function noteVersion(headers) {
+  const v = headers?.['x-server-version']
+  if (v) versionListeners.forEach((cb) => cb(v))
+}
+
 api.interceptors.response.use(
   (response) => {
+    noteVersion(response.headers)
     const envelope = response.data
     return { data: envelope.data, meta: envelope.meta ?? null }
   },
   (error) => {
+    noteVersion(error.response?.headers)
     const envelope = error.response?.data
     const message = envelope?.error || error.message || 'Something went wrong'
     return Promise.reject({ message, status: error.response?.status })

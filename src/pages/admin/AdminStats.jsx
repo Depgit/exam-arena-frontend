@@ -11,15 +11,33 @@ export default function AdminStats() {
       .catch((err) => setError(err.message))
   }, [])
 
+  const demo = stats?.demo_users ?? 0
+  const total = (stats?.users ?? 0) + demo
+  const realPct = total ? Math.round(((stats?.users ?? 0) / total) * 100) : 0
+
   return (
     <div className="page">
       <h1>System Statistics</h1>
       {error && <div className="alert-error">{error}</div>}
       {stats && (
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-row"><span>Players</span><strong>{stats.users}</strong></div>
-            {stats.demo_users != null && <div className="stat-row"><span>Demo accounts</span><strong>{stats.demo_users}</strong></div>}
+        <div className="stats-grid admin-stats-grid">
+          <div className="stat-card users-card">
+            <div className="stat-card-head">
+              <h3>Users</h3>
+              <span className="users-total">{total}</span>
+            </div>
+            <div className="users-split" aria-hidden="true">
+              <span className="users-split-real" style={{ width: `${realPct}%` }} />
+            </div>
+            <div className="stat-row">
+              <span><i className="users-dot real" /> Real players</span>
+              <strong>{stats.users}</strong>
+            </div>
+            <div className="stat-row">
+              <span><i className="users-dot demo" /> Demo accounts</span>
+              <strong>{demo}</strong>
+            </div>
+            <p className="muted users-note">Bots and admins aren't counted. Demo accounts are removed after 3 days.</p>
           </div>
           <div className="stat-card">
             <div className="stat-row"><span>Live now</span><strong>{stats.live_users}</strong></div>

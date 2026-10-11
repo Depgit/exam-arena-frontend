@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useAuth } from './AuthContext'
-import { WS_BASE_URL } from '../api/client'
+import { WS_BASE_URL, onServerVersion } from '../api/client'
 import { invalidateForEvent } from '../api/endpoints'
 
 // Exam Arena enforces a single WebSocket session per user, and nearly every
@@ -17,6 +17,9 @@ export function WebSocketProvider({ children }) {
   const socketRef = useRef(null)
   const listenersRef = useRef(new Map()) // type -> Set(callback)
   const reconnectTimer = useRef(null)
+  // Server version the live connection is on (from its "connected" message).
+  const socketVersion = useRef('')
+  const lastVersionReconnect = useRef(0)
 
   const dispatch = useCallback((msg) => {
     // Drop cached reads this event makes stale BEFORE any listener runs,
@@ -68,6 +71,7 @@ export function WebSocketProvider({ children }) {
             console.warn('[ws] dropped unparseable frame:', line)
             continue
           }
+          if (msg.type === 'connected') socketVersion.current = msg.payload?.server_version || ''
           dispatch(msg)
         }
       }
@@ -75,7 +79,22 @@ export function WebSocketProvider({ children }) {
 
     connect()
 
+    // After a deploy the old server can hold this connection for a couple
+    // of minutes while requests already reach the new one, and then "Match
+    // found" and friends' messages never arrive. When a request is answered
+    // by a different version than the live connection, reconnect: new
+    // connections always go to the current version.
+    const stopWatching = onServerVersion((version) => {
+      const mine = socketVersion.current
+      if (!mine || mine === version) return
+      if (Date.now() - lastVersionReconnect.current < 15_000) return
+      lastVersionReconnect.current = Date.now()
+      socketVersion.current = ''
+      socketRef.current?.close() // onclose reconnects
+    })
+
     return () => {
+      stopWatching()
       cancelled = true
       clearTimeout(reconnectTimer.current)
       socketRef.current?.close()
