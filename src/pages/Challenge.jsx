@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getRoomInvite, joinFriendMatch } from '../api/endpoints'
 import { useAuth } from '../context/AuthContext'
@@ -20,6 +20,8 @@ export default function Challenge() {
   const [error, setError] = useState('')
   const [joining, setJoining] = useState(false)
   const here = `/c/${code}`
+  const fallback = useRef(null)
+  useEffect(() => () => clearTimeout(fallback.current), [])
 
   useEffect(() => {
     getRoomInvite(code)
@@ -34,8 +36,12 @@ export default function Challenge() {
     setJoining(true)
     try {
       const { data } = await joinFriendMatch({ room_code: code })
-      // match_start usually arrives first; this is the fallback.
-      setTimeout(() => navigate(`/app/match/${data.match_id}`), 1500)
+      // match_start usually arrives first; this is the fallback. Only if
+      // we're still here — a second history entry for the match would
+      // let Back land on a stale copy of it.
+      fallback.current = setTimeout(() => {
+        if (!window.location.pathname.startsWith('/app/match/')) navigate(`/app/match/${data.match_id}`, { replace: true })
+      }, 1500)
     } catch (err) {
       setError(err.message)
       setJoining(false)

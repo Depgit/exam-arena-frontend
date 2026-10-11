@@ -52,13 +52,17 @@ export default function LiveMatch() {
   const { user } = useAuth()
   const { send, connected } = useWebSocket()
 
-  const [questions, setQuestions] = useState(location.state?.questions || [])
-  const [players, setPlayers] = useState(location.state?.players || [])
-  const [timerSeconds, setTimerSeconds] = useState(location.state?.timer_seconds ?? null)
+  // The match_start payload handed over by the page that started the match.
+  // Read once: the browser keeps router state in its history, so pressing
+  // Back to this page later would otherwise replay a finished match from it.
+  const [start] = useState(() => location.state)
+  const [questions, setQuestions] = useState(start?.questions || [])
+  const [players, setPlayers] = useState(start?.players || [])
+  const [timerSeconds, setTimerSeconds] = useState(start?.timer_seconds ?? null)
   // Last authoritative clock reading from the server. The server only speaks
   // every 10 seconds, so useSmoothCountdown interpolates between readings —
   // see the hook for why the client is allowed to do that.
-  const [serverRemaining, setServerRemaining] = useState(location.state?.timer_seconds ?? null)
+  const [serverRemaining, setServerRemaining] = useState(start?.timer_seconds ?? null)
   const remaining = useSmoothCountdown(serverRemaining)
   const [scoreboard, setScoreboard] = useState([])
   const [answeredIds, setAnsweredIds] = useState(new Set()) // acknowledged by the server
@@ -84,16 +88,49 @@ export default function LiveMatch() {
   const [floater, setFloater] = useState(null) // { id, text, kind }
   const [opponentPulse, setOpponentPulse] = useState(0)
   // VS splash only for a fresh match (arrived via match_start), not a refresh.
-  const [intro, setIntro] = useState(Boolean(location.state?.players?.length))
+  const [intro, setIntro] = useState(Boolean(start?.players?.length))
   const questionStartRef = useRef(Date.now())
-  const isBotMatch = location.state?.match_type === 'bot' || players.some((p) => p.is_bot)
+  const isBotMatch = start?.match_type === 'bot' || players.some((p) => p.is_bot)
 
-  // If we arrived here without router state (e.g. page refresh), hydrate
-  // from the REST endpoint instead. Completed matches show final results.
+  // Drop the saved hand-off from this history entry, so Back/Forward to
+  // this page later starts from the server, not from the old copy.
   useEffect(() => {
-    if (questions && questions.length > 0) return
+    if (location.state) navigate(location.pathname, { replace: true, state: null })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Always ask the server what this match is now. A fresh match (arrived
+  // via match_start) is already on screen and only gets confirmed; a
+  // refresh or reopen is filled in from here; a match that has ended —
+  // e.g. reached again with Back — shows its final result instead of
+  // replaying the questions.
+  useEffect(() => {
     getMatch(matchId)
       .then(({ data }) => {
+        const status = data.match?.status
+        if (status && status !== 'in_progress') {
+          setIntro(false)
+          setQuestions([])
+          if (data.players?.length) setPlayers(data.players)
+          const byScore = [...(data.players || [])].sort((a, b) => b.score - a.score)
+          setResults(
+            byScore.map((p) => ({
+              user_id: p.user_id,
+              username: p.username,
+              score: p.score,
+              // Bot matches store no final rank: rank by score, ties share.
+              rank: p.final_rank ?? 1 + byScore.filter((o) => o.score > p.score).length,
+              correct: null,
+              total: null,
+              elo_delta: p.rating_delta ?? null,
+              rating_before: p.rating_before ?? null,
+              rating_after: p.rating_after ?? null,
+            }))
+          )
+          return
+        }
+        if (start?.questions?.length) return // fresh match: already on screen
+
         if (data.questions) setQuestions(data.questions)
         if (data.match?.timer_seconds) setTimerSeconds(data.match.timer_seconds)
         if (data.live_scores) setScoreboard(data.live_scores)
@@ -107,21 +144,6 @@ export default function LiveMatch() {
           setGraded(mine)
           const firstOpen = (data.questions || []).findIndex((q) => !mine[q.id])
           if (firstOpen > 0) setCurrent(firstOpen)
-        }
-        if (data.match?.status === 'completed') {
-          setResults(
-            data.players.map((p) => ({
-              user_id: p.user_id,
-              username: p.username,
-              score: p.score,
-              rank: p.final_rank,
-              correct: null,
-              total: null,
-              elo_delta: null,
-              rating_before: null,
-              rating_after: null,
-            }))
-          )
         }
       })
       .catch((err) => setError(err.message))
@@ -292,7 +314,7 @@ export default function LiveMatch() {
     const title = { draw: 'Draw', victory: 'Victory', defeat: 'Defeat', over: 'Match over' }[outcome]
     const iLeft = leftBy === user.id
     const rival = sorted.find((r) => r.user_id !== user.id)
-    const mode = isBotMatch ? 'bot' : location.state?.match_type
+    const mode = isBotMatch ? 'bot' : start?.match_type
     const MODE_NAME = { ranked: 'Ranked', arena: 'Arena', friend: 'Friend', bot: 'Bot' }
     const canShare = mine && rival && !iLeft && outcome !== 'over'
     const leftNote = !leftBy ? '' : iLeft ? 'You left the match — your opponent wins.' : 'Your opponent left the match — the win is yours.'
