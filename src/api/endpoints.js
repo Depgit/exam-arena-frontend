@@ -174,6 +174,8 @@ export const getMyStreak = () => api.get('/api/v1/streak/me')
 // Recent messages (always live); new ones arrive as "chat_message" events.
 export const getChat = () => api.get('/api/v1/chat')
 export const sendChat = (body) => api.post('/api/v1/chat', { body })
+// Admin moderation: remove a message for everyone ("chat_deleted" event).
+export const deleteChatMessage = (id) => api.delete(`/api/v1/admin/chat/${id}`)
 
 // ---- Subjects ----
 // Categories almost never change; keep them for the whole session.

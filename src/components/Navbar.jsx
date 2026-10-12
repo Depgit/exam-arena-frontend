@@ -31,6 +31,7 @@ const adminLinks = [
   ['/admin/growth', 'Growth', '📈'],
   ['/admin/questions/new', 'Create Question', '✏️'],
   ['/admin/flags', 'Flagged', '🚩'],
+  ['/admin/chat', 'Chat', '💬'],
   ['/admin/stats', 'System', '🖥️'],
 ]
 

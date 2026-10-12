@@ -52,6 +52,11 @@ export function ChatProvider({ children }) {
     if (openViews.current === 0) setUnread((n) => n + 1)
   })
 
+  // An admin removed a message: drop it here too.
+  useWSListener('chat_deleted', ({ id } = {}) => {
+    setMessages((prev) => prev.filter((m) => m.id !== id))
+  })
+
   const send = useCallback(
     async (body) => {
       const { data } = await sendChat(body)

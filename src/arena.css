@@ -5648,3 +5648,36 @@ button.podium-spot:hover .podium-name {
     animation: none;
   }
 }
+
+/* ── Admin: chat moderation ──────────────────────────────────────── */
+.admin-chat-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-chat-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.admin-chat-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-chat-text p {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-chat-meta {
+  font-size: 13px;
+}

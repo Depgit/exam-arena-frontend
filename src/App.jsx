@@ -47,6 +47,7 @@ const CreateQuestion = lazy(() => import('./pages/admin/CreateQuestion'))
 const AdminStats = lazy(() => import('./pages/admin/AdminStats'))
 const AdminFlags = lazy(() => import('./pages/admin/AdminFlags'))
 const AdminGrowth = lazy(() => import('./pages/admin/AdminGrowth'))
+const AdminChat = lazy(() => import('./pages/admin/AdminChat'))
 
 const PageLoader = () => (
   <div className="page-center">
@@ -104,6 +105,7 @@ export default function App() {
                     <Route path="/admin/stats" element={<AdminStats />} />
                     <Route path="/admin/growth" element={<AdminGrowth />} />
                     <Route path="/admin/flags" element={<AdminFlags />} />
+                    <Route path="/admin/chat" element={<AdminChat />} />
                   </Route>
                 </Route>
 
