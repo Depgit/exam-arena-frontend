@@ -10,9 +10,9 @@ import { haptic, HAPTIC } from '../../lib/haptics'
 
 const POLL_MS = 2000
 // Seconds of searching before offering a bot. The server pairs a lone
-// searcher with an opponent after 10–12 s, so this only shows when that
+// searcher with an opponent after 10–15 s, so this mostly shows when that
 // can't happen.
-const BOT_OFFER_AFTER_S = 25
+const BOT_OFFER_AFTER_S = 20
 // During Mind Race Night everyone is here to meet people: hold the bot
 // offer back so players find each other first.
 const BOT_OFFER_NIGHT_S = 45
