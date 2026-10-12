@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getSubjects, createFriendMatch, joinFriendMatch } from '../../api/endpoints'
+import { getSubjects, createFriendMatch, joinFriendMatch, cancelFriendRoom } from '../../api/endpoints'
 import { useWSListener } from '../../context/WebSocketContext'
 import ShareButtons from '../../components/share/ShareButtons'
 import { useAuth } from '../../context/AuthContext'
@@ -13,8 +13,17 @@ export default function FriendMatch() {
   const [waitingRoom, setWaitingRoom] = useState(null)
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
   const navigate = useNavigate()
   const { user } = useAuth()
+  // The room still waiting for a friend, so leaving the page can close it.
+  const openRoomRef = useRef(null)
+  useEffect(() => {
+    openRoomRef.current = waitingRoom
+  }, [waitingRoom])
+  useEffect(() => () => {
+    if (openRoomRef.current) cancelFriendRoom(openRoomRef.current).catch(() => {})
+  }, [])
 
   async function copyCode() {
     try {
@@ -34,6 +43,7 @@ export default function FriendMatch() {
   }, [])
 
   useWSListener('match_start', (payload) => {
+    openRoomRef.current = null // it started: nothing to close
     navigate(`/app/match/${payload.match_id}`, { state: payload })
   })
 
@@ -51,6 +61,23 @@ export default function FriendMatch() {
       setWaitingRoom(data.match_id)
     } catch (err) {
       setError(err.message)
+    }
+  }
+
+  async function handleCancel() {
+    if (!waitingRoom || cancelling) return
+    setCancelling(true)
+    setError('')
+    try {
+      await cancelFriendRoom(waitingRoom)
+      openRoomRef.current = null
+      setRoomCode('')
+      setWaitingRoom(null)
+    } catch (err) {
+      // 409: the friend joined just now — match_start is on its way.
+      setError(err.message)
+    } finally {
+      setCancelling(false)
     }
   }
 
@@ -119,6 +146,9 @@ export default function FriendMatch() {
                 <div className="spinner" />
                 Waiting for your friend to join…
               </div>
+              <button type="button" className="btn-ghost" onClick={handleCancel} disabled={cancelling}>
+                {cancelling ? 'Cancelling…' : 'Cancel room'}
+              </button>
             </div>
           )}
         </div>

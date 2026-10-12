@@ -200,6 +200,8 @@ export const createFriendMatch = (body) => api.post('/api/v1/matches/friend', bo
 // Unrated match against a bot; the match arrives as a match_start event.
 export const playBot = (body) => api.post('/api/v1/matches/bot', body)
 export const joinFriendMatch = (body) => api.post('/api/v1/matches/friend/join', body)
+// Host closes their room while it is still waiting for the friend.
+export const cancelFriendRoom = (matchId) => api.delete(`/api/v1/matches/friend/${matchId}`)
 // Who is behind a challenge link (public — works before logging in).
 export const getRoomInvite = (code) => api.get(`/api/v1/matches/friend/${encodeURIComponent(code)}`)
 

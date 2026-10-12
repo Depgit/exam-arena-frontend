@@ -61,7 +61,9 @@ export default function Friends() {
     if (challengeRef.current?.match_id !== payload.match_id) return
     setChallenge(null)
     setNotice('')
-    setError(`${payload.by_username} declined your challenge.`)
+    setError(payload.reason === 'busy'
+      ? `${payload.by_username} is playing another match right now — try again in a bit.`
+      : `${payload.by_username} declined your challenge.`)
   })
 
   // Suggest players while typing (after a short pause). A sequence number

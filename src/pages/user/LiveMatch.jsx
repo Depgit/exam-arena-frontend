@@ -256,7 +256,7 @@ export default function LiveMatch() {
 
   // The opponent declined our rematch.
   useWSListener('friend_challenge_declined', (payload) => {
-    if (rematch?.roomId && payload.match_id === rematch.roomId) setRematch({ state: 'declined' })
+    if (rematch?.roomId && payload.match_id === rematch.roomId) setRematch({ state: 'declined', busy: payload.reason === 'busy' })
   })
 
   async function askRematch() {
@@ -557,7 +557,7 @@ export default function LiveMatch() {
               </>
             )}
             {rematch?.state === 'declined' && (
-              <span className="muted">{rival.username} said not now. <button className="btn-link" onClick={() => setRematch(null)}>Ask again</button></span>
+              <span className="muted">{rival.username} {rematch.busy ? 'is in another match now.' : 'said not now.'} <button className="btn-link" onClick={() => setRematch(null)}>Ask again</button></span>
             )}
             {rematch?.state === 'error' && (
               <span className="rematch-error">{rematch.message} <button className="btn-link" onClick={() => setRematch(null)}>OK</button></span>
