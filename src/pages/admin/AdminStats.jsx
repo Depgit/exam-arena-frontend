@@ -12,8 +12,9 @@ export default function AdminStats() {
   }, [])
 
   const demo = stats?.demo_users ?? 0
-  const total = (stats?.users ?? 0) + demo
-  const realPct = total ? Math.round(((stats?.users ?? 0) / total) * 100) : 0
+  const ghosts = stats?.ghost_users ?? 0
+  const total = (stats?.users ?? 0) + ghosts + demo
+  const pct = (n) => (total ? (n / total) * 100 : 0)
 
   return (
     <div className="page">
@@ -27,17 +28,22 @@ export default function AdminStats() {
               <span className="users-total">{total}</span>
             </div>
             <div className="users-split" aria-hidden="true">
-              <span className="users-split-real" style={{ width: `${realPct}%` }} />
+              <span className="users-split-real" style={{ width: `${pct(stats.users)}%` }} />
+              <span className="users-split-ghost" style={{ width: `${pct(ghosts)}%` }} />
             </div>
             <div className="stat-row">
               <span><i className="users-dot real" /> Real players</span>
               <strong>{stats.users}</strong>
             </div>
             <div className="stat-row">
+              <span><i className="users-dot ghost" /> Ghost players</span>
+              <strong>{ghosts}</strong>
+            </div>
+            <div className="stat-row">
               <span><i className="users-dot demo" /> Demo accounts</span>
               <strong>{demo}</strong>
             </div>
-            <p className="muted users-note">Bots and admins aren't counted. Demo accounts are removed after 3 days.</p>
+            <p className="muted users-note">Ghost players are bots shown to players as people. "Play vs Bot" bots and admins aren't counted. Demo accounts are removed after 3 days.</p>
           </div>
           <div className="stat-card">
             <div className="stat-row"><span>Live now</span><strong>{stats.live_users}</strong></div>

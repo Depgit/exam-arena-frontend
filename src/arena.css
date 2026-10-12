@@ -3533,6 +3533,7 @@ button.podium-spot:hover .podium-name {
 }
 
 .users-split {
+  display: flex;
   height: 8px;
   margin: var(--space-2) 0 var(--space-1);
   overflow: hidden;
@@ -3544,7 +3545,12 @@ button.podium-spot:hover .podium-name {
   display: block;
   height: 100%;
   background: linear-gradient(90deg, #7c5cff, #c04bff);
-  border-radius: 999px;
+}
+
+.users-split-ghost {
+  display: block;
+  height: 100%;
+  background: #ffb547;
 }
 
 .users-dot {
@@ -3558,6 +3564,10 @@ button.podium-spot:hover .podium-name {
 
 .users-dot.real {
   background: #9b7bff;
+}
+
+.users-dot.ghost {
+  background: #ffb547;
 }
 
 .users-dot.demo {
