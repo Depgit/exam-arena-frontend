@@ -11,6 +11,14 @@ import './arena.css'
 startServerWake()
 trackVisit()
 
+// Makes the site installable and powers the Android app (public/sw.js).
+// Production only: in dev a service worker would get in the way of reloads.
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {})
+  })
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App />
