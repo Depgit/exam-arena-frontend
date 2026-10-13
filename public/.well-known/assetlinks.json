@@ -4,7 +4,9 @@
     "target": {
       "namespace": "android_app",
       "package_name": "in.mindrace.app",
-      "sha256_cert_fingerprints": ["REPLACE_WITH_SHA256_FROM_PWABUILDER_OR_PLAY_CONSOLE"]
+      "sha256_cert_fingerprints": [
+        "92:71:93:6A:7E:4F:2A:CD:83:9E:C2:57:11:DF:4F:23:AD:1F:2D:2B:FC:6D:28:B5:A5:70:7E:EF:CA:3F:0C:B8"
+      ]
     }
   }
 ]

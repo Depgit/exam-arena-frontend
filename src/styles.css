@@ -3074,3 +3074,52 @@ a.kpi-card:hover {
     transform: none;
   }
 }
+
+/* ── Privacy policy and other legal pages ────────────────────────── */
+.auth-legal {
+  margin: var(--space-1) 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.legal-page {
+  min-height: 100vh;
+  padding: 32px 16px 48px;
+  background: var(--bg, #05060d);
+}
+
+.legal-card {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px clamp(18px, 4vw, 40px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-1);
+  color: var(--text);
+  line-height: 1.65;
+}
+
+.legal-card h1 {
+  margin: 12px 0 4px;
+  color: var(--text-strong);
+}
+
+.legal-card h2 {
+  margin: 28px 0 8px;
+  font-size: 18px;
+  color: var(--text-strong);
+}
+
+.legal-card ul {
+  padding-left: 20px;
+}
+
+.legal-card li + li {
+  margin-top: 6px;
+}
+
+.legal-back {
+  font-size: 14px;
+  text-decoration: none;
+}

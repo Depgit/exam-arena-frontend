@@ -16,6 +16,7 @@ import NotInMatch from './components/NotInMatch'
 const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
 const Challenge = lazy(() => import('./pages/Challenge'))
+const Privacy = lazy(() => import('./pages/Privacy'))
 const Result = lazy(() => import('./pages/Result'))
 const Invite = lazy(() => import('./pages/Invite'))
 const GroupInvite = lazy(() => import('./pages/GroupInvite'))
@@ -75,6 +76,7 @@ export default function App() {
                 <Route path="/" element={<RootRedirect />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/privacy" element={<Privacy />} />
                 <Route path="/c/:code" element={<Challenge />} />
                 <Route path="/r/:matchId" element={<Result />} />
                 <Route path="/i/:code" element={<Invite />} />

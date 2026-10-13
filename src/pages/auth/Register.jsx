@@ -79,6 +79,9 @@ export default function Register() {
         <p className="auth-switch">
           Already a player? <Link to={`/login${search}`}>Log in</Link>
         </p>
+        <p className="auth-legal">
+          By playing you agree to our <Link to="/privacy">Privacy Policy</Link>.
+        </p>
       </form>
     </div>
   )
