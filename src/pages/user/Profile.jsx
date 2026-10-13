@@ -82,6 +82,7 @@ function FriendButton({ userId, username }) {
 }
 import { Avatar, RankBadge, tierFor } from '../../components/game/game'
 import EditProfileDialog from '../../components/EditProfileDialog'
+import PowerIcon from '../../components/icons/PowerIcon'
 
 export default function Profile() {
   const { user, isGuest, logout } = useAuth()
@@ -151,7 +152,7 @@ export default function Profile() {
           <div className="profile-actions">
             <button className="btn-ghost" onClick={() => setEditing(true)}>✏️ Edit profile</button>
             <Link className="btn-ghost" to="/app/invite">🎁 Invite friends</Link>
-            <button className="btn-ghost mobile-only" onClick={() => logout()}>⏻ Log out</button>
+            <button className="btn-ghost mobile-only" onClick={() => logout()}><PowerIcon size={16} /> Log out</button>
           </div>
         )}
       </section>

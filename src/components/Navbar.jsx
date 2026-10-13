@@ -5,6 +5,7 @@ import { useStreak } from '../context/StreakContext'
 import { useChat } from '../context/ChatContext'
 import SoundToggle from './SoundToggle'
 import { Avatar } from './game/game'
+import PowerIcon from './icons/PowerIcon'
 
 const userLinks = [
   ['/app/dashboard', 'Lobby', '🏠'],
@@ -120,7 +121,7 @@ export default function Navbar() {
             navigate('/login')
           }}
         >
-          ⏻
+          <PowerIcon />
         </button>
       </div>
     </nav>
