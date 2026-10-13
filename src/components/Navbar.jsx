@@ -114,6 +114,8 @@ export default function Navbar() {
           title="Log out"
           aria-label="Log out"
           onClick={() => {
+            // Easy to hit by accident on a phone: ask first.
+            if (!window.confirm('Log out of Mind Race?')) return
             logout()
             navigate('/login')
           }}

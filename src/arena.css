@@ -5150,10 +5150,6 @@ button.podium-spot:hover .podium-name {
     display: grid;
   }
 
-  .nav-logout {
-    display: none !important;
-  }
-
   .mobile-only {
     display: inline-flex;
   }
@@ -5680,4 +5676,12 @@ button.podium-spot:hover .podium-name {
 
 .admin-chat-meta {
   font-size: 13px;
+}
+
+/* Very narrow phones: the logo keeps its ⚡ mark only, so the top bar fits
+   chat, sound, profile and log out. */
+@media (max-width: 400px) {
+  .brand-text {
+    display: none;
+  }
 }
