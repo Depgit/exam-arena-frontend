@@ -117,6 +117,11 @@ export default function LiveMatch() {
   const [results, setResults] = useState(null)
   const [leftBy, setLeftBy] = useState('') // who left the match early, if anyone
   const [confirmLeave, setConfirmLeave] = useState(false)
+  // Switching tabs mid-match: the first time shows a warning, the second
+  // forfeits the match. The server keeps the count (tab_switch).
+  const [tabWarning, setTabWarning] = useState(false)
+  const [tabForfeit, setTabForfeit] = useState(false)
+  const pendingTabSwitchesRef = useRef(0) // switches not yet sent to the server
   // Rematch: null | { state: 'sending' | 'waiting' | 'declined' | 'error', roomId?, message? }
   const [rematch, setRematch] = useState(null)
   const [error, setError] = useState('')
@@ -277,6 +282,18 @@ export default function LiveMatch() {
     if (roomId) closeChallenge(roomId).catch(() => {})
   }
 
+  useWSListener('tab_switch_warning', (payload) => {
+    if (payload.match_id !== matchId) return
+    setTabWarning(true)
+    haptic(HAPTIC.error)
+  })
+
+  useWSListener('tab_switch_forfeit', (payload) => {
+    if (payload.match_id !== matchId) return
+    setTabWarning(false)
+    setTabForfeit(true)
+  })
+
   useWSListener('error', (payload) => {
     setError(payload.message)
   })
@@ -360,6 +377,26 @@ export default function LiveMatch() {
     return () => clearInterval(id)
   }, [connected, results, send])
 
+  // Report every switch away from this tab while there are still questions
+  // to answer. A switch made while offline is sent once the socket is back.
+  const watchTabs = !results && !intro && !tabForfeit && questions.length > 0 && !allDone
+  useEffect(() => {
+    if (!watchTabs) return
+    const flush = () => {
+      while (pendingTabSwitchesRef.current > 0 && send('tab_switch', { match_id: matchId })) {
+        pendingTabSwitchesRef.current--
+      }
+    }
+    const onVisibility = () => {
+      if (!document.hidden) return
+      pendingTabSwitchesRef.current++
+      flush()
+    }
+    if (connected) flush()
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [watchTabs, connected, matchId, send])
+
   const nextDisabled = isLast && (alreadyAnswered || !selected)
   const dotState = (q) => {
     const g = graded[q.id]
@@ -367,7 +404,7 @@ export default function LiveMatch() {
   }
 
   useAnswerKeys({
-    enabled: !results && !intro && !!question,
+    enabled: !results && !intro && !!question && !tabWarning,
     options: sortedOptions,
     onPick: selectOption,
     onEnter: nextDisabled ? undefined : goNext,
@@ -467,12 +504,14 @@ export default function LiveMatch() {
     const won = mine?.rank === 1 && !isDraw
     const outcome = isDraw ? 'draw' : won ? 'victory' : mine ? 'defeat' : 'over'
     const title = { draw: 'Draw', victory: 'Victory', defeat: 'Defeat', over: 'Match over' }[outcome]
-    const iLeft = leftBy === user.id
+    const iLeft = leftBy === user.id || tabForfeit
     const rival = sorted.find((r) => r.user_id !== user.id)
     const mode = isBotMatch ? 'bot' : start?.match_type
     const MODE_NAME = { ranked: 'Ranked', arena: 'Arena', friend: 'Friend', bot: 'Bot' }
     const canShare = mine && rival && !iLeft && outcome !== 'over'
-    const leftNote = !leftBy ? '' : iLeft ? 'You left the match — your opponent wins.' : 'Your opponent left the match — the win is yours.'
+    const leftNote = tabForfeit
+      ? 'You switched tabs twice — the match is forfeited and your opponent wins.'
+      : !leftBy ? '' : iLeft ? 'You left the match — your opponent wins.' : 'Your opponent left the match — the win is yours.'
 
     return (
       <div className={`page match-results-page outcome-${outcome}`}>
@@ -481,7 +520,7 @@ export default function LiveMatch() {
           <div className="results-trophy" aria-hidden="true">
             {iLeft ? '🏳️' : isDraw ? '🤝' : won ? '🏆' : mine ? '💀' : '⚔️'}
           </div>
-          <h1 className="results-title">{iLeft ? 'You left' : title}</h1>
+          <h1 className="results-title">{tabForfeit ? 'Forfeited' : iLeft ? 'You left' : title}</h1>
           {leftNote && <p className="left-note">{leftNote}</p>}
           <p className="muted">{mine?.correct != null ? `${mine.correct}/${mine.total} correct` : ''}</p>
           {isBotMatch && <p className="unrated-note">🤖 Unrated · bot match — your rating didn't change</p>}
@@ -568,6 +607,27 @@ export default function LiveMatch() {
         <div className="results-actions">
           <button className="btn-primary btn-xl" onClick={() => navigate('/app/matchmaking')}>
             Play again
+          </button>
+          <button className="btn-ghost" onClick={() => navigate('/app/dashboard')}>
+            Back to lobby
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Group Race: switching tabs twice takes you out; the race goes on.
+  if (tabForfeit && isGroup) {
+    return (
+      <div className="page match-results-page outcome-defeat">
+        <div className="results-header">
+          <div className="results-trophy" aria-hidden="true">🏳️</div>
+          <h1 className="results-title">Out of the race</h1>
+          <p className="left-note">You switched tabs twice, so you finish last.</p>
+        </div>
+        <div className="results-actions">
+          <button className="btn-primary btn-xl" onClick={() => navigate('/app/group')}>
+            👥 Race again
           </button>
           <button className="btn-ghost" onClick={() => navigate('/app/dashboard')}>
             Back to lobby
@@ -671,6 +731,23 @@ export default function LiveMatch() {
     />
   )
 
+  const tabWarningDialog = tabWarning && (
+    <div className="leave-backdrop" role="presentation">
+      <div className="leave-dialog" role="alertdialog" aria-modal="true" aria-labelledby="tab-warning-title">
+        <span className="leave-icon" aria-hidden="true">⚠️</span>
+        <h2 id="tab-warning-title">Don't switch tabs during a match</h2>
+        <p className="muted">
+          This is your only warning. If you switch tabs again, you lose the match, whatever your score.
+        </p>
+        <div className="leave-actions">
+          <button className="btn-primary" onClick={() => setTabWarning(false)} autoFocus>
+            Got it, keep playing
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
   // ── All questions answered — waiting for opponent ────────────────────
   if (allDone) {
     return (
@@ -700,6 +777,7 @@ export default function LiveMatch() {
           <ProgressDots questions={questions} current={-1} stateOf={dotState} />
         </div>
         {leaveDialog}
+        {tabWarningDialog}
       </div>
     )
   }
@@ -758,6 +836,7 @@ export default function LiveMatch() {
         </button>
       </div>
       {leaveDialog}
+      {tabWarningDialog}
     </div>
   )
 }
