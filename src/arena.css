@@ -1834,6 +1834,13 @@ kbd {
   animation: fadeIn 0.25s var(--ease-out);
 }
 
+/* Question text can't be selected or long-press copied (QuestionCard). */
+.no-copy {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 .question-card-head {
   gap: var(--space-3);
 }

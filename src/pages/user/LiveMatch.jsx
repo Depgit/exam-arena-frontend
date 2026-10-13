@@ -397,6 +397,30 @@ export default function LiveMatch() {
     return () => document.removeEventListener('visibilitychange', onVisibility)
   }, [watchTabs, connected, matchId, send])
 
+  // While the match runs, block right-click and the shortcuts that open
+  // developer tools or the page source. Only slows people down: the
+  // browser's own menu can still open them.
+  const inMatch = !results && !tabForfeit && questions.length > 0
+  useEffect(() => {
+    if (!inMatch) return
+    const block = (e) => e.preventDefault()
+    const onKey = (e) => {
+      const mod = e.ctrlKey || e.metaKey
+      const devtools =
+        e.key === 'F12' ||
+        // Ctrl+Shift+I/J/C (Windows, Linux) and Cmd+Option+I/J/C (Mac)
+        (mod && (e.shiftKey || e.altKey) && ['KeyI', 'KeyJ', 'KeyC'].includes(e.code)) ||
+        (mod && e.code === 'KeyU') // view source
+      if (devtools) e.preventDefault()
+    }
+    document.addEventListener('contextmenu', block)
+    document.addEventListener('keydown', onKey, true)
+    return () => {
+      document.removeEventListener('contextmenu', block)
+      document.removeEventListener('keydown', onKey, true)
+    }
+  }, [inMatch])
+
   const nextDisabled = isLast && (alreadyAnswered || !selected)
   const dotState = (q) => {
     const g = graded[q.id]

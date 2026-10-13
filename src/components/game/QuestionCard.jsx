@@ -59,6 +59,8 @@ export function useAnswerKeys({ enabled = true, options = [], onPick, onEnter, o
  * @param floater      optional { id, text, kind } score pop-up
  * @param children     footer (status line, hints, feedback)
  */
+const blockEvent = (e) => e.preventDefault()
+
 export default function QuestionCard({
   question,
   index,
@@ -73,7 +75,15 @@ export default function QuestionCard({
   const options = useMemo(() => sortOptions(question), [question])
 
   return (
-    <div className="question-card">
+    // no-copy: questions can't be selected, copied or long-pressed, so they
+    // can't be pasted into a search mid-match.
+    <div
+      className="question-card no-copy"
+      onCopy={blockEvent}
+      onCut={blockEvent}
+      onContextMenu={blockEvent}
+      onDragStart={blockEvent}
+    >
       {floater && (
         <span key={floater.id} className={`score-floater ${floater.kind}`} aria-hidden="true">
           {floater.text}
