@@ -8,7 +8,9 @@
 // the offline page are cached. The backend API (another origin) is never
 // touched.
 
-const CACHE = 'mindrace-v1'
+// v2: v1 could hold index.html saved under a stylesheet's name (see below);
+// a new name makes 'activate' delete it for everyone.
+const CACHE = 'mindrace-v2'
 const OFFLINE_URL = '/offline.html'
 const PRECACHE = [OFFLINE_URL, '/icons/icon-192.png']
 
@@ -41,17 +43,27 @@ self.addEventListener('fetch', (event) => {
   // Hashed build files never change: serve from cache once fetched.
   if (url.pathname.startsWith('/assets/')) {
     event.respondWith(
-      caches.match(req).then(
-        (hit) =>
-          hit ||
-          fetch(req).then((res) => {
-            if (res.ok) {
-              const copy = res.clone()
-              caches.open(CACHE).then((c) => c.put(req, copy))
-            }
-            return res
-          })
-      )
+      caches.match(req).then((hit) => (hit && !isPage(hit) ? hit : fetchAsset(req)))
     )
   }
 })
+
+// A build file that's missing (mid-deploy, or from an older build) comes
+// back as index.html with status 200, since the host serves the app for
+// unknown paths, and marked cacheable for a year because of its /assets/
+// path. Saving that would stand in for the real file for good, leaving the
+// site unstyled. So such a response is never cached, and is retried once
+// past the browser's own cache in case that is where it came from.
+const isPage = (res) => (res.headers.get('content-type') || '').includes('text/html')
+
+function fetchAsset(req) {
+  return fetch(req)
+    .then((res) => (isPage(res) ? fetch(req, { cache: 'reload' }) : res))
+    .then((res) => {
+      if (res.ok && !isPage(res)) {
+        const copy = res.clone()
+        caches.open(CACHE).then((c) => c.put(req, copy))
+      }
+      return res
+    })
+}
