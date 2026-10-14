@@ -1,4 +1,5 @@
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { useConfirm } from '../context/ConfirmContext'
 import { useAuth } from '../context/AuthContext'
 import { useWebSocket } from '../context/WebSocketContext'
 import { useStreak } from '../context/StreakContext'
@@ -37,6 +38,7 @@ const adminLinks = [
 ]
 
 export default function Navbar() {
+  const confirm = useConfirm()
   const { user, isAdmin, logout } = useAuth()
   const { connected } = useWebSocket()
   const { streak } = useStreak()
@@ -114,9 +116,17 @@ export default function Navbar() {
           className="btn-ghost icon-btn nav-logout"
           title="Log out"
           aria-label="Log out"
-          onClick={() => {
+          onClick={async () => {
             // Easy to hit by accident on a phone: ask first.
-            if (!window.confirm('Log out of Mind Race?')) return
+            const ok = await confirm({
+              title: 'Log out of Mind Race?',
+              message: 'Your streak and progress are saved. Log back in any time.',
+              confirmText: 'Log out',
+              cancelText: 'Stay',
+              tone: 'danger',
+              icon: '👋',
+            })
+            if (!ok) return
             logout()
             navigate('/login')
           }}

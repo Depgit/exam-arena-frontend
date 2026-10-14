@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useConfirm } from '../../context/ConfirmContext'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import {
@@ -20,6 +21,7 @@ function relationTo(list, userId) {
 }
 
 function FriendButton({ userId, username }) {
+  const confirm = useConfirm()
   const [relation, setRelation] = useState(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -70,7 +72,16 @@ function FriendButton({ userId, username }) {
           <button
             className="btn-ghost small"
             disabled={busy}
-            onClick={() => window.confirm(`Remove ${username} from your friends?`) && act(() => removeFriend(userId))}
+            onClick={async () => {
+              const ok = await confirm({
+                title: `Remove ${username}?`,
+                message: "They won't be in your friends list any more. You can add them again later.",
+                confirmText: 'Remove',
+                tone: 'danger',
+                icon: '👥',
+              })
+              if (ok) act(() => removeFriend(userId))
+            }}
           >
             Remove
           </button>

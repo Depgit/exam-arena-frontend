@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import { ConfirmProvider } from './context/ConfirmContext'
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { WebSocketProvider } from './context/WebSocketContext'
@@ -71,6 +72,7 @@ export default function App() {
           <WebSocketProvider>
           <ChatProvider>
           <StreakProvider>
+          <ConfirmProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<RootRedirect />} />
@@ -115,6 +117,7 @@ export default function App() {
               </Routes>
             </Suspense>
             <ServerWakeNotice />
+          </ConfirmProvider>
           </StreakProvider>
           </ChatProvider>
           </WebSocketProvider>

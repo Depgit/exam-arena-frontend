@@ -5692,3 +5692,237 @@ button.podium-spot:hover .podium-name {
     display: none;
   }
 }
+
+/* ══ Popups ════════════════════════════════════════════════════════
+   One look for every popup: confirm boxes (useConfirm), Leave match,
+   Edit profile, admin Live players. A centred card on desktop; a sheet
+   that slides up from the bottom on phones (thumb-friendly, like
+   Android's own dialogs). Purple accent by default, red for actions
+   that can't be undone. */
+.modal-backdrop,
+.leave-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgba(3, 4, 12, 0.62);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  animation: modal-fade 0.2s ease;
+}
+
+.modal-card,
+.leave-dialog,
+.live-dialog {
+  position: relative;
+  width: min(400px, 100%);
+  padding: 30px 24px 22px;
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(124, 92, 255, 0.18), transparent 62%),
+    var(--card-gradient);
+  border: 1px solid rgba(150, 125, 255, 0.3);
+  border-radius: 22px;
+  box-shadow:
+    0 30px 80px -20px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  animation: modal-in 0.28s var(--ease-out);
+}
+
+/* the accent line along the top edge */
+.modal-card::before,
+.leave-dialog::before,
+.live-dialog::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary-gradient);
+}
+
+.modal-danger,
+.leave-danger {
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(244, 63, 94, 0.16), transparent 62%),
+    var(--card-gradient);
+  border-color: var(--error-border);
+}
+
+.modal-danger::before,
+.leave-danger::before {
+  background: linear-gradient(90deg, #f43f5e, #fb7185);
+}
+
+.leave-dialog.profile-dialog {
+  width: min(460px, 100%);
+}
+
+.live-dialog {
+  width: min(620px, 100%);
+}
+
+.modal-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.modal-icon,
+.leave-icon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  margin-bottom: 4px;
+  font-size: 28px;
+  line-height: 1;
+  background: var(--primary-soft);
+  border: 1px solid var(--primary-border);
+  border-radius: 50%;
+  box-shadow: 0 0 0 7px rgba(124, 92, 255, 0.08);
+}
+
+.modal-danger .modal-icon,
+.leave-danger .leave-icon {
+  background: var(--error-soft);
+  border-color: var(--error-border);
+  box-shadow: 0 0 0 7px rgba(244, 63, 94, 0.08);
+}
+
+/* Popup headings are real titles, not the small-caps section labels
+   that h2 is everywhere else. */
+.modal-title,
+.leave-dialog h2,
+.live-dialog h2 {
+  margin: 4px 0 0;
+  font-size: 20px;
+  line-height: 1.25;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-strong);
+}
+
+.modal-title::before,
+.leave-dialog h2::before,
+.live-dialog h2::before {
+  display: none;
+}
+
+.modal-message {
+  margin: 0;
+  max-width: 34ch;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.modal-actions,
+.leave-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  margin-top: 14px;
+}
+
+.modal-actions button,
+.leave-actions button {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  white-space: nowrap;
+  border-radius: 12px;
+}
+
+@keyframes modal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes modal-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+
+@media (max-width: 600px) {
+  .modal-backdrop,
+  .leave-backdrop {
+    place-items: end center;
+    padding: 0;
+  }
+
+  .modal-card,
+  .leave-dialog,
+  .live-dialog {
+    width: 100%;
+    max-width: none;
+    padding: 34px 20px calc(20px + env(safe-area-inset-bottom));
+    border-bottom: 0;
+    border-radius: 22px 22px 0 0;
+    animation: modal-sheet-up 0.32s var(--ease-out);
+  }
+
+  .live-dialog {
+    max-height: 88dvh;
+  }
+
+  /* grab handle */
+  .modal-card::after,
+  .leave-dialog::after,
+  .live-dialog::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    width: 40px;
+    height: 4px;
+    background: var(--border-strong);
+    border-radius: 999px;
+    transform: translateX(-50%);
+  }
+
+  /* one button per row, the main action on top where the thumb is */
+  .modal-actions,
+  .leave-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions button:last-child,
+  .leave-actions button:last-child {
+    order: -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop,
+  .leave-backdrop,
+  .modal-card,
+  .leave-dialog,
+  .live-dialog {
+    animation: none;
+  }
+}
+
+/* Notifications (challenges, friend requests): softer glass cards. */
+.toast {
+  border-radius: 16px;
+  background: rgba(20, 24, 52, 0.94);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}

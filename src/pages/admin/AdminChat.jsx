@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useConfirm } from '../../context/ConfirmContext'
 import { getChat, deleteChatMessage } from '../../api/endpoints'
 import { useWSListener } from '../../context/WebSocketContext'
 
@@ -9,6 +10,7 @@ function when(iso) {
 
 /** Chat moderation: the latest global chat messages, newest first, each with Delete. */
 export default function AdminChat() {
+  const confirm = useConfirm()
   const [messages, setMessages] = useState(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -30,7 +32,14 @@ export default function AdminChat() {
 
   async function remove(m) {
     const name = m.display_name || m.username
-    if (!window.confirm(`Delete this message from ${name}?\n\n"${m.body}"`)) return
+    const ok = await confirm({
+      title: `Delete ${name}'s message?`,
+      message: `“${m.body}”\n\nIt disappears from everyone's chat right away.`,
+      confirmText: 'Delete',
+      tone: 'danger',
+      icon: '🗑️',
+    })
+    if (!ok) return
     setBusy(m.id)
     setError('')
     setNotice('')

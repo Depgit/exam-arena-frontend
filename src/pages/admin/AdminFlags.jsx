@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useConfirm } from '../../context/ConfirmContext'
 import { getFlaggedQuestions, reviewQuestionFlags } from '../../api/endpoints'
 
 const REASON_LABELS = {
@@ -12,6 +13,7 @@ const REASON_LABELS = {
 const STATUSES = ['open', 'resolved', 'dismissed', 'reviewed', 'all']
 
 export default function AdminFlags() {
+  const confirm = useConfirm()
   const [status, setStatus] = useState('open')
   const [items, setItems] = useState(null)
   const [error, setError] = useState('')
@@ -122,10 +124,15 @@ export default function AdminFlags() {
                 <button
                   className="btn-ghost small btn-danger-text"
                   disabled={busy === q.question_id}
-                  onClick={() => {
-                    if (window.confirm('Archive this question? It is removed from play immediately.')) {
-                      review(q.question_id, { status: 'resolved', archive_question: true }, 'Question archived and removed from play.')
-                    }
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: 'Archive this question?',
+                      message: 'It is removed from play immediately.',
+                      confirmText: 'Archive',
+                      tone: 'danger',
+                      icon: '🗄️',
+                    })
+                    if (ok) review(q.question_id, { status: 'resolved', archive_question: true }, 'Question archived and removed from play.')
                   }}
                 >
                   Archive question

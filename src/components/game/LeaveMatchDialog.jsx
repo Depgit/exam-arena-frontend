@@ -35,7 +35,7 @@ export default function LeaveMatchDialog({ matchId, rated, group, onClose, onLef
   return (
     <div className="leave-backdrop" onClick={() => !busy && onClose()} role="presentation">
       <div
-        className="leave-dialog"
+        className="leave-dialog leave-danger"
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="leave-title"

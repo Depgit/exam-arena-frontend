@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useConfirm } from '../../context/ConfirmContext'
 import { useNavigate } from 'react-router-dom'
 import { getDailyChallenge, startDailyChallenge, submitDailyChallenge } from '../../api/endpoints'
 import { useAuth } from '../../context/AuthContext'
@@ -35,6 +36,7 @@ export function DailyLeaderboard({ entries, userId }) {
 }
 
 export default function DailyChallenge() {
+  const confirm = useConfirm()
   const { user } = useAuth()
   const navigate = useNavigate()
   const [overview, setOverview] = useState(null)
@@ -120,9 +122,18 @@ export default function DailyChallenge() {
     sfx.play('select')
     setSelections((s) => ({ ...s, [runQuestion.id]: optionId }))
   }
-  const confirmSubmit = () => {
+  const confirmSubmit = async () => {
     const open = runQuestions.filter((q) => !selections[q.id]).length
-    if (open > 0 && !window.confirm(`${open} question${open === 1 ? '' : 's'} unanswered. Submit anyway?`)) return
+    if (open > 0) {
+      const ok = await confirm({
+        title: 'Submit with blanks?',
+        message: `${open} question${open === 1 ? ' is' : 's are'} still unanswered. Unanswered questions score nothing.`,
+        confirmText: 'Submit anyway',
+        cancelText: 'Keep answering',
+        icon: '📝',
+      })
+      if (!ok) return
+    }
     submit()
   }
   useAnswerKeys({

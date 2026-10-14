@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useConfirm } from '../../context/ConfirmContext'
 import {
   getFriends,
   getSubjects,
@@ -18,6 +19,7 @@ const SEARCH_DELAY_MS = 250
 const nameOf = (f) => f.display_name || f.username
 
 export default function Friends() {
+  const confirm = useConfirm()
   const [list, setList] = useState({ friends: [], incoming: [], outgoing: [] })
   const [subjects, setSubjects] = useState([])
   const [categoryId, setCategoryId] = useState('')
@@ -284,8 +286,15 @@ export default function Friends() {
                 </button>
                 <button
                   className="btn-ghost small"
-                  onClick={() => {
-                    if (window.confirm(`Remove ${nameOf(f)} from your friends?`)) run(() => removeFriend(f.user_id))
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: `Remove ${nameOf(f)}?`,
+                      message: "They won't be in your friends list any more. You can add them again later.",
+                      confirmText: 'Remove',
+                      tone: 'danger',
+                      icon: '👥',
+                    })
+                    if (ok) run(() => removeFriend(f.user_id))
                   }}
                 >
                   Remove
