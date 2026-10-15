@@ -266,3 +266,12 @@ export const setCategorySortOrder = (id, sortOrder) =>
       invalidate('/api/v1/subjects')
       return res
     })
+
+// ---- Push notifications (src/lib/push.js) ----
+// { enabled, public_key }: whether the server sends notifications, and the key to subscribe with.
+export const getPushKey = () => api.get('/api/v1/push/key')
+// body: the browser's PushSubscription JSON.
+export const subscribePush = (sub) => api.post('/api/v1/push/subscribe', sub)
+export const unsubscribePush = (endpoint) => api.post('/api/v1/push/unsubscribe', { endpoint })
+// Sends "Notifications are on" to this player's devices.
+export const testPush = () => api.post('/api/v1/push/test')

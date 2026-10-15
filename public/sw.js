@@ -48,6 +48,42 @@ self.addEventListener('fetch', (event) => {
   }
 })
 
+// ── Push notifications (sent by the backend, internal/push) ──
+
+self.addEventListener('push', (event) => {
+  let data = {}
+  try {
+    data = event.data ? event.data.json() : {}
+  } catch {
+    data = { body: event.data ? event.data.text() : '' }
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'MindRace', {
+      body: data.body || '',
+      icon: '/icons/icon-192.png',
+      tag: data.tag,
+      renotify: Boolean(data.tag),
+      data: { url: data.url || '/app/dashboard' },
+    })
+  )
+})
+
+// Tap: bring an open MindRace window to that page, or open one.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const url = new URL(event.notification.data?.url || '/', self.location.origin).href
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+      const open = windows.find((w) => new URL(w.url).origin === self.location.origin)
+      if (!open) return self.clients.openWindow(url)
+      return open
+        .focus()
+        .then((w) => (w || open).navigate(url))
+        .catch(() => self.clients.openWindow(url))
+    })
+  )
+})
+
 // A build file that's missing (mid-deploy, or from an older build) comes
 // back as index.html with status 200, since the host serves the app for
 // unknown paths, and marked cacheable for a year because of its /assets/

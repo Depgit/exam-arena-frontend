@@ -5,10 +5,17 @@ import FriendNotifications from './FriendNotifications'
 import ChatDrawer from './chat/ChatDrawer'
 import ResumeMatch from './ResumeMatch'
 import { useAuth } from '../context/AuthContext'
+import { syncPush } from '../lib/push'
 
 export default function Layout() {
-  const { isAdmin, isGuest, needsVerification } = useAuth()
+  const { user, isAdmin, isGuest, needsVerification } = useAuth()
   const { pathname } = useLocation()
+
+  // Notifications already allowed on this device: keep the server's record
+  // pointing at this account (src/lib/push.js).
+  useEffect(() => {
+    if (user?.id && !isGuest) syncPush()
+  }, [user?.id, isGuest])
 
   // Download the other pages' code while the browser is idle, so opening a
   // page never waits on a chunk download. Same chunks App.jsx lazy-loads.

@@ -5,6 +5,7 @@ import { getSubjects, getUserStats, getUserProfile, getLeaderboard, getDailyChal
 import NightBanner from '../../components/NightBanner'
 import InviteCard from '../../components/InviteCard'
 import StreakCard from '../../components/StreakCard'
+import NotifyPrompt from '../../components/NotifyPrompt'
 import { Avatar, RankBadge, tierFor } from '../../components/game/game'
 import ChatPanel from '../../components/chat/ChatPanel'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
@@ -164,6 +165,8 @@ export default function Dashboard() {
           </Link>
         </div>
       </section>
+
+      <NotifyPrompt />
 
       {/* ── 2. Mind Race Night: a slim strip, big only while live ────── */}
       <NightBanner slim />

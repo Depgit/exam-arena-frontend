@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import { closeChallenge, getMatch, requestRematch } from '../../api/endpoints'
 import LeaveMatchDialog from '../../components/game/LeaveMatchDialog'
+import NotifyPrompt from '../../components/NotifyPrompt'
 import ShareButtons from '../../components/share/ShareButtons'
 import { SITE, drawResultCard, groupShareText, matchShareText } from '../../lib/share'
 import { useAuth } from '../../context/AuthContext'
@@ -507,6 +508,8 @@ export default function LiveMatch() {
           </div>
         )}
 
+        <NotifyPrompt context="result" />
+
         <div className="results-actions">
           <button className="btn-primary btn-xl" onClick={() => navigate('/app/group')}>
             👥 Race again
@@ -627,6 +630,8 @@ export default function LiveMatch() {
             )}
           </div>
         )}
+
+        <NotifyPrompt context="result" />
 
         <div className="results-actions">
           <button className="btn-primary btn-xl" onClick={() => navigate('/app/matchmaking')}>
