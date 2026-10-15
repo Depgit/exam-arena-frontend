@@ -6,7 +6,7 @@ import { trackVisit } from './lib/analytics'
 import './styles.css'
 import './arena.css'
 
-// Ping the backend before anything renders, so a sleeping server starts
+// Ping the backend before so a sleeping server starts
 // booting while the page is still loading.
 startServerWake()
 trackVisit()

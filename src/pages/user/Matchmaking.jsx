@@ -13,9 +13,9 @@ const POLL_MS = 2000
 // searcher with an opponent after 1–20 s, so this mostly shows when that
 // can't happen.
 const BOT_OFFER_AFTER_S = 20
-// During Mind Race Night everyone is here to meet people: hold the bot
-// offer back so players find each other first.
-const BOT_OFFER_NIGHT_S = 45
+// During Mind Race Night opponents arrive just as fast, so the bot offer
+// waits the same time.
+const BOT_OFFER_NIGHT_S = BOT_OFFER_AFTER_S
 const MAX_POLLS = 15 // ~30s, then give up and tell the player
 
 const MODES = [
