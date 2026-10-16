@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 
 const CONTACT = 'depcoder@gmail.com'
-const UPDATED = '13 October 2026'
+const UPDATED = '16 October 2026'
 
 /** Privacy policy — public, linked from sign-up and the Play Store listing. */
 export default function Privacy() {
@@ -52,8 +52,13 @@ export default function Privacy() {
           <li>
             <strong>Usage information:</strong> when you were last active, and simple first-party analytics —
             a random ID kept in your browser, which pages you open and how you found us (for example a shared
-            link). We do not use advertising trackers or third-party analytics, and we don’t use cookies for
-            tracking.
+            link). We don’t use third-party analytics.
+          </li>
+          <li>
+            <strong>Ads (website only):</strong> on mindrace.in we show ads from Google AdSense. Google may
+            use cookies and similar technology to show ads, limit how often you see the same ad and prevent
+            fraud. We ask Google for <strong>non-personalised ads only</strong> (not based on your interests or
+            browsing), and we block ads unsuitable for students. Our Android app shows no ads.
           </li>
           <li>
             <strong>Technical information:</strong> like any website, our hosting providers may record your IP
@@ -70,6 +75,13 @@ export default function Privacy() {
           <li>To improve the game, for example which questions are too hard or too easy.</li>
         </ul>
         <p>We do not sell your information, and we do not show personalised ads.</p>
+        <p>
+          You can learn how Google uses information from sites that show its ads at{' '}
+          <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noreferrer">
+            policies.google.com/technologies/partner-sites
+          </a>
+          .
+        </p>
 
         <h2>What other players can see</h2>
         <p>
@@ -90,10 +102,11 @@ export default function Privacy() {
         </p>
         <ul>
           <li>Cloudflare — hosts the website and app.</li>
-          <li>Render — runs our game server.</li>
+          <li>Google Cloud — runs our game server.</li>
           <li>Supabase — stores our database.</li>
           <li>Resend — sends our emails.</li>
           <li>Google — “Sign in with Google”, if you choose to use it.</li>
+          <li>Google AdSense — ads on our website (not in the app).</li>
         </ul>
 
         <h2>How long we keep it</h2>

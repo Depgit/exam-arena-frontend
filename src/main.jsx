@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import { startServerWake } from './lib/serverWake'
 import { trackVisit } from './lib/analytics'
+import { loadAdSense } from './lib/ads'
 import './styles.css'
 import './arena.css'
 
@@ -28,6 +29,9 @@ window.addEventListener('vite:preloadError', (event) => {
   event.preventDefault()
   window.location.reload()
 })
+
+// Ads for website visitors (never inside the Android app — see lib/ads.js).
+if (import.meta.env.PROD) loadAdSense()
 
 // Makes the site installable and powers the Android app (public/sw.js).
 // Production only: in dev a service worker would get in the way of reloads.
