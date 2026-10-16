@@ -1,0 +1,11 @@
+# Crawlers (search engines, Google AdSense) may read every public page.
+User-agent: *
+Allow: /
+
+# Signed-in areas have nothing to index.
+Disallow: /app/
+Disallow: /admin/
+
+# AdSense's crawler reviews the pages that will show ads, so it may read all.
+User-agent: Mediapartners-Google
+Allow: /
