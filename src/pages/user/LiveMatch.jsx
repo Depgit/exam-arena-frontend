@@ -13,6 +13,7 @@ import { Avatar, Confetti, RankBadge, TimerRing } from '../../components/game/ga
 import QuestionCard, { KeyHint, ProgressDots, sortOptions, useAnswerKeys } from '../../components/game/QuestionCard'
 import * as sfx from '../../lib/sfx'
 import { haptic, HAPTIC } from '../../lib/haptics'
+import AdSlot from '../../components/AdSlot'
 
 const INTRO_MS = 1400
 // How long to wait for the server's ack before sending an answer again.
@@ -630,6 +631,8 @@ export default function LiveMatch() {
             )}
           </div>
         )}
+
+        <AdSlot name="result" />
 
         <NotifyPrompt context="result" />
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getSubjects, getLeaderboard } from '../../api/endpoints'
 import { useAuth } from '../../context/AuthContext'
 import { Avatar, RankBadge } from '../../components/game/game'
+import AdSlot from '../../components/AdSlot'
 
 const PODIUM_ORDER = [1, 0, 2] // silver · gold · bronze, gold in the middle
 
@@ -131,6 +132,7 @@ export default function Leaderboard() {
           </tbody>
         </table>
       )}
+      <AdSlot name="leaderboard" />
     </div>
   )
 }

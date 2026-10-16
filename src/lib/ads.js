@@ -9,6 +9,14 @@
 // Ads are non-personalised: many players are under 18.
 
 export const ADSENSE_CLIENT = 'ca-pub-1052208524822225'
+
+// Display ad units from AdSense (Ads → By ad unit → Display ads): paste
+// each unit's data-ad-slot number here. An empty slot shows nothing.
+export const AD_SLOTS = {
+  lobby: '4376851902', // bottom of the Lobby
+  result: '8116786363', // after-match result screen, below the scores
+  leaderboard: '8252517739', // below the leaderboard table
+}
 const IN_APP_KEY = 'mr_in_app'
 
 export function isInApp() {

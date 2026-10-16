@@ -10,6 +10,7 @@ import { Avatar, RankBadge, tierFor } from '../../components/game/game'
 import ChatPanel from '../../components/chat/ChatPanel'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { formatDuration } from './DailyChallenge'
+import AdSlot from '../../components/AdSlot'
 
 function DailyChallengeCard() {
   // Last visit's data first (instant), then the fresh copy.
@@ -261,6 +262,7 @@ export default function Dashboard() {
           </div>
         </aside>
       </div>
+      <AdSlot name="lobby" />
     </div>
   )
 }

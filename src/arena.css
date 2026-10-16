@@ -5979,3 +5979,25 @@ button.podium-spot:hover .podium-name {
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
+
+/* ── Ads (AdSense display units, website only) ───────────────────── */
+.ad-slot {
+  margin: var(--space-6) auto 0;
+  max-width: 970px;
+  min-height: 100px; /* reserve space so the page doesn't jump */
+  text-align: center;
+}
+
+.ad-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Google had no ad for this visit: hide the empty box and its label. */
+.ad-slot:has(ins[data-ad-status='unfilled']) {
+  display: none;
+}
