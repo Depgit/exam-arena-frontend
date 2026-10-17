@@ -90,10 +90,10 @@ export default function App() {
                 <Route element={<ProtectedRoute requireRole="user" />}>
                   <Route element={<Layout />}>
                     <Route path="/app/dashboard" element={<Dashboard />} />
-                    <Route path="/app/matchmaking" element={<PlayOnly what="playing a match"><NotInMatch><Matchmaking /></NotInMatch></PlayOnly>} />
+                    <Route path="/app/matchmaking" element={<PlayOnly what="playing a match" demoTrial><NotInMatch><Matchmaking /></NotInMatch></PlayOnly>} />
                     <Route path="/app/friend" element={<PlayOnly what="playing a friend match"><NotInMatch><FriendMatch /></NotInMatch></PlayOnly>} />
                     <Route path="/app/group" element={<PlayOnly what="a Group Race"><NotInMatch><GroupRace /></NotInMatch></PlayOnly>} />
-                    <Route path="/app/match/:matchId" element={<PlayOnly what="playing a match"><LiveMatchPage /></PlayOnly>} />
+                    <Route path="/app/match/:matchId" element={<PlayOnly what="playing a match" demoTrial><LiveMatchPage /></PlayOnly>} />
                     <Route path="/app/practice" element={<PlayOnly what="practice"><Practice /></PlayOnly>} />
                     <Route path="/app/leaderboard" element={<Leaderboard />} />
                     <Route path="/app/events" element={<Events />} />

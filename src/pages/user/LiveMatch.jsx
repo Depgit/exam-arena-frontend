@@ -14,6 +14,7 @@ import QuestionCard, { KeyHint, ProgressDots, sortOptions, useAnswerKeys } from 
 import * as sfx from '../../lib/sfx'
 import { haptic, HAPTIC } from '../../lib/haptics'
 import AdSlot from '../../components/AdSlot'
+import { SignupWall } from '../../components/PlayOnly'
 
 const INTRO_MS = 1400
 // How long to wait for the server's ack before sending an answer again.
@@ -81,7 +82,7 @@ export default function LiveMatch() {
   const { matchId } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, isGuest } = useAuth()
   const { send, connected } = useWebSocket()
 
   // The match_start payload handed over by the page that started the match.
@@ -637,6 +638,13 @@ export default function LiveMatch() {
 
         <AdSlot name="result" />
 
+        {isGuest ? (
+          <SignupWall title="Want a rematch? Create a free account" icon="🚀">
+            That was your free demo match. Sign up to battle real players, climb the
+            leaderboard and keep your progress — it takes 20 seconds.
+          </SignupWall>
+        ) : (
+          <>
         <NotifyPrompt context="result" />
 
         <div className="results-actions">
@@ -653,6 +661,8 @@ export default function LiveMatch() {
             </button>
           )}
         </div>
+          </>
+        )}
       </div>
     )
   }

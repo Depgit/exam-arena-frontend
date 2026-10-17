@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext'
 import { Avatar, RankBadge, TimerRing } from '../../components/game/game'
 import * as sfx from '../../lib/sfx'
 import { haptic, HAPTIC } from '../../lib/haptics'
+import { SignupWall } from '../../components/PlayOnly'
 
 const POLL_MS = 2000
 // Seconds of searching before offering a bot. The server pairs a lone
@@ -33,8 +34,18 @@ const MODES = [
   },
 ]
 
+// A demo account gets one free bot match; remember it was used so the
+// sign-up card shows straight away next time (the server enforces it).
+const demoKey = (id) => `mr_demo_played:${id}`
+function demoPlayed(id) {
+  try { return localStorage.getItem(demoKey(id)) === '1' } catch { return false }
+}
+function markDemoPlayed(id) {
+  try { localStorage.setItem(demoKey(id), '1') } catch { /* private mode */ }
+}
+
 export default function Matchmaking() {
-  const { user } = useAuth()
+  const { user, isGuest } = useAuth()
   // ?event=<id>: search in a college event's private queue (classmates
   // only). No mode/subject pickers, no bot offer, no auto give-up.
   const [params] = useSearchParams()
@@ -203,6 +214,7 @@ export default function Matchmaking() {
   // takes us into the match; if the socket is slow, fall back to the id
   // from the response (LiveMatch loads itself over REST).
   const [botBusy, setBotBusy] = useState(false)
+  const [trialUsed, setTrialUsed] = useState(() => isGuest && demoPlayed(user.id))
   async function handleBot() {
     if (!categoryId || botBusy) return
     setError('')
@@ -210,13 +222,19 @@ export default function Matchmaking() {
     sfx.play('select')
     try {
       const { data } = await playBot({ exam_category_id: categoryId })
+      if (isGuest) markDemoPlayed(user.id)
       setQueued(false)
       setTimeout(() => {
         if (!window.location.pathname.startsWith('/app/match/')) navigate(`/app/match/${data.match_id}`)
       }, 1500)
     } catch (err) {
-      setError(err.message)
       setBotBusy(false)
+      if (isGuest && err.status === 403) {
+        markDemoPlayed(user.id)
+        setTrialUsed(true)
+        return
+      }
+      setError(err.message)
     }
   }
 
@@ -320,6 +338,59 @@ export default function Matchmaking() {
               ))}
             </ul>
           )}
+        </div>
+      </div>
+    )
+  }
+
+  if (isGuest) {
+    // Demo account: one free bot match, then sign up.
+    if (trialUsed) {
+      return (
+        <div className="page">
+          <SignupWall title="Enjoyed it? Keep playing for free" icon="🎉">
+            You've played your free demo match. Create a free account to battle real players,
+            climb the leaderboard and keep your progress — it takes 20 seconds.
+          </SignupWall>
+        </div>
+      )
+    }
+    return (
+      <div className="page">
+        <header className="page-head">
+          <span className="eyebrow">Free demo match</span>
+          <h1>Try a quick battle</h1>
+          <p className="muted">Play one match against our bot — no sign-up needed. Pick a subject:</p>
+        </header>
+        {error && <div className="alert-error">{error}</div>}
+        <div className="tile-picker">
+          {subjects?.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              className={`tile-option ${categoryId === s.id ? 'selected' : ''}`}
+              aria-pressed={categoryId === s.id}
+              title={s.description}
+              onClick={() => {
+                setCategoryId(s.id)
+                sfx.play('select')
+              }}
+            >
+              <strong>{s.name}</strong>
+              {s.code && <span>{s.code}</span>}
+            </button>
+          ))}
+        </div>
+        <div className="find-bar">
+          <div>
+            <strong>🤖 vs Bot</strong>
+            <span className="muted"> · {category?.name || 'Pick a subject'} · 1 free match</span>
+          </div>
+          <div className="find-actions">
+            <button className="btn-primary btn-xl" onClick={handleBot} disabled={!categoryId || botBusy}>
+              {botBusy ? 'Starting…' : '🤖 Play free match'}
+            </button>
+          </div>
         </div>
       </div>
     )
