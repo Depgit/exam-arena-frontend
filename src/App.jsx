@@ -98,6 +98,7 @@ export default function App() {
                     <Route path="/app/match/:matchId" element={<PlayOnly what="playing a match" demoTrial><LiveMatchPage /></PlayOnly>} />
                     <Route path="/app/practice" element={<PlayOnly what="practice"><Practice /></PlayOnly>} />
                     <Route path="/app/leaderboard" element={<Leaderboard />} />
+                    <Route path="/app/about" element={<About />} />
                     <Route path="/app/events" element={<Events />} />
                     <Route path="/app/events/:eventId" element={<EventPage />} />
                     <Route path="/app/profile" element={<Profile />} />

@@ -18,6 +18,7 @@ const userLinks = [
   ['/app/daily', 'Daily', '📅'],
   ['/app/events', 'Events', '🎓'],
   ['/app/leaderboard', 'Ranks', '🏆'],
+  ['/app/about', 'About', 'ℹ️'],
 ]
 // Phones get a bottom tab bar with the five most-used screens; Daily and
 // Friend Match stay reachable from the Lobby.
