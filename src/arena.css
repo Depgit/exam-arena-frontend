@@ -6069,3 +6069,9 @@ button.podium-spot:hover .podium-name {
 }
 .event-prize { margin: 2px 0 0; color: #ffd23f; font-weight: 700; }
 .event-winner-contact { margin-bottom: var(--space-3); padding: 10px 14px; border-radius: 12px; background: rgba(255, 210, 63, 0.1); border: 1px solid rgba(255, 210, 63, 0.4); overflow-wrap: anywhere; }
+.event-custom-duration { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.event-custom-duration input { width: 80px; }
+.event-custom-duration span { color: var(--muted); font-weight: 700; }
+.event-quick-start { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.event-when { margin: 0; padding: 10px 14px; border-radius: 12px; font-weight: 700; background: rgba(62, 240, 160, 0.1); border: 1px solid rgba(62, 240, 160, 0.35); }
+.event-when.bad { background: var(--error-soft); border-color: var(--error-border); color: var(--error-fg); }

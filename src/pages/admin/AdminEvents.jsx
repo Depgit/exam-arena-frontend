@@ -5,6 +5,16 @@ import EventStandings from '../../components/events/EventStandings'
 import { PHASE_LABEL, phaseOf, fmtWhen, durationLabel } from '../../components/events/eventTime'
 
 const DURATIONS = [30, 45, 60, 90, 120, 180]
+// The server accepts 10 minutes to 12 hours.
+const MIN_MINUTES = 10
+const MAX_MINUTES = 12 * 60
+
+const durationText = (m) => {
+  const h = Math.floor(m / 60)
+  const r = m % 60
+  if (!h) return `${r} minutes`
+  return `${h} hour${h > 1 ? 's' : ''}${r ? ` ${r} min` : ''}`
+}
 
 // "2026-10-20T15:30" for a datetime-local input, in this device's time.
 function localInput(d) {
@@ -20,7 +30,7 @@ export default function AdminEvents() {
   const [form, setForm] = useState(() => {
     const start = new Date(Date.now() + 60 * 60 * 1000)
     start.setMinutes(0, 0, 0)
-    return { name: '', exam_category_id: '', starts_at: localInput(start), duration_minutes: 60, prize: '' }
+    return { name: '', exam_category_id: '', starts_at: localInput(start), duration_minutes: 60, custom_h: 1, custom_m: 15, prize: '' }
   })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -52,8 +62,39 @@ export default function AdminEvents() {
     }
   }, [open])
 
+  const custom = form.duration_minutes === 'custom'
+  const minutes = custom ? Number(form.custom_h || 0) * 60 + Number(form.custom_m || 0) : Number(form.duration_minutes)
+  const durationOk = minutes >= MIN_MINUTES && minutes <= MAX_MINUTES
+  const startDate = new Date(form.starts_at)
+  // The server allows a start up to 5 minutes in the past ("start now").
+  const startOk = !Number.isNaN(startDate.getTime()) && startDate.getTime() >= Date.now() - 5 * 60 * 1000
+  const endDate = new Date(startDate.getTime() + minutes * 60 * 1000)
+
+  // Quick picks for the start time.
+  const setStart = (d) => setForm((f) => ({ ...f, starts_at: localInput(d) }))
+  const inMinutes = (m) => {
+    const d = new Date(Date.now() + m * 60 * 1000)
+    d.setSeconds(0, 0)
+    return d
+  }
+  const at8pm = () => {
+    const d = new Date()
+    d.setHours(20, 0, 0, 0)
+    if (d.getTime() < Date.now()) d.setDate(d.getDate() + 1) // already past: tomorrow
+    return d
+  }
+  const timeText = (d) => d.toLocaleString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
+
   async function create(e) {
     e.preventDefault()
+    if (!durationOk) {
+      setError(`Duration must be between ${MIN_MINUTES} minutes and 12 hours.`)
+      return
+    }
+    if (!startOk) {
+      setError('The start time has already passed — pick a time from now on.')
+      return
+    }
     setBusy(true)
     setError('')
     setNotice('')
@@ -62,7 +103,7 @@ export default function AdminEvents() {
         name: form.name,
         exam_category_id: form.exam_category_id,
         starts_at: new Date(form.starts_at).toISOString(),
-        duration_minutes: Number(form.duration_minutes),
+        duration_minutes: minutes,
         prize: form.prize,
       })
       setNotice(`Created “${data.name}” — join code ${data.code}`)
@@ -131,22 +172,49 @@ export default function AdminEvents() {
             </select>
           </label>
           <label className="field">
-            <span className="field-label">Starts</span>
+            <span className="field-label">Starts (exact date &amp; time)</span>
             <input type="datetime-local" value={form.starts_at} onChange={(e) => setForm({ ...form, starts_at: e.target.value })} required />
+            <span className="event-quick-start">
+              <button type="button" className="btn-ghost small" onClick={() => setStart(inMinutes(0))}>Now</button>
+              <button type="button" className="btn-ghost small" onClick={() => setStart(inMinutes(15))}>In 15 min</button>
+              <button type="button" className="btn-ghost small" onClick={() => setStart(inMinutes(60))}>In 1 hour</button>
+              <button type="button" className="btn-ghost small" onClick={() => setStart(at8pm())}>8 PM</button>
+            </span>
           </label>
           <label className="field">
             <span className="field-label">Duration</span>
-            <select value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: e.target.value })}>
-              {DURATIONS.map((m) => <option key={m} value={m}>{m >= 60 ? `${m / 60} hour${m > 60 ? 's' : ''}` : `${m} minutes`}</option>)}
+            <select value={form.duration_minutes} onChange={(e) => setForm({ ...form, duration_minutes: e.target.value === 'custom' ? 'custom' : Number(e.target.value) })}>
+              {DURATIONS.map((m) => <option key={m} value={m}>{durationText(m)}</option>)}
+              <option value="custom">Custom…</option>
             </select>
+            {custom && (
+              <div className="event-custom-duration">
+                <input type="number" min={0} max={12} value={form.custom_h} onChange={(e) => setForm({ ...form, custom_h: e.target.value })} aria-label="Hours" />
+                <span>h</span>
+                <input type="number" min={0} max={59} step={5} value={form.custom_m} onChange={(e) => setForm({ ...form, custom_m: e.target.value })} aria-label="Minutes" />
+                <span>min</span>
+              </div>
+            )}
+            {custom && (
+              <span className={`field-help ${durationOk ? '' : 'field-error'}`}>
+                {durationOk ? `= ${durationText(minutes)}` : `Between ${MIN_MINUTES} minutes and 12 hours`}
+              </span>
+            )}
           </label>
         </div>
+        <p className={`event-when ${startOk && durationOk ? '' : 'bad'}`}>
+          {!startOk
+            ? '⚠️ That start time has already passed.'
+            : durationOk
+              ? `📅 Starts ${timeText(startDate)} · ends ${endDate.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}${endDate.toDateString() !== startDate.toDateString() ? ` (${endDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })})` : ''} · ${durationText(minutes)} · your local time`
+              : '⚠️ Choose a duration between 10 minutes and 12 hours.'}
+        </p>
         <label className="field">
           <span className="field-label">Prize for the winner <span className="muted">(optional)</span></span>
           <input value={form.prize} onChange={(e) => setForm({ ...form, prize: e.target.value })} placeholder="e.g. ₹500 Amazon coupon" maxLength={200} />
           <span className="field-help">Shown to students on the event. You hand it over yourself after the event — the winner's email appears here.</span>
         </label>
-        <button className="btn-primary btn-lg" type="submit" disabled={busy || !form.name.trim()}>
+        <button className="btn-primary btn-lg" type="submit" disabled={busy || !form.name.trim() || !durationOk || !startOk}>
           {busy ? 'Creating…' : 'Create event'}
         </button>
       </form>
