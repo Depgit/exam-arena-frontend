@@ -50,6 +50,9 @@ const AdminStats = lazy(() => import('./pages/admin/AdminStats'))
 const AdminFlags = lazy(() => import('./pages/admin/AdminFlags'))
 const AdminGrowth = lazy(() => import('./pages/admin/AdminGrowth'))
 const AdminChat = lazy(() => import('./pages/admin/AdminChat'))
+const AdminEvents = lazy(() => import('./pages/admin/AdminEvents'))
+const Events = lazy(() => import('./pages/user/Events'))
+const EventPage = lazy(() => import('./pages/user/EventPage'))
 
 const PageLoader = () => (
   <div className="page-center">
@@ -93,6 +96,8 @@ export default function App() {
                     <Route path="/app/match/:matchId" element={<PlayOnly what="playing a match"><LiveMatchPage /></PlayOnly>} />
                     <Route path="/app/practice" element={<PlayOnly what="practice"><Practice /></PlayOnly>} />
                     <Route path="/app/leaderboard" element={<Leaderboard />} />
+                    <Route path="/app/events" element={<Events />} />
+                    <Route path="/app/events/:eventId" element={<EventPage />} />
                     <Route path="/app/profile" element={<Profile />} />
                     <Route path="/app/profile/:userId" element={<Profile />} />
                     <Route path="/app/friends" element={<Friends />} />
@@ -110,6 +115,7 @@ export default function App() {
                     <Route path="/admin/growth" element={<AdminGrowth />} />
                     <Route path="/admin/flags" element={<AdminFlags />} />
                     <Route path="/admin/chat" element={<AdminChat />} />
+                    <Route path="/admin/events" element={<AdminEvents />} />
                   </Route>
                 </Route>
 

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { getSubjects, joinQueue, leaveQueue, getQueueStats, playBot, getNight } from '../../api/endpoints'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { getSubjects, joinQueue, leaveQueue, getQueueStats, playBot, getNight, getEvent, eventQueue } from '../../api/endpoints'
 import { useWebSocket, useWSListener } from '../../context/WebSocketContext'
 import { useSmoothCountdown } from '../../hooks/useSmoothCountdown'
 import { useAuth } from '../../context/AuthContext'
@@ -35,6 +35,12 @@ const MODES = [
 
 export default function Matchmaking() {
   const { user } = useAuth()
+  // ?event=<id>: search in a college event's private queue (classmates
+  // only). No mode/subject pickers, no bot offer, no auto give-up.
+  const [params] = useSearchParams()
+  const eventId = params.get('event')
+  const [event, setEvent] = useState(null)
+  const autoStarted = useRef(false)
   const [subjects, setSubjects] = useState([])
   const [categoryId, setCategoryId] = useState('')
   const [matchType, setMatchType] = useState('ranked')
@@ -69,6 +75,29 @@ export default function Matchmaking() {
       .catch(() => {})
   }, [])
 
+  // Event mode: load the event, then start searching straight away (the
+  // player already tapped "Find opponent" on the event page).
+  useEffect(() => {
+    if (!eventId) {
+      try { sessionStorage.removeItem('mr_last_event') } catch { /* private mode */ }
+      return
+    }
+    getEvent(eventId)
+      .then(({ data }) => {
+        setEvent(data.event)
+        setCategoryId(data.event.exam_category_id)
+        try { sessionStorage.setItem('mr_last_event', data.event.id) } catch { /* private mode */ }
+      })
+      .catch((err) => setError(err.message))
+  }, [eventId])
+  useEffect(() => {
+    if (event && !autoStarted.current) {
+      autoStarted.current = true
+      handleJoin()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [event])
+
   useEffect(() => {
     if (!queued) return
     let count = 0
@@ -78,7 +107,7 @@ export default function Matchmaking() {
       // pools can be null/absent when nobody is queued.
       getQueueStats().then(({ data }) => setQueueStats(data?.pools ?? {})).catch(() => { })
       count++
-      if (count > MAX_POLLS) {
+      if (!eventId && count > MAX_POLLS) { // events: classmates may take a while — keep searching
         clearInterval(interval)
         handleLeave()
         setError('No opponent found right now — play the bot below, or try again in a bit.')
@@ -162,7 +191,8 @@ export default function Matchmaking() {
     setNotice('')
     sfx.play('select')
     try {
-      await joinQueue({ exam_category_id: categoryId, match_type: matchType })
+      if (eventId) await eventQueue(eventId)
+      else await joinQueue({ exam_category_id: categoryId, match_type: matchType })
       setQueued(true)
     } catch (err) {
       setError(err.message)
@@ -195,6 +225,7 @@ export default function Matchmaking() {
       await leaveQueue()
     } finally {
       setQueued(false)
+      if (eventId) navigate(`/app/events/${eventId}`)
     }
   }
 
@@ -204,6 +235,7 @@ export default function Matchmaking() {
   // Pool keys are "<category uuid>:<match type>" — show names, not ids.
   const poolLabel = (pool) => {
     const [catId, type] = pool.split(':')
+    if (type === 'event') return `🎓 ${event?.name || 'College event'}`
     const cat = subjects.find((s) => s.id === catId)
     return `${cat?.name || 'Unknown'} · ${type === 'arena' ? 'Arena' : 'Ranked'}`
   }
@@ -214,7 +246,7 @@ export default function Matchmaking() {
     return (
       <div className="page">
         <div className="found-stage">
-          <span className="eyebrow">{proposal.match_type === 'arena' ? 'Arena' : 'Ranked'} · {subjects.find((s) => s.id === proposal.exam_category_id)?.name}</span>
+          <span className="eyebrow">{event ? `🎓 ${event.name}` : proposal.match_type === 'arena' ? 'Arena' : 'Ranked'} · {subjects.find((s) => s.id === proposal.exam_category_id)?.name}</span>
           <h1 className="found-title">Match found!</h1>
           <div className="found-versus">
             <div className="found-player vs-left">
@@ -264,15 +296,15 @@ export default function Matchmaking() {
             </span>
           </div>
           <div className="search-copy">
-            <span className="eyebrow">{matchType === 'arena' ? 'Arena' : 'Ranked'} · {category?.name}</span>
+            <span className="eyebrow">{event ? `🎓 ${event.name}` : matchType === 'arena' ? 'Arena' : 'Ranked'} · {category?.name}</span>
             <h1>{found ? 'Opponent found!' : 'Searching for an opponent'}</h1>
             <div className="search-clock" aria-live="polite">{clock}</div>
-            <p className="muted">{notice || "You'll get a prompt to accept when an opponent is found."}</p>
+            <p className="muted">{notice || (event ? 'Looking for a classmate in this event — you\'ll get a prompt to accept.' : "You'll get a prompt to accept when an opponent is found.")}</p>
           </div>
           {!found && (
             <button className="btn-ghost" onClick={handleLeave}>Cancel search</button>
           )}
-          {!found && elapsed >= (nightLive ? BOT_OFFER_NIGHT_S : BOT_OFFER_AFTER_S) && (
+          {!found && !eventId && elapsed >= (nightLive ? BOT_OFFER_NIGHT_S : BOT_OFFER_AFTER_S) && (
             <div className="bot-offer">
               <span>No one around right now?</span>
               <button className="btn-primary" onClick={handleBot} disabled={botBusy}>
@@ -288,6 +320,23 @@ export default function Matchmaking() {
               ))}
             </ul>
           )}
+        </div>
+      </div>
+    )
+  }
+
+  if (eventId) {
+    // Event mode, not searching (loading, or a search ended): back to the event.
+    return (
+      <div className="page">
+        <header className="page-head">
+          <span className="eyebrow">🎓 College event</span>
+          <h1>{event?.name || 'Loading…'}</h1>
+        </header>
+        {error && <div className="alert-error">{error}</div>}
+        <div className="find-actions">
+          <Link className="btn-ghost" to={`/app/events/${eventId}`}>← Back to event</Link>
+          {event && <button className="btn-primary btn-xl" onClick={handleJoin}>⚔️ Find opponent</button>}
         </div>
       </div>
     )

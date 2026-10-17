@@ -16,6 +16,7 @@ const userLinks = [
   ['/app/friends', 'Friends', '👥'],
   ['/app/practice', 'Practice', '🎯'],
   ['/app/daily', 'Daily', '📅'],
+  ['/app/events', 'Events', '🎓'],
   ['/app/leaderboard', 'Ranks', '🏆'],
 ]
 // Phones get a bottom tab bar with the five most-used screens; Daily and
@@ -34,6 +35,7 @@ const adminLinks = [
   ['/admin/questions/new', 'Create Question', '✏️'],
   ['/admin/flags', 'Flagged', '🚩'],
   ['/admin/chat', 'Chat', '💬'],
+  ['/admin/events', 'Events', '🎓'],
   ['/admin/stats', 'System', '🖥️'],
 ]
 

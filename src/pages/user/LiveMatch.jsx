@@ -525,6 +525,9 @@ export default function LiveMatch() {
 
   // ── Results screen ──────────────────────────────────────────────────
   if (results) {
+    // A match searched from a college event leads back into that event.
+    let lastEvent = null
+    try { lastEvent = sessionStorage.getItem('mr_last_event') } catch { /* private mode */ }
     const sorted = [...results].sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99))
     const mine = sorted.find((r) => r.user_id === user.id)
     // The server gives tied players the same rank.
@@ -637,12 +640,18 @@ export default function LiveMatch() {
         <NotifyPrompt context="result" />
 
         <div className="results-actions">
-          <button className="btn-primary btn-xl" onClick={() => navigate('/app/matchmaking')}>
+          <button className="btn-primary btn-xl" onClick={() => navigate(lastEvent ? `/app/matchmaking?event=${lastEvent}` : '/app/matchmaking')}>
             Play again
           </button>
-          <button className="btn-ghost" onClick={() => navigate('/app/dashboard')}>
-            Back to lobby
-          </button>
+          {lastEvent ? (
+            <button className="btn-ghost" onClick={() => navigate(`/app/events/${lastEvent}`)}>
+              🎓 Event leaderboard
+            </button>
+          ) : (
+            <button className="btn-ghost" onClick={() => navigate('/app/dashboard')}>
+              Back to lobby
+            </button>
+          )}
         </div>
       </div>
     )

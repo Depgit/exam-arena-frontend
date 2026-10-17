@@ -172,6 +172,15 @@ export default function Dashboard() {
       {/* ── 2. Mind Race Night: a slim strip, big only while live ────── */}
       <NightBanner slim />
 
+      <Link className="group-promo event-promo" to="/app/events">
+        <span className="group-promo-icon" aria-hidden="true">🎓</span>
+        <span className="group-promo-text">
+          <strong>College event?</strong>
+          <span className="muted">Join with your code and race your classmates</span>
+        </span>
+        <span aria-hidden="true">→</span>
+      </Link>
+
       <div className="dashboard-layout">
         <div className="dashboard-main">
           {/* ── 3. Today ─────────────────────────────────────────────── */}

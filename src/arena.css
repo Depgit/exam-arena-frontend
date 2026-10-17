@@ -6001,3 +6001,71 @@ button.podium-spot:hover .podium-name {
 .ad-slot:has(ins[data-ad-status='unfilled']) {
   display: none;
 }
+
+/* ══ College events ════════════════════════════════════════════════ */
+.event-promo { margin-top: var(--space-3); }
+
+.event-join { margin: var(--space-4) 0 var(--space-6); }
+.event-join-row { display: flex; gap: var(--space-3); margin-top: var(--space-3); }
+.event-join-row .code-input { flex: 1; min-width: 0; letter-spacing: 0.25em; }
+
+.event-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-3); }
+.event-card {
+  display: flex; flex-direction: column; gap: 6px; padding: var(--space-4);
+  color: inherit; text-decoration: none;
+  background: var(--card-gradient); border: 1px solid var(--border); border-radius: 16px;
+  transition: border-color var(--dur) ease, transform var(--dur) ease;
+}
+.event-card:hover { border-color: var(--primary-border); transform: translateY(-2px); }
+.event-card.phase-live { border-color: rgba(62, 240, 160, 0.55); box-shadow: 0 0 30px -12px rgba(62, 240, 160, 0.7); }
+.event-name { font-size: 18px; color: var(--text-strong); }
+
+.event-phase {
+  align-self: flex-start; display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+  background: var(--surface-3); color: var(--text-secondary);
+}
+.event-phase.live { background: rgba(62, 240, 160, 0.16); color: #3ef0a0; }
+.event-phase.upcoming { background: var(--primary-soft); color: var(--primary-text); }
+.event-phase.cancelled { background: var(--error-soft); color: var(--error-fg); }
+
+.event-back { display: inline-block; margin-bottom: var(--space-3); font-size: 14px; text-decoration: none; }
+.event-hero {
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+  padding: var(--space-6) var(--space-4); text-align: center;
+  background: var(--card-gradient); border: 1px solid var(--border); border-radius: 20px;
+}
+.event-hero h1 { margin: 4px 0 0; }
+.event-hero.phase-live { border-color: rgba(62, 240, 160, 0.5); }
+.event-clock { display: flex; flex-direction: column; align-items: center; margin: var(--space-3) 0; }
+.event-clock span { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.event-clock strong { font-family: var(--font-display); font-size: 44px; line-height: 1.1; color: var(--text-strong); }
+.event-clock.live strong { color: #3ef0a0; }
+.event-winner { margin-top: var(--space-3); padding: 10px 20px; border-radius: 999px; font-size: 18px; background: rgba(255, 210, 63, 0.14); border: 1px solid rgba(255, 210, 63, 0.5); }
+.event-me { margin: var(--space-2) 0 0; color: var(--text-secondary); }
+.event-page .small { font-size: 13px; max-width: 46ch; }
+.event-standings tr.me td { color: var(--text-strong); }
+
+.event-form { margin: var(--space-4) 0 var(--space-6); display: grid; gap: var(--space-3); }
+.event-form-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+.event-form select, .event-form input[type='datetime-local'] { width: 100%; }
+
+.admin-event-list { display: grid; gap: var(--space-3); }
+.admin-event { padding: var(--space-4); background: var(--card-gradient); border: 1px solid var(--border); border-radius: 16px; }
+.admin-event.phase-live { border-color: rgba(62, 240, 160, 0.5); }
+.admin-event-main { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.admin-event-main > div:first-child { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.admin-event-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.event-code {
+  padding: 6px 14px; border-radius: 10px; cursor: pointer;
+  font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: 0.18em;
+  color: var(--gold, #ffd23f); background: rgba(255, 210, 63, 0.1); border: 1px dashed rgba(255, 210, 63, 0.55);
+}
+.admin-event-board { margin-top: var(--space-4); }
+
+@media (max-width: 700px) {
+  .event-form-row { grid-template-columns: 1fr; }
+  .event-join-row { flex-direction: column; }
+}
+.event-prize { margin: 2px 0 0; color: #ffd23f; font-weight: 700; }
+.event-winner-contact { margin-bottom: var(--space-3); padding: 10px 14px; border-radius: 12px; background: rgba(255, 210, 63, 0.1); border: 1px solid rgba(255, 210, 63, 0.4); overflow-wrap: anywhere; }

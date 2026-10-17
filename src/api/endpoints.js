@@ -133,6 +133,19 @@ export const loginGuest = () => api.post('/api/v1/auth/guest')
 export const getMe = () => api.get('/api/v1/auth/me')
 // Mind Race Night: schedule, phase, who's playing, tonight's standings.
 export const getNight = () => api.get('/api/v1/night')
+
+// ---- College events ----
+// Students: join with a code, see your events, an event's standings, and
+// search for an opponent in its private queue.
+export const joinEvent = (code) => api.post('/api/v1/events/join', { code })
+export const getMyEvents = () => api.get('/api/v1/events')
+export const getEvent = (id) => api.get(`/api/v1/events/${id}`)
+export const eventQueue = (id) => api.post(`/api/v1/events/${id}/queue`)
+// Admin: create, list, view and cancel events.
+export const adminCreateEvent = (body) => api.post('/api/v1/admin/events', body)
+export const adminEvents = () => api.get('/api/v1/admin/events')
+export const adminEvent = (id) => api.get(`/api/v1/admin/events/${id}`)
+export const adminCancelEvent = (id) => api.delete(`/api/v1/admin/events/${id}`)
 // Referrals: who an invite link is from (public), your invites, all inviters (admin).
 export const getInvite = (code) => api.get(`/api/v1/invite/${encodeURIComponent(code)}`)
 export const getMyReferrals = () => api.get('/api/v1/referrals/me')
