@@ -209,6 +209,11 @@ export default function Dashboard() {
               <strong>Rankings</strong>
               <small>All players</small>
             </Link>
+            <Link to="/about" className="mode-chip">
+              <span aria-hidden="true">ℹ️</span>
+              <strong>About</strong>
+              <small>How it works</small>
+            </Link>
           </div>
 
           {/* ── 4. Invite: a slim strip ───────────────────────────────── */}

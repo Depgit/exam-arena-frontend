@@ -8,7 +8,7 @@ export default function Privacy() {
   return (
     <div className="legal-page">
       <article className="legal-card">
-        <Link to="/" className="legal-back">← Mind Race</Link>
+        <Link to="/" className="legal-back">← Mind Race</Link> · <Link to="/about" className="legal-back">About</Link>
         <h1>Privacy Policy</h1>
         <p className="muted">Last updated: {UPDATED}</p>
 

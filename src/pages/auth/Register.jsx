@@ -80,7 +80,7 @@ export default function Register() {
           Already a player? <Link to={`/login${search}`}>Log in</Link>
         </p>
         <p className="auth-legal">
-          By playing you agree to our <Link to="/privacy">Privacy Policy</Link>.
+          By playing you agree to our <Link to="/privacy">Privacy Policy</Link>. · <Link to="/about">About Mind Race</Link>
         </p>
       </form>
     </div>

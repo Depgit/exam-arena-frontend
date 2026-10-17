@@ -86,6 +86,9 @@ export default function Login() {
         <p className="auth-switch">
           New challenger? <Link to={`/register${search}`}>Create an account</Link>
         </p>
+        <p className="auth-legal">
+          <Link to="/about">What is Mind Race?</Link>
+        </p>
       </form>
     </div>
   )
