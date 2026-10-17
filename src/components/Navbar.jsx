@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useConfirm } from '../context/ConfirmContext'
 import { useAuth } from '../context/AuthContext'
@@ -54,6 +55,35 @@ export default function Navbar() {
   // A live match gets the whole screen on phones.
   const inMatch = pathname.startsWith('/app/match/')
   const name = user?.display_name || user?.username
+  // Phones: the ☰ menu with every page (the bottom bar only fits five).
+  const [menuOpen, setMenuOpen] = useState(false)
+  useEffect(() => setMenuOpen(false), [pathname])
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e) => e.key === 'Escape' && setMenuOpen(false)
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [menuOpen])
+
+  async function askLogout() {
+    // Easy to hit by accident on a phone: ask first.
+    const ok = await confirm({
+      title: 'Log out of Mind Race?',
+      message: 'Your streak and progress are saved. Log back in any time.',
+      confirmText: 'Log out',
+      cancelText: 'Stay',
+      tone: 'danger',
+      icon: '👋',
+    })
+    if (!ok) return
+    setMenuOpen(false)
+    logout()
+    navigate('/login')
+  }
 
   return (
     <>
@@ -119,25 +149,63 @@ export default function Navbar() {
           className="btn-ghost icon-btn nav-logout"
           title="Log out"
           aria-label="Log out"
-          onClick={async () => {
-            // Easy to hit by accident on a phone: ask first.
-            const ok = await confirm({
-              title: 'Log out of Mind Race?',
-              message: 'Your streak and progress are saved. Log back in any time.',
-              confirmText: 'Log out',
-              cancelText: 'Stay',
-              tone: 'danger',
-              icon: '👋',
-            })
-            if (!ok) return
-            logout()
-            navigate('/login')
-          }}
+          onClick={askLogout}
         >
           <PowerIcon />
         </button>
+        {!inMatch && (
+          <button
+            type="button"
+            className="nav-menu-btn"
+            aria-label="Open menu"
+            aria-expanded={menuOpen}
+            aria-controls="nav-drawer"
+            onClick={() => setMenuOpen(true)}
+          >
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+          </button>
+        )}
       </div>
     </nav>
+
+    {menuOpen && (
+      <div className="nav-drawer-backdrop" onClick={() => setMenuOpen(false)}>
+        <aside
+          id="nav-drawer"
+          className="nav-drawer"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="nav-drawer-head">
+            <Link to={isAdmin ? '/admin/dashboard' : '/app/profile'} className="nav-drawer-user">
+              <Avatar name={name} size={36} />
+              <span>
+                <strong>{name}</strong>
+                <small>{isAdmin ? 'Admin' : 'View profile'}</small>
+              </span>
+            </Link>
+            <button type="button" className="nav-drawer-close" aria-label="Close menu" onClick={() => setMenuOpen(false)}>
+              ✕
+            </button>
+          </div>
+          <nav className="nav-drawer-links" aria-label="All pages">
+            {links.map(([to, label, icon]) => (
+              <NavLink key={to} to={to} className={({ isActive }) => (isActive ? 'active' : '')}>
+                <span className="nav-drawer-icon" aria-hidden="true">{icon}</span>
+                {label}
+              </NavLink>
+            ))}
+          </nav>
+          <button type="button" className="nav-drawer-logout" onClick={askLogout}>
+            <PowerIcon /> Log out
+          </button>
+        </aside>
+      </div>
+    )}
 
     {!inMatch && (
       <nav className="bottom-nav" aria-label="Main">

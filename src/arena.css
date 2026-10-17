@@ -6075,3 +6075,179 @@ button.podium-spot:hover .podium-name {
 .event-quick-start { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .event-when { margin: 0; padding: 10px 14px; border-radius: 12px; font-weight: 700; background: rgba(62, 240, 160, 0.1); border: 1px solid rgba(62, 240, 160, 0.35); }
 .event-when.bad { background: var(--error-soft); border-color: var(--error-border); color: var(--error-fg); }
+
+/* ── Phones: ☰ menu with every page ──────────────────────────────── */
+.nav-menu-btn {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .nav-menu-btn {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-menu-btn span {
+    display: block;
+    width: 16px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--text-strong);
+  }
+  .nav-menu-btn:active {
+    transform: scale(0.94);
+  }
+  /* Log out lives in the menu on phones, to leave room for ☰. */
+  .navbar-right .nav-logout {
+    display: none;
+  }
+}
+
+.nav-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 350; /* over the server notice (300), under dialogs (400) */
+  background: rgba(3, 4, 10, 0.6);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: nav-fade 0.18s ease;
+}
+
+.nav-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(300px, 84vw);
+  padding: calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  background: linear-gradient(180deg, #0d0f22, #070815);
+  border-left: 1px solid rgba(124, 92, 255, 0.3);
+  box-shadow: -20px 0 50px -20px rgba(124, 92, 255, 0.5);
+  animation: nav-slide 0.22s var(--ease-out, ease-out);
+}
+
+.nav-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 12px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-drawer-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  text-decoration: none;
+  color: var(--text-strong);
+}
+.nav-drawer-user span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.nav-drawer-user strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nav-drawer-user small {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.nav-drawer-close {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  color: var(--text-secondary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.nav-drawer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 16px;
+}
+.nav-drawer-links a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 0 12px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text-secondary);
+  border-radius: 10px;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-drawer-links a:active {
+  background: var(--overlay-hover);
+}
+.nav-drawer-links a.active {
+  color: var(--text-strong);
+  background: linear-gradient(90deg, rgba(124, 92, 255, 0.25), rgba(124, 92, 255, 0.06));
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+.nav-drawer-icon {
+  width: 22px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.nav-drawer-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: auto;
+  min-height: 46px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ff8a8a;
+  background: rgba(255, 90, 90, 0.08);
+  border: 1px solid rgba(255, 90, 90, 0.3);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+@keyframes nav-slide {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes nav-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-drawer,
+  .nav-drawer-backdrop {
+    animation: none;
+  }
+}
