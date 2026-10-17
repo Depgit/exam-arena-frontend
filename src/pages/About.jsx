@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 const CONTACT = 'depcoder@gmail.com'
@@ -15,7 +15,13 @@ const MODES = [
 
 /** About Mind Race — public, for anyone who wants to know what it is. */
 export default function About() {
-  const { user } = useAuth()
+  const { user, isGuest, logout } = useAuth()
+  const navigate = useNavigate()
+  // Demo account: leave it first so signing up starts clean.
+  const signUp = () => {
+    logout()
+    navigate('/register')
+  }
   const home = user ? '/app/dashboard' : '/'
 
   return (
@@ -113,7 +119,12 @@ export default function About() {
           free match against our bot without signing up. Creating an account takes about 20 seconds.
         </p>
         <div className="about-cta">
-          {user ? (
+          {isGuest ? (
+            <>
+              <Link className="btn-primary btn-lg" to="/app/matchmaking">🤖 Play your free match</Link>
+              <button type="button" className="btn-ghost" onClick={signUp}>Create free account</button>
+            </>
+          ) : user ? (
             <Link className="btn-primary btn-lg" to="/app/matchmaking">⚔️ Play a match</Link>
           ) : (
             <>

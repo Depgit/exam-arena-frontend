@@ -221,8 +221,9 @@ kbd {
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
+  padding: 8px 10px;
   border-radius: 6px;
   position: relative;
 }
@@ -2348,10 +2349,9 @@ button.podium-spot:hover .podium-name {
 }
 
 /* ── Responsive ──────────────────────────────────────────────────── */
-/* Seven nav links plus the HUD cluster don't fit on one row below
-   ~1360px, so links get their own scrollable row sooner than the base
-   stylesheet's 1200px breakpoint. */
-@media (max-width: 1360px) {
+/* Ten nav links plus the HUD cluster don't fit on one row below
+   ~1800px (with the streak and chat buttons), so links get their own row there. */
+@media (max-width: 1800px) {
   .navbar {
     flex-wrap: wrap;
     gap: 6px var(--space-3);

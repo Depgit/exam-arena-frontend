@@ -2830,7 +2830,9 @@ a.kpi-card:hover {
   }
 }
 
-@media (max-width: 1200px) {
+/* Too narrow for brand + all links + profile on one line: links get
+   their own row. */
+@media (max-width: 1800px) {
   .navbar {
     flex-wrap: wrap;
     gap: 6px var(--space-3);
